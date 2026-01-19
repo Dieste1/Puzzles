@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Valentine Puzzle Pack</title>
+  <link rel="stylesheet" href="style.css" />
+  <meta name="theme-color" content="#0b0b10">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+  <header class="header">
+    <div class="wrap">
+      <div class="title">
+        <h1 id="siteTitle">💘 Valentine Puzzle Pack</h1>
+        <p id="siteSubtitle">Solve the puzzles to unlock the final surprise.</p>
+      </div>
+      <nav class="tabs" aria-label="Puzzles">
+        <button class="tab active" data-view="home">Home</button>
+        <button class="tab" data-view="wordle">Wordle</button>
+        <button class="tab" data-view="connections">Connections</button>
+        <button class="tab" data-view="bee">Spelling Bee</button>
+        <button class="tab" data-view="spanagram">Spanagram</button>
+        <button class="tab" data-view="reveal">Final Reveal</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- HOME -->
+    <section class="view" id="view-home">
+      <div class="card">
+        <h2>Welcome 💌</h2>
+        <p>
+          This is a mini puzzle night. Start anywhere, but the <strong>Final Reveal</strong>
+          is best opened after you’ve solved at least one puzzle.
+        </p>
+        <div class="grid2">
+          <div class="mini">
+            <h3>🟩 Wordle</h3>
+            <p>Guess the secret word in 6 tries.</p>
+            <button class="primary" data-goto="wordle">Play Wordle</button>
+          </div>
+          <div class="mini">
+            <h3>🟨 Connections</h3>
+            <p>Find 4 groups of 4 words.</p>
+            <button class="primary" data-goto="connections">Play Connections</button>
+          </div>
+          <div class="mini">
+            <h3>🐝 Spelling Bee</h3>
+            <p>Make words using the letters.</p>
+            <button class="primary" data-goto="bee">Play Bee</button>
+          </div>
+          <div class="mini">
+            <h3>🎁 Final Reveal</h3>
+            <p>A message just for you.</p>
+            <button class="primary" data-goto="reveal">Open Reveal</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card subtle">
+        <h2>Make it yours ✨</h2>
+        <p>
+          Edit the <code>CONFIG</code> section in <code>app.js</code> to customize answers,
+          words, and the final message.
+        </p>
+      </div>
+    </section>
+
+    <!-- WORDLE -->
+    <section class="view hidden" id="view-wordle">
+      <div class="card">
+        <div class="row">
+          <h2>🟩 Wordle</h2>
+          <button class="ghost" id="wordleReset">Reset</button>
+        </div>
+        <p class="help">Type letters, press Enter to submit, Backspace to delete.</p>
+
+        <div id="wordleBoard" class="wordle-board" aria-label="Wordle board"></div>
+
+        <div class="row">
+          <input id="wordleInput" class="text" maxlength="5" placeholder="Type guess…" autocomplete="off" />
+          <button class="primary" id="wordleSubmit">Enter</button>
+        </div>
+
+        <p id="wordleMsg" class="msg" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <!-- CONNECTIONS -->
+    <section class="view hidden" id="view-connections">
+      <div class="card">
+        <div class="row">
+          <h2>🟨 Connections</h2>
+          <button class="ghost" id="connReset">Reset</button>
+        </div>
+        <p class="help">Select 4 words that belong together, then submit.</p>
+
+        <div id="connGrid" class="conn-grid" aria-label="Connections grid"></div>
+
+        <div class="row">
+          <button class="primary" id="connSubmit">Submit</button>
+          <button class="ghost" id="connClear">Clear</button>
+        </div>
+
+        <div id="connSolved" class="conn-solved"></div>
+        <p id="connMsg" class="msg" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <!-- BEE -->
+    <section class="view hidden" id="view-bee">
+      <div class="card">
+        <div class="row">
+          <h2>🐝 Spelling Bee</h2>
+          <button class="ghost" id="beeReset">Reset</button>
+        </div>
+
+        <p class="help">
+          Use the letters to form words (4+ letters). Must include the <strong>center</strong> letter.
+        </p>
+
+        <div class="bee-letters" id="beeLetters"></div>
+
+        <div class="row">
+          <input id="beeInput" class="text" placeholder="Enter a word…" autocomplete="off" />
+          <button class="primary" id="beeSubmit">Submit</button>
+        </div>
+
+        <div class="row">
+          <div class="pill">Found: <span id="beeCount">0</span></div>
+          <div class="pill">Score: <span id="beeScore">0</span></div>
+        </div>
+
+        <div id="beeFound" class="bee-found"></div>
+        <p id="beeMsg" class="msg" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <!-- SPANAGRAM -->
+     <section class="view hidden" id="view-spanagram">
+  <div class="card">
+    <div class="row">
+      <h2>🧵 Spanagram</h2>
+      <button class="ghost" id="spanReset">Reset</button>
+    </div>
+
+    <p class="help" id="spanThemeHelp"></p>
+
+    <div id="spanGrid" class="span-grid" aria-label="Spanagram grid"></div>
+
+    <div class="row">
+      <button class="primary" id="spanSubmit">Submit</button>
+      <button class="ghost" id="spanClear">Clear</button>
+      <div class="pill">Found: <span id="spanFoundCount">0</span></div>
+    </div>
+
+    <div class="card subtle">
+      <h3 style="margin-top:0;">Words</h3>
+      <div id="spanWordList" class="span-wordlist"></div>
+      <p id="spanMsg" class="msg" role="status" aria-live="polite"></p>
+    </div>
+  </div>
+</section>
+
+
+    <!-- REVEAL -->
+    <section class="view hidden" id="view-reveal">
+      <div class="card">
+        <h2>🎁 Final Reveal</h2>
+        <p class="help">Optional: you can require at least one solve before showing the message.</p>
+
+        <div class="reveal-box">
+          <p id="revealGate" class="msg"></p>
+          <button class="primary" id="revealBtn">Open</button>
+          <div id="revealContent" class="reveal-content hidden"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer wrap">
+    <p class="tiny">Made with ❤️ — customizable puzzle pack.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
