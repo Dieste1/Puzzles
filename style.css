@@ -107,11 +107,12 @@ body{
 }
 
 /* Card colors */
-.yellow{ background:var(--yellow); color:#000; }
-.gray{ background:var(--gray); color:#000; }
-.purple{ background:var(--purple); color:#000; }
-.mint{ background:var(--mint); color:#000; }
-.pink{ background:var(--pink); color:#000; }
+.yellow { background:var(--yellow); color:#000; }
+.gray   { background:var(--gray); color:#000; }
+.purple { background:var(--purple); color:#000; }
+.mint   { background:var(--mint); color:#000; }
+.pink   { background:var(--pink); color:#000; }
+.blue   { background:var(--mini-blue); color:#000;}
 
 /* ---------- Generic card pages ---------- */
 .card{
