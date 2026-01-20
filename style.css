@@ -25,6 +25,15 @@
   --w-bg:#ffffff;
   --w-text:#111;
   --w-kb:#d3d6da;
+
+  /* Mini theme */
+  --mini-blue:#9fc6ff;
+  --mini-bar:#9fd3ff;
+  --mini-ink:#0f2a55;
+  --mini-grid:#ffffff;
+  --mini-line: rgba(15, 42, 85, .35);
+  --mini-active:#ffdf33;
+  --mini-word:#bfe3ff;
 }
 
 *{box-sizing:border-box}
@@ -180,23 +189,45 @@ body{
 }
 .bottom-nav button.active{ color:#fff; }
 
-/* ---------- Mini ---------- */
-.mini-grid{
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:8px;
-  margin:16px 0;
-}
-.mini-cell{
-  aspect-ratio:1;
-  background:#2f2f2f;
-  border-radius:10px;
+/* ---------- Shared intro blocks ---------- */
+.intro-top{ display:flex; align-items:center; }
+.intro-center{
+  flex:1;
   display:flex;
+  flex-direction:column;
   align-items:center;
   justify-content:center;
+  text-align:center;
+  padding: 18px 10px;
+}
+.pill-btn{
+  background:#111;
+  color:#fff;
+  border:none;
+  border-radius:999px;
+  padding:14px 44px;
   font-weight:900;
   font-size:18px;
 }
+.intro-title{
+  margin:10px 0 6px;
+  font-size:34px;
+  font-weight:900;
+  letter-spacing:-.2px;
+}
+.intro-sub{
+  margin:0 0 18px;
+  font-size:22px;
+  line-height:1.25;
+  max-width: 300px;
+  color: rgba(0,0,0,.72);
+}
+.intro-footer{
+  margin-top:22px;
+  color: rgba(0,0,0,.72);
+}
+.intro-date{ font-weight:900; font-size:18px; }
+.intro-small{ font-size:14px; margin-top:4px; }
 
 /* ---------- Strands intro ---------- */
 .strands-intro{
@@ -209,16 +240,6 @@ body{
   box-shadow: var(--shadow);
   display:flex;
   flex-direction:column;
-}
-.intro-top{ display:flex; align-items:center; }
-.intro-center{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  padding: 18px 10px;
 }
 .strands-mark{
   width:72px;height:72px;
@@ -245,34 +266,6 @@ body{
   color:#f1c40f;
   transform: rotate(10deg);
 }
-.intro-title{
-  margin:10px 0 6px;
-  font-size:34px;
-  font-weight:900;
-  letter-spacing:-.2px;
-}
-.intro-sub{
-  margin:0 0 18px;
-  font-size:22px;
-  line-height:1.25;
-  max-width: 300px;
-  color: rgba(0,0,0,.72);
-}
-.pill-btn{
-  background:#111;
-  color:#fff;
-  border:none;
-  border-radius:999px;
-  padding:14px 44px;
-  font-weight:900;
-  font-size:18px;
-}
-.intro-footer{
-  margin-top:22px;
-  color: rgba(0,0,0,.72);
-}
-.intro-date{ font-weight:900; font-size:18px; }
-.intro-small{ font-size:14px; margin-top:4px; }
 
 /* ---------- Strands game look ---------- */
 .light-card{ background:#ffffff; color:#000; }
@@ -392,7 +385,6 @@ body{
   padding: 14px 14px 16px;
   box-shadow: var(--shadow);
 }
-
 .conn-topbar{
   display:flex;
   align-items:center;
@@ -401,7 +393,6 @@ body{
   padding-bottom:10px;
   border-bottom: 1px solid rgba(255,255,255,.12);
 }
-
 .conn-back{
   background:transparent;
   border:none;
@@ -409,7 +400,6 @@ body{
   font-size:22px;
   padding:8px 6px;
 }
-
 .conn-icons{
   display:flex;
   gap:8px;
@@ -424,7 +414,6 @@ body{
   font-size:18px;
   opacity:.9;
 }
-
 .conn-subscribe{
   background:transparent;
   border:1px solid rgba(255,255,255,.6);
@@ -434,21 +423,18 @@ body{
   font-weight:700;
   white-space:nowrap;
 }
-
 .conn-title{
   text-align:center;
   font-size:20px;
   margin:14px 0 12px;
   color: rgba(255,255,255,.9);
 }
-
 .conn-grid.nyt{
   display:grid;
   grid-template-columns:repeat(4, 1fr);
   gap:12px;
   margin: 10px 0 16px;
 }
-
 .conn-word{
   border:none;
   border-radius:14px;
@@ -459,12 +445,10 @@ body{
   color:#111;
   text-transform:uppercase;
 }
-
 .conn-word.selected{
   outline: 3px solid rgba(255,255,255,.25);
   opacity:.85;
 }
-
 .conn-status{
   display:flex;
   justify-content:center;
@@ -483,7 +467,6 @@ body{
   border-radius:999px;
   background: rgba(255,255,255,.28);
 }
-
 .conn-actions{
   display:flex;
   gap:12px;
@@ -503,14 +486,13 @@ body{
   border-color: rgba(255,255,255,.28);
   color: rgba(255,255,255,.55);
 }
-
 .conn-msg{
   margin-top:14px;
   text-align:center;
   color: rgba(255,255,255,.55);
 }
 
-/* ---------- WORDLE INTRO (NEW) ---------- */
+/* ---------- WORDLE INTRO ---------- */
 .wordle-intro{
   min-height: calc(100vh - 86px);
   background: #efefef;
@@ -523,7 +505,6 @@ body{
   flex-direction:column;
   gap:14px;
 }
-
 .wordle-logo{
   width:72px;height:72px;
   border-radius:18px;
@@ -559,12 +540,10 @@ body{
   color: rgba(0,0,0,.72);
   font-family: ui-serif, Georgia, "Times New Roman", serif;
 }
-
 .wordle-footer{
   margin-top:22px;
   color: rgba(0,0,0,.72);
 }
-
 .wordle-banner{
   margin-top:auto;
   background:#fff;
@@ -589,7 +568,7 @@ body{
 .banner-sub{ color: rgba(0,0,0,.62); margin-top:3px; }
 .banner-arrow{ font-size:26px; opacity:.5; }
 
-/* ---------- WORDLE GAME (NYT-ish) ---------- */
+/* ---------- WORDLE GAME ---------- */
 .wordle-game{
   min-height: calc(100vh - 86px);
   background: var(--w-bg);
@@ -602,7 +581,6 @@ body{
   flex-direction:column;
   align-items:center;
 }
-
 .wordle-topbar{
   width:100%;
   display:flex;
@@ -612,7 +590,6 @@ body{
   padding:8px 2px 10px;
   border-bottom: 1px solid rgba(0,0,0,.12);
 }
-
 .wordle-back{
   background:transparent;
   border:none;
@@ -620,7 +597,6 @@ body{
   font-size:22px;
   padding:8px 6px;
 }
-
 .wordle-icons{
   display:flex;
   gap:10px;
@@ -635,7 +611,6 @@ body{
   font-size:18px;
   opacity:.9;
 }
-
 .wordle-subscribe{
   background:transparent;
   border:1px solid rgba(0,0,0,.35);
@@ -645,20 +620,17 @@ body{
   font-weight:700;
   white-space:nowrap;
 }
-
 .wordle-board.nyt{
   display:grid;
   grid-template-rows:repeat(6, 1fr);
   gap:8px;
   margin: 26px 0 14px;
 }
-
 .wordle-row{
   display:grid;
   grid-template-columns:repeat(5, 1fr);
   gap:8px;
 }
-
 .wordle-tile{
   width: 54px;
   height: 54px;
@@ -671,36 +643,30 @@ body{
   font-size:26px;
   text-transform:uppercase;
 }
-
 .wordle-tile.filled{
   border-color: rgba(0,0,0,.35);
 }
-
 .wordle-tile.correct{
   background: var(--w-correct);
   border-color: var(--w-correct);
   color:#fff;
 }
-
 .wordle-tile.present{
   background: var(--w-present);
   border-color: var(--w-present);
   color:#fff;
 }
-
 .wordle-tile.absent{
   background: var(--w-absent);
   border-color: var(--w-absent);
   color:#fff;
 }
-
 .wordle-msg{
   min-height: 22px;
   margin: 4px 0 10px;
   color: rgba(0,0,0,.6);
   font-weight:700;
 }
-
 .wordle-hidden-input{
   position:absolute;
   opacity:0;
@@ -708,7 +674,6 @@ body{
   height:0;
   width:0;
 }
-
 .wordle-kb{
   width:100%;
   margin-top:auto;
@@ -717,13 +682,11 @@ body{
   gap:10px;
   padding: 10px 0 0;
 }
-
 .kb-row{
   display:flex;
   gap:8px;
   justify-content:center;
 }
-
 .kb-key{
   border:none;
   background: var(--w-kb);
@@ -734,12 +697,198 @@ body{
   min-width: 32px;
   text-transform:uppercase;
 }
-
 .kb-key.wide{ min-width: 64px; }
-
 .kb-key.correct{ background: var(--w-correct); color:#fff; }
 .kb-key.present{ background: var(--w-present); color:#fff; }
 .kb-key.absent{ background: var(--w-absent); color:#fff; }
+
+/* ---------- MINI INTRO ---------- */
+.mini-intro{
+  min-height: calc(100vh - 86px);
+  background: var(--mini-blue);
+  color:#000;
+  border-radius: 22px;
+  margin: 16px;
+  padding: 14px 16px 16px;
+  box-shadow: var(--shadow);
+  display:flex;
+  flex-direction:column;
+}
+.mini-logo{
+  width:72px;height:72px;
+  border-radius:18px;
+  display:grid;
+  place-items:center;
+  margin-bottom:12px;
+}
+.mini-logo-grid{
+  display:grid;
+  grid-template-columns: repeat(2, 16px);
+  grid-template-rows: repeat(2, 16px);
+  gap:6px;
+}
+.ml-cell{
+  width:16px;height:16px;
+  border-radius:4px;
+  border: 2px solid rgba(0,0,0,.15);
+  background:#fff;
+}
+.ml-black{ background:#111; border-color:#111; }
+
+.mini-title{
+  margin:8px 0 6px;
+  font-size:38px;
+  font-weight:900;
+  letter-spacing:-.2px;
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+}
+.mini-sub{
+  margin:0 0 18px;
+  font-size:24px;
+  line-height:1.25;
+  max-width: 320px;
+  color: rgba(0,0,0,.72);
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+}
+.mini-footer{
+  margin-top:18px;
+  color: rgba(0,0,0,.8);
+}
+.mini-date{
+  font-weight:900;
+  font-size:18px;
+}
+.mini-byline{
+  font-size:16px;
+  margin-top:6px;
+  color: rgba(0,0,0,.75);
+}
+
+/* ---------- MINI GAME ---------- */
+.mini-game{
+  min-height: calc(100vh - 86px);
+  background: var(--mini-blue);
+  border-radius: 22px;
+  margin: 16px;
+  padding: 0;
+  box-shadow: var(--shadow);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+.mini-topbar{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding: 10px 10px;
+  color: var(--mini-ink);
+}
+.mini-back{
+  background:transparent;
+  border:none;
+  color: var(--mini-ink);
+  font-size:26px;
+  padding:6px 8px;
+}
+.mini-timer{
+  font-weight:900;
+  font-size:18px;
+  min-width: 64px;
+}
+.mini-icons{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  margin-left:auto;
+}
+.mini-icon{
+  background:transparent;
+  border:none;
+  color: var(--mini-ink);
+  font-weight:900;
+  font-size:18px;
+  padding:8px 8px;
+  border-radius:10px;
+  opacity:.9;
+}
+.mini-icon.is-active{
+  background: rgba(255,255,255,.45);
+}
+
+.mini-crossword{
+  background: var(--mini-grid);
+  margin: 8px 10px 0;
+  border: 2px solid rgba(0,0,0,.65);
+  display:grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap:0;
+  aspect-ratio: 5 / 5;
+}
+
+.mini-cell{
+  position:relative;
+  border: 1px solid var(--mini-line);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
+  font-size:34px;
+  color: #1d4f9a;
+  user-select:none;
+}
+.mini-cell.block{
+  background:#111;
+  border-color:#111;
+}
+.mini-cell.active{
+  background: var(--mini-active);
+}
+.mini-cell.word{
+  background: var(--mini-word);
+}
+.mini-num{
+  position:absolute;
+  top:4px;
+  left:6px;
+  font-size:14px;
+  font-weight:900;
+  color: rgba(0,0,0,.7);
+}
+.mini-letter{
+  line-height:1;
+}
+
+.mini-hidden-input{
+  position:absolute;
+  opacity:0;
+  pointer-events:none;
+  height:0;
+  width:0;
+}
+
+.mini-cluebar{
+  margin-top:auto;
+  background: var(--mini-bar);
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding: 12px 10px;
+  color: var(--mini-ink);
+}
+.mini-clue-btn{
+  background:transparent;
+  border:none;
+  font-size:28px;
+  font-weight:900;
+  color: var(--mini-ink);
+  padding: 0 8px;
+}
+.mini-clue-text{
+  flex:1;
+  text-align:left;
+  font-weight:900;
+  font-size:18px;
+}
 
 /* Reveal */
 .reveal-content{

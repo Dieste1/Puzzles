@@ -49,7 +49,7 @@
           </div>
         </div>
 
-        <div class="game-card yellow" data-goto="mini">
+        <div class="game-card yellow" data-goto="mini-intro">
           <h2>The Mini</h2>
           <p>Solve the puzzle in seconds.</p>
           <div class="meta">
@@ -70,23 +70,65 @@
       </div>
     </section>
 
-    <!-- MINI -->
-    <section class="view" id="view-mini">
-      <div class="card">
-        <div class="top-row">
-          <button class="icon-btn" data-goto="home" aria-label="Back">←</button>
-          <div class="spacer"></div>
+    <!-- MINI INTRO (NEW) -->
+    <section class="view" id="view-mini-intro">
+      <div class="mini-intro">
+        <div class="intro-top">
+          <button class="icon-btn light" data-goto="home" aria-label="Back">←</button>
         </div>
 
-        <h2 class="h1">The Mini</h2>
-        <p class="help">Tap Reveal to show the filled grid (placeholder mini).</p>
+        <div class="intro-center">
+          <div class="mini-logo" aria-hidden="true">
+            <div class="mini-logo-grid">
+              <span class="ml-cell ml-black"></span><span class="ml-cell"></span>
+              <span class="ml-cell"></span><span class="ml-cell"></span>
+            </div>
+          </div>
 
-        <div class="mini-grid" id="miniGrid"></div>
-        <button class="primary" id="miniReveal">Reveal</button>
+          <h2 class="mini-title">The Mini Crossword</h2>
+          <p class="mini-sub">How quickly can you<br/>solve the clues?</p>
+
+          <button class="pill-btn" id="miniPlay">Play</button>
+
+          <div class="mini-footer">
+            <div class="mini-date">January 20, 2026</div>
+            <div class="mini-byline">By Sam Ezersky • Edited by Joel Fagliano</div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- WORDLE INTRO (NEW) -->
+    <!-- MINI GAME (NEW) -->
+    <section class="view" id="view-mini">
+      <div class="mini-game">
+        <div class="mini-topbar">
+          <button class="mini-back" data-goto="mini-intro" aria-label="Back">←</button>
+
+          <div class="mini-timer" id="miniTimer">0:00</div>
+
+          <div class="mini-icons">
+            <button class="mini-icon" type="button" aria-label="List">≡</button>
+            <button class="mini-icon" type="button" aria-label="Pencil">✎</button>
+            <button class="mini-icon is-active" id="miniTarget" type="button" aria-label="Target">⦿</button>
+            <button class="mini-icon" type="button" aria-label="Info">i</button>
+            <button class="mini-icon" type="button" aria-label="Settings">⚙︎</button>
+          </div>
+        </div>
+
+        <div id="miniCrossword" class="mini-crossword"></div>
+
+        <!-- hidden input for mobile typing -->
+        <input id="miniHiddenInput" class="mini-hidden-input" maxlength="1" autocomplete="off" autocapitalize="characters" spellcheck="false" />
+
+        <div class="mini-cluebar">
+          <button class="mini-clue-btn" id="miniPrevClue" aria-label="Previous clue">‹</button>
+          <div class="mini-clue-text" id="miniClueText">Jotted (down)</div>
+          <button class="mini-clue-btn" id="miniNextClue" aria-label="Next clue">›</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- WORDLE INTRO -->
     <section class="view" id="view-wordle-intro">
       <div class="wordle-intro">
         <div class="intro-top">
@@ -130,7 +172,7 @@
       </div>
     </section>
 
-    <!-- WORDLE GAME (NEW LOOK) -->
+    <!-- WORDLE GAME -->
     <section class="view" id="view-wordle">
       <div class="wordle-game">
         <div class="wordle-topbar">
@@ -150,10 +192,8 @@
 
         <p id="wordleMsg" class="wordle-msg"></p>
 
-        <!-- Hidden text input for mobile keyboard focus (optional) -->
         <input id="wordleHiddenInput" class="wordle-hidden-input" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" />
 
-        <!-- On-screen keyboard -->
         <div id="wordleKeyboard" class="wordle-kb" aria-label="Keyboard"></div>
       </div>
     </section>
@@ -182,7 +222,7 @@
       </div>
     </section>
 
-    <!-- CONNECTIONS GAME (NYT-ish layout) -->
+    <!-- CONNECTIONS GAME -->
     <section class="view" id="view-connections">
       <div class="connections-game">
         <div class="conn-topbar">
@@ -295,7 +335,7 @@
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
     <button data-view="home" aria-label="Home">🏠</button>
-    <button data-view="mini" aria-label="Mini">🧩</button>
+    <button data-view="mini-intro" aria-label="Mini">🧩</button>
     <button data-view="wordle-intro" aria-label="Wordle">⬜</button>
     <button data-view="connections-intro" aria-label="Connections">🟪</button>
     <button data-view="strands-intro" aria-label="Strands">🧵</button>
