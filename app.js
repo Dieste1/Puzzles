@@ -18,11 +18,20 @@ const CONFIG = {
   },
 
   wordleSolution: "HEART",
+
   connectionsWords: [
     "JAZZ","MARTINI","CANDLE","DANCE",
     "MONTREAL","OLDPORT","PLATEAU","MILEEND",
     "KIND","FUNNY","SMART","WARM",
     "ALWAYS","TOGETHER","FOREVER","US"
+  ],
+
+  // NEW: Connections solution groups (fully wired)
+  connectionsGroups: [
+    { name: "Date Night Vibes", words: ["JAZZ","MARTINI","CANDLE","DANCE"] },
+    { name: "Montreal Spots",   words: ["MONTREAL","OLDPORT","PLATEAU","MILEEND"] },
+    { name: "You Are…",         words: ["KIND","FUNNY","SMART","WARM"] },
+    { name: "Us Forever",       words: ["ALWAYS","TOGETHER","FOREVER","US"] }
   ],
 
   finalRevealHtml: `
@@ -48,6 +57,88 @@ const CONFIG = {
    ========================= */
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+/* =========================
+   PROGRESS + LOCKING (localStorage)
+   ========================= */
+const STORE_KEY = "aliego_puzzle_pack_v1";
+
+const Progress = {
+  state: {
+    miniSolved: false,
+    wordleSolved: false,
+    connectionsSolved: false,
+    strandsSolved: false
+  },
+  load(){
+    try{
+      const raw = localStorage.getItem(STORE_KEY);
+      if(!raw) return;
+      const parsed = JSON.parse(raw);
+      if(parsed && typeof parsed === "object"){
+        this.state = { ...this.state, ...parsed };
+      }
+    }catch(_){}
+  },
+  save(){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(this.state)); }catch(_){}
+  },
+  mark(key, val=true){
+    this.state[key] = !!val;
+    this.save();
+    updateHomeLockUI();
+  },
+  allSolved(){
+    const s = this.state;
+    return !!(s.miniSolved && s.wordleSolved && s.connectionsSolved && s.strandsSolved);
+  }
+};
+
+Progress.load();
+
+/* =========================
+   TOAST (small, no HTML changes needed)
+   ========================= */
+let toastEl = null;
+let toastTimer = null;
+
+function ensureToast(){
+  if(toastEl) return toastEl;
+  toastEl = document.createElement("div");
+  toastEl.id = "toast";
+  toastEl.style.position = "fixed";
+  toastEl.style.left = "50%";
+  toastEl.style.bottom = "92px";
+  toastEl.style.transform = "translateX(-50%)";
+  toastEl.style.background = "rgba(0,0,0,.86)";
+  toastEl.style.color = "#fff";
+  toastEl.style.padding = "10px 14px";
+  toastEl.style.borderRadius = "999px";
+  toastEl.style.fontWeight = "800";
+  toastEl.style.fontSize = "14px";
+  toastEl.style.maxWidth = "92vw";
+  toastEl.style.textAlign = "center";
+  toastEl.style.boxShadow = "0 10px 25px rgba(0,0,0,.25)";
+  toastEl.style.zIndex = "9999";
+  toastEl.style.opacity = "0";
+  toastEl.style.pointerEvents = "none";
+  toastEl.style.transition = "opacity 160ms ease, transform 160ms ease";
+  document.body.appendChild(toastEl);
+  return toastEl;
+}
+
+function toast(msg){
+  const el = ensureToast();
+  el.textContent = msg;
+  el.style.opacity = "1";
+  el.style.transform = "translateX(-50%) translateY(0)";
+
+  if(toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{
+    el.style.opacity = "0";
+    el.style.transform = "translateX(-50%) translateY(6px)";
+  }, 1800);
+}
 
 /* =========================
    VIEW ROUTER (with transition + header hiding)
@@ -89,9 +180,38 @@ function applyImmersiveMode(viewName){
   if(mainRoot) mainRoot.classList.toggle("is-immersive", isImm);
 }
 
+function updateHomeLockUI(){
+  // Update the Final Reveal card's "Locked" label visually without editing HTML.
+  const card = document.querySelector('.game-card[data-goto="reveal"]');
+  if(!card) return;
+  const meta = card.querySelector(".meta");
+  if(!meta) return;
+  const spans = meta.querySelectorAll("span");
+  const unlocked = Progress.allSolved();
+  if(spans[0]) spans[0].textContent = unlocked ? "Unlocked" : "Locked";
+  if(spans[1]) spans[1].textContent = unlocked ? "🎁" : "💝";
+
+  // optional: soften the card when locked
+  card.style.opacity = unlocked ? "1" : "0.88";
+}
+
+updateHomeLockUI();
+
+function canOpenReveal(){
+  return Progress.allSolved();
+}
+
 function showView(name){
   if(!views.includes(name)) return;
   if(name === activeView) return;
+
+  // Lock gate
+  if(name === "reveal" && !canOpenReveal()){
+    toast("Finish all 4 puzzles to unlock the final reveal 💝");
+    // keep user on home if they tried from a game end
+    if(activeView !== "home") showView("home");
+    return;
+  }
 
   const current = document.getElementById(`view-${activeView}`);
   const next = document.getElementById(`view-${name}`);
@@ -143,44 +263,52 @@ setActiveNav("home");
 applyImmersiveMode("home");
 
 /* =========================
-   CLICK DELEGATION (fixes “buttons not clickable”)
+   CLICK + TOUCH DELEGATION
+   (keeps "clickable" reliable on mobile)
    ========================= */
-document.addEventListener("click", (e)=>{
+function delegateNav(e){
   const navBtn = e.target.closest("[data-view]");
   if(navBtn){
     showView(navBtn.dataset.view);
-    return;
+    return true;
   }
 
   const go = e.target.closest("[data-goto]");
   if(go){
     showView(go.dataset.goto);
-    return;
+    return true;
   }
 
   // play buttons
   if(e.target.closest("#miniPlay")){
-    miniReset();
+    miniReset(true);
     showView("mini");
-    return;
+    return true;
   }
   if(e.target.closest("#wordlePlay")){
     resetWordle();
     showView("wordle");
-    return;
+    return true;
   }
   if(e.target.closest("#connectionsPlay")){
+    resetConnections(true);
     showView("connections");
-    return;
+    return true;
   }
   if(e.target.closest("#strandsPlay")){
+    resetStrands(true);
     showView("strands");
-    return;
+    return true;
   }
-});
+  return false;
+}
+
+document.addEventListener("click", (e)=>{ delegateNav(e); });
+// extra: touchstart to reduce tap-delay and help iOS
+document.addEventListener("touchstart", (e)=>{ delegateNav(e); }, { passive:true });
 
 /* =========================
-   MINI — Intro -> Game
+   MINI — Across/Down + Clues
    ========================= */
 const MP = CONFIG.mini;
 const miniCrossword = $("#miniCrossword");
@@ -196,12 +324,8 @@ let miniLetters = new Array(MP.size * MP.size).fill("");
 let miniTimer = 0;
 let miniTimerId = null;
 
-const MINI_CLUES = [
-  "Jotted (down)",
-  "Style of cuisine with bulgogi beef, for short",
-  "___ two (etc.)",
-  "Opposite of stop"
-];
+// NEW: direction + clue model
+let miniDir = "across"; // "across" | "down"
 let miniClueIndex = 0;
 
 function formatTime(s){
@@ -242,6 +366,20 @@ function acrossWordIndices(idx){
   return out;
 }
 
+function downWordIndices(idx){
+  if(isBlock(idx)) return [];
+  const {r,c} = idxToRC(idx);
+
+  let up = r;
+  while(up-1 >= 0 && !isBlock((up-1)*MP.size + c)) up--;
+  let down = r;
+  while(down+1 < MP.size && !isBlock((down+1)*MP.size + c)) down++;
+
+  const out = [];
+  for(let y=up;y<=down;y++) out.push(y*MP.size + c);
+  return out;
+}
+
 function computeNumbers(){
   const nums = new Array(MP.size*MP.size).fill("");
   let n = 1;
@@ -278,14 +416,117 @@ function pickFirstCell(){
   return 0;
 }
 
-function moveToNextCell(){
-  const {r,c} = idxToRC(miniSelected);
-  for(let x=c+1;x<MP.size;x++){
-    const idx = r*MP.size + x;
-    if(!isBlock(idx)) { miniSelected = idx; return; }
+function getMiniWordIndices(idx){
+  return (miniDir === "across") ? acrossWordIndices(idx) : downWordIndices(idx);
+}
+
+function moveToNextInActiveWord(){
+  const word = getMiniWordIndices(miniSelected);
+  if(!word.length) return;
+
+  const pos = word.indexOf(miniSelected);
+  if(pos === -1) return;
+
+  const next = word[pos+1];
+  if(typeof next === "number"){
+    miniSelected = next;
+    return;
   }
+
+  // if at end, move to next non-block cell in reading order
   for(let i=miniSelected+1;i<MP.size*MP.size;i++){
     if(!isBlock(i)) { miniSelected = i; return; }
+  }
+}
+
+function miniAllFilledCorrect(){
+  // Compare miniLetters to solution (ignore blocks)
+  for(let i=0;i<MP.size*MP.size;i++){
+    if(isBlock(i)) continue;
+    const want = (MP.solution[i] || "").toUpperCase();
+    const got = (miniLetters[i] || "").toUpperCase();
+    if(!want) continue;
+    if(got !== want) return false;
+  }
+  return true;
+}
+
+/* ----- Build clue lists from the fixed solution layout ----- */
+function buildMiniEntries(){
+  // Create across/down entries with numbers + indices
+  const entries = { across: [], down: [] };
+
+  function isStartAcross(i){
+    if(isBlock(i)) return false;
+    const {r,c} = idxToRC(i);
+    const leftBlocked = (c === 0) || isBlock(r*MP.size + (c-1));
+    const rightOpen = (c+1 < MP.size) && !isBlock(r*MP.size + (c+1));
+    return leftBlocked && rightOpen;
+  }
+
+  function isStartDown(i){
+    if(isBlock(i)) return false;
+    const {r,c} = idxToRC(i);
+    const upBlocked = (r === 0) || isBlock((r-1)*MP.size + c);
+    const downOpen = (r+1 < MP.size) && !isBlock((r+1)*MP.size + c);
+    return upBlocked && downOpen;
+  }
+
+  for(let i=0;i<MP.size*MP.size;i++){
+    const num = MINI_NUMS[i];
+    if(!num) continue;
+
+    if(isStartAcross(i)){
+      entries.across.push({ num, start: i, indices: acrossWordIndices(i) });
+    }
+    if(isStartDown(i)){
+      entries.down.push({ num, start: i, indices: downWordIndices(i) });
+    }
+  }
+
+  return entries;
+}
+
+const MINI_ENTRIES = buildMiniEntries();
+
+// Clues (hand-authored to match the embedded solution)
+const MINI_ACROSS_CLUES = [
+  "___ of a kind",
+  "Things you type",
+  "Digital book, for short",
+  "Give it another go",
+  "They help you see"
+];
+
+const MINI_DOWN_CLUES = [
+  "Maguire who played Spider-Man",
+  "Put into words",
+  "Smells",
+  "“They ___ here”",
+  "It’s above the clouds"
+];
+
+function entryClueText(dir, entry, idxInDir){
+  const list = (dir === "across") ? MINI_ACROSS_CLUES : MINI_DOWN_CLUES;
+  const clue = list[idxInDir] || "—";
+  const label = `${entry.num} ${dir.toUpperCase()}`;
+  return `${label} — ${clue}`;
+}
+
+function findEntryIndexForCell(dir, cellIdx){
+  const list = (dir === "across") ? MINI_ENTRIES.across : MINI_ENTRIES.down;
+  for(let i=0;i<list.length;i++){
+    if(list[i].indices.includes(cellIdx)) return i;
+  }
+  return 0;
+}
+
+function setMiniClueFromSelection(){
+  const dirList = (miniDir === "across") ? MINI_ENTRIES.across : MINI_ENTRIES.down;
+  miniClueIndex = findEntryIndexForCell(miniDir, miniSelected);
+  const entry = dirList[miniClueIndex];
+  if(miniClueText && entry){
+    miniClueText.textContent = entryClueText(miniDir, entry, miniClueIndex);
   }
 }
 
@@ -293,9 +534,9 @@ function renderMini(){
   if(!miniCrossword) return;
 
   miniCrossword.innerHTML = "";
-  if(miniClueText) miniClueText.textContent = MINI_CLUES[miniClueIndex % MINI_CLUES.length];
 
-  const word = new Set(acrossWordIndices(miniSelected));
+  const word = new Set(getMiniWordIndices(miniSelected));
+  setMiniClueFromSelection();
 
   for(let i=0;i<MP.size*MP.size;i++){
     const cell = document.createElement("div");
@@ -324,6 +565,11 @@ function renderMini(){
     cell.appendChild(letter);
 
     cell.addEventListener("click", ()=>{
+      // Tap same cell toggles across/down
+      if(miniSelected === i){
+        miniDir = (miniDir === "across") ? "down" : "across";
+        toast(miniDir === "across" ? "Across" : "Down");
+      }
       miniSelected = i;
       renderMini();
       if(miniHiddenInput) miniHiddenInput.focus({ preventScroll: true });
@@ -331,19 +577,29 @@ function renderMini(){
 
     miniCrossword.appendChild(cell);
   }
+
+  // completion check
+  if(!Progress.state.miniSolved && miniAllFilledCorrect()){
+    Progress.mark("miniSolved", true);
+    toast("Mini solved ✅");
+    // if everything done, allow reveal
+    if(Progress.allSolved()) toast("Final Reveal unlocked 🎁");
+  }
 }
 
-function miniReset(){
+function miniReset(showToast=false){
   miniLetters = new Array(MP.size*MP.size).fill("");
   miniSelected = pickFirstCell();
+  miniDir = "across";
   miniClueIndex = 0;
   renderMini();
+  if(showToast) toast("Mini ready 🧩");
 }
 
 function setMiniLetter(ch){
   if(isBlock(miniSelected)) return;
   miniLetters[miniSelected] = ch.toUpperCase();
-  moveToNextCell();
+  moveToNextInActiveWord();
   renderMini();
 }
 function clearMiniLetter(){
@@ -370,18 +626,36 @@ if(miniHiddenInput){
     if(v) setMiniLetter(v.slice(-1));
     miniHiddenInput.value = "";
   });
+
+  // Mobile polish: tap anywhere in board area focuses input
+  const miniView = $("#view-mini");
+  if(miniView){
+    miniView.addEventListener("touchstart", ()=>{
+      miniHiddenInput.focus({ preventScroll:true });
+    }, { passive:true });
+  }
 }
 
 if(miniPrevClue){
   miniPrevClue.addEventListener("click", ()=>{
-    miniClueIndex = (miniClueIndex - 1 + MINI_CLUES.length) % MINI_CLUES.length;
-    renderMini();
+    const list = (miniDir === "across") ? MINI_ENTRIES.across : MINI_ENTRIES.down;
+    miniClueIndex = (miniClueIndex - 1 + list.length) % list.length;
+    const entry = list[miniClueIndex];
+    if(entry){
+      miniSelected = entry.start;
+      renderMini();
+    }
   });
 }
 if(miniNextClue){
   miniNextClue.addEventListener("click", ()=>{
-    miniClueIndex = (miniClueIndex + 1) % MINI_CLUES.length;
-    renderMini();
+    const list = (miniDir === "across") ? MINI_ENTRIES.across : MINI_ENTRIES.down;
+    miniClueIndex = (miniClueIndex + 1) % list.length;
+    const entry = list[miniClueIndex];
+    if(entry){
+      miniSelected = entry.start;
+      renderMini();
+    }
   });
 }
 
@@ -389,7 +663,7 @@ if(miniNextClue){
 miniReset();
 
 /* =========================
-   WORDLE — reset + basic input
+   WORDLE — reset + basic input + solved flag
    ========================= */
 const wordleBoard = $("#wordleBoard");
 const wordleMsg = $("#wordleMsg");
@@ -517,6 +791,11 @@ function submitWordle(){
   if(guess === SOL){
     wordleDone = true;
     setMsg("You got it! 💘");
+    if(!Progress.state.wordleSolved){
+      Progress.mark("wordleSolved", true);
+      toast("Wordle solved ✅");
+      if(Progress.allSolved()) toast("Final Reveal unlocked 🎁");
+    }
     return;
   }
 
@@ -563,6 +842,14 @@ if(wordleHiddenInput){
     renderCurrentRow();
     wordleHiddenInput.value = "";
   });
+
+  // Mobile polish: tap game area focuses hidden input
+  const wordleView = $("#view-wordle");
+  if(wordleView){
+    wordleView.addEventListener("touchstart", ()=>{
+      wordleHiddenInput.focus({ preventScroll:true });
+    }, { passive:true });
+  }
 }
 
 function resetWordle(){
@@ -579,9 +866,8 @@ function resetWordle(){
 resetWordle();
 
 /* =========================
-   CONNECTIONS (UI-only for now)
+   CONNECTIONS — FULL GAME
    ========================= */
-const connectionsPlay = $("#connectionsPlay");
 const connGrid = $("#connGrid");
 const connSubmit = $("#connSubmit");
 const connClear = $("#connClear");
@@ -590,6 +876,10 @@ const connMsg = $("#connMsg");
 
 let connSelected = new Set();
 let connWords = [...CONFIG.connectionsWords];
+
+let connMistakes = 4;
+let connSolvedGroups = []; // {name, words}
+let connLockedWords = new Set(); // words that are already solved/removed
 
 function shuffleArray(arr){
   const a = [...arr];
@@ -600,16 +890,77 @@ function shuffleArray(arr){
   return a;
 }
 
+function ensureConnSolvedUI(){
+  const host = $("#view-connections .connections-game");
+  if(!host) return null;
+
+  let box = $("#connSolved");
+  if(box) return box;
+
+  box = document.createElement("div");
+  box.id = "connSolved";
+  box.style.display = "flex";
+  box.style.flexDirection = "column";
+  box.style.gap = "10px";
+  box.style.margin = "12px 0 12px";
+  host.insertBefore(box, connGrid);
+  return box;
+}
+
+function renderConnSolved(){
+  const box = ensureConnSolvedUI();
+  if(!box) return;
+  box.innerHTML = "";
+
+  connSolvedGroups.forEach(g=>{
+    const row = document.createElement("div");
+    row.style.border = "1px solid rgba(255,255,255,.18)";
+    row.style.borderRadius = "14px";
+    row.style.padding = "10px 12px";
+    row.style.background = "rgba(255,255,255,.06)";
+
+    const title = document.createElement("div");
+    title.style.fontWeight = "900";
+    title.style.marginBottom = "6px";
+    title.textContent = g.name;
+
+    const words = document.createElement("div");
+    words.style.opacity = ".85";
+    words.style.fontWeight = "800";
+    words.style.letterSpacing = ".3px";
+    words.textContent = g.words.join(" · ");
+
+    row.appendChild(title);
+    row.appendChild(words);
+    box.appendChild(row);
+  });
+
+  // update mistakes dots if present in DOM (no HTML change required)
+  const dots = $$("#view-connections .dot");
+  dots.forEach((d, i)=>{
+    d.style.opacity = (i < connMistakes) ? "1" : "0.18";
+  });
+}
+
+function remainingConnWords(){
+  return connWords.filter(w => !connLockedWords.has(w));
+}
+
 function renderConnections(){
   if(!connGrid) return;
+
+  renderConnSolved();
+
   connGrid.innerHTML = "";
-  connWords.forEach(w=>{
+  remainingConnWords().forEach(w=>{
     const b = document.createElement("button");
     b.className = "conn-word";
     b.textContent = w;
     if(connSelected.has(w)) b.classList.add("selected");
 
     b.addEventListener("click", ()=>{
+      if(connLockedWords.has(w)) return;
+
       if(connSelected.has(w)) connSelected.delete(w);
       else{
         if(connSelected.size >= 4){
@@ -625,6 +976,31 @@ function renderConnections(){
     connGrid.appendChild(b);
   });
 }
+
+function normalizeSet(setLike){
+  return [...setLike].map(x=>String(x).toUpperCase()).sort().join("|");
+}
+
+function findMatchingGroup(selected4){
+  const pick = normalizeSet(selected4);
+  for(const g of CONFIG.connectionsGroups){
+    const key = normalizeSet(g.words);
+    if(key === pick) return g;
+  }
+  return null;
+}
+
+function resetConnections(showToast=false){
+  connSelected = new Set();
+  connWords = [...CONFIG.connectionsWords];
+  connMistakes = 4;
+  connSolvedGroups = [];
+  connLockedWords = new Set();
+  if(connMsg) connMsg.textContent = "";
+  renderConnections();
+  if(showToast) toast("Connections ready 🟪");
+}
+
 renderConnections();
 
 if(connClear){
@@ -647,14 +1023,53 @@ if(connSubmit){
       if(connMsg) connMsg.textContent = "Select exactly 4.";
       return;
     }
-    if(connMsg) connMsg.textContent = "Nice — now wire in your group logic ✅";
+
+    const selected = [...connSelected];
+    const match = findMatchingGroup(selected);
+
+    if(match){
+      // Already solved?
+      const already = connSolvedGroups.some(g => normalizeSet(g.words) === normalizeSet(match.words));
+      if(already){
+        if(connMsg) connMsg.textContent = "You already found that group.";
+        connSelected.clear();
+        renderConnections();
+        return;
+      }
+
+      match.words.forEach(w=> connLockedWords.add(w));
+      connSolvedGroups.push({ name: match.name, words: [...match.words] });
+      connSelected.clear();
+      if(connMsg) connMsg.textContent = "Nice! ✅";
+      renderConnections();
+
+      if(connSolvedGroups.length === 4){
+        if(connMsg) connMsg.textContent = "You solved Connections! 🎉";
+        if(!Progress.state.connectionsSolved){
+          Progress.mark("connectionsSolved", true);
+          toast("Connections solved ✅");
+          if(Progress.allSolved()) toast("Final Reveal unlocked 🎁");
+        }
+      }
+      return;
+    }
+
+    // wrong group
+    connMistakes = Math.max(0, connMistakes - 1);
+    if(connMsg) connMsg.textContent = connMistakes ? "Not quite — try again." : "No mistakes left.";
+    toast(connMistakes ? `Mistakes left: ${connMistakes}` : "Out of mistakes");
+    connSelected.clear();
+    renderConnections();
+
+    if(connMistakes === 0){
+      if(connMsg) connMsg.textContent = "Out of mistakes — shuffle and keep exploring ❤️";
+    }
   });
 }
 
 /* =========================
-   STRANDS
+   STRANDS — completion + solved flag
    ========================= */
-const strandsPlay = $("#strandsPlay");
 const spanThemeHelp = $("#spanThemeHelp");
 const spanThemeTitle = $("#spanThemeTitle");
 const spanGridEl = $("#spanGrid");
@@ -679,6 +1094,27 @@ function selectionWord(){
 function updateProgress(){
   const total = SP.themeWords.length + 1;
   if(spanProgress) spanProgress.textContent = `${spanFoundWords.size} of ${total} theme words found.`;
+
+  // completion
+  if(spanFoundWords.size >= total && !Progress.state.strandsSolved){
+    Progress.mark("strandsSolved", true);
+    toast("Strands solved ✅");
+    if(spanMsg) spanMsg.textContent = "Theme complete! ⭐";
+    if(Progress.allSolved()){
+      toast("Final Reveal unlocked 🎁");
+      // optional: auto-open reveal once all solved
+      // showView("reveal");
+    }
+  }
+}
+
+function resetStrands(showToast=false){
+  spanSelected = [];
+  spanFoundWords = new Set();
+  if(spanMsg) spanMsg.textContent = "";
+  renderStrands();
+  updateProgress();
+  if(showToast) toast("Strands ready 🧵");
 }
 
 function renderStrands(){
@@ -711,6 +1147,7 @@ function renderStrands(){
       const w = selectionWord();
       const themeSet = new Set(SP.themeWords.map(x=>x.toUpperCase()));
       const big = SP.strandsWord.toUpperCase();
+
       if(themeSet.has(w) || w === big){
         if(!spanFoundWords.has(w)){
           spanFoundWords.add(w);
@@ -739,11 +1176,15 @@ if(spanClear){
 }
 
 /* =========================
-   FINAL REVEAL
+   FINAL REVEAL — locked until solved
    ========================= */
 const revealBtn = $("#revealBtn");
 if(revealBtn){
   revealBtn.addEventListener("click", ()=>{
+    if(!canOpenReveal()){
+      toast("Solve all 4 puzzles first 💝");
+      return;
+    }
     const el = $("#revealContent");
     if(!el) return;
     el.innerHTML = CONFIG.finalRevealHtml;

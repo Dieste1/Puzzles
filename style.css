@@ -88,6 +88,10 @@ body{
   padding:18px;
   box-shadow: var(--shadow);
   cursor:pointer;
+  position:relative;
+  overflow:hidden;
+  user-select:none;
+  -webkit-tap-highlight-color: transparent;
 }
 .game-card h2{
   margin:0 0 6px;
@@ -113,6 +117,32 @@ body{
 .mint   { background:var(--mint); color:#000; }
 .pink   { background:var(--pink); color:#000; }
 .blue   { background:var(--mini-blue); color:#000;}
+
+/* ---------- Locked card (Final Reveal) ---------- */
+.game-card.is-locked{
+  opacity:.88;
+}
+.locked-overlay{
+  position:absolute;
+  inset:0;
+  background: rgba(255,255,255,.35);
+  backdrop-filter: blur(1.5px);
+  opacity:.55;
+  pointer-events:none;
+}
+.locked-badge{
+  position:absolute;
+  top:14px;
+  right:14px;
+  width:36px;
+  height:36px;
+  border-radius:999px;
+  background: rgba(0,0,0,.18);
+  display:grid;
+  place-items:center;
+  font-size:18px;
+  pointer-events:none;
+}
 
 /* ---------- Generic card pages ---------- */
 .card{
@@ -160,6 +190,7 @@ body{
   padding:12px 18px;
   border-radius:999px;
   font-weight:800;
+  cursor:pointer;
 }
 .ghost{
   background:transparent;
@@ -180,6 +211,7 @@ body{
   justify-content:space-around;
   padding:12px 8px;
   box-shadow: 0 -10px 30px rgba(0,0,0,.25);
+  z-index: 20;
 }
 .bottom-nav button{
   background:none;
@@ -209,6 +241,7 @@ body{
   padding:14px 44px;
   font-weight:900;
   font-size:18px;
+  cursor:pointer;
 }
 .intro-title{
   margin:10px 0 6px;
@@ -336,6 +369,7 @@ body{
   border-radius:999px;
   padding:10px 18px;
   font-weight:800;
+  cursor:pointer;
 }
 .progress{
   font-weight:900;
@@ -374,6 +408,7 @@ body{
   padding:12px 44px;
   font-weight:900;
   font-size:18px;
+  cursor:pointer;
 }
 
 /* ---------- Connections game (NYT-ish) ---------- */
@@ -400,6 +435,7 @@ body{
   color:#fff;
   font-size:22px;
   padding:8px 6px;
+  cursor:pointer;
 }
 .conn-icons{
   display:flex;
@@ -414,6 +450,7 @@ body{
   color:#fff;
   font-size:18px;
   opacity:.9;
+  cursor:pointer;
 }
 .conn-subscribe{
   background:transparent;
@@ -423,6 +460,7 @@ body{
   border-radius:999px;
   font-weight:700;
   white-space:nowrap;
+  cursor:pointer;
 }
 .conn-title{
   text-align:center;
@@ -445,6 +483,9 @@ body{
   background: var(--conn-tile);
   color:#111;
   text-transform:uppercase;
+  cursor:pointer;
+  user-select:none;
+  -webkit-tap-highlight-color: transparent;
 }
 .conn-word.selected{
   outline: 3px solid rgba(255,255,255,.25);
@@ -482,6 +523,7 @@ body{
   padding:12px 18px;
   font-weight:900;
   min-width: 120px;
+  cursor:pointer;
 }
 .conn-action.secondary{
   border-color: rgba(255,255,255,.28);
@@ -491,6 +533,26 @@ body{
   margin-top:14px;
   text-align:center;
   color: rgba(255,255,255,.55);
+}
+
+/* NEW: Solved groups container inserted by app.js */
+#connSolved{
+  margin: 10px 0 12px;
+}
+#connSolved > div{
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:14px;
+  padding:10px 12px;
+  background: rgba(255,255,255,.06);
+}
+#connSolved > div > div:first-child{
+  font-weight:900;
+  margin-bottom:6px;
+}
+#connSolved > div > div:last-child{
+  opacity:.85;
+  font-weight:800;
+  letter-spacing:.3px;
 }
 
 /* ---------- WORDLE INTRO ---------- */
@@ -597,6 +659,7 @@ body{
   color: #111;
   font-size:22px;
   padding:8px 6px;
+  cursor:pointer;
 }
 .wordle-icons{
   display:flex;
@@ -611,6 +674,7 @@ body{
   color:#111;
   font-size:18px;
   opacity:.9;
+  cursor:pointer;
 }
 .wordle-subscribe{
   background:transparent;
@@ -620,6 +684,7 @@ body{
   border-radius:999px;
   font-weight:700;
   white-space:nowrap;
+  cursor:pointer;
 }
 .wordle-board.nyt{
   display:grid;
@@ -697,6 +762,7 @@ body{
   font-weight:900;
   min-width: 32px;
   text-transform:uppercase;
+  cursor:pointer;
 }
 .kb-key.wide{ min-width: 64px; }
 .kb-key.correct{ background: var(--w-correct); color:#fff; }
@@ -790,6 +856,7 @@ body{
   color: var(--mini-ink);
   font-size:26px;
   padding:6px 8px;
+  cursor:pointer;
 }
 .mini-timer{
   font-weight:900;
@@ -811,6 +878,7 @@ body{
   padding:8px 8px;
   border-radius:10px;
   opacity:.9;
+  cursor:pointer;
 }
 .mini-icon.is-active{
   background: rgba(255,255,255,.45);
@@ -867,6 +935,15 @@ body{
   width:0;
 }
 
+/* NEW: tiny hint text under grid */
+.mini-direction-hint{
+  margin: 10px 12px 0;
+  color: rgba(15,42,85,.72);
+  font-weight:900;
+  font-size:13px;
+  letter-spacing:.2px;
+}
+
 .mini-cluebar{
   margin-top:auto;
   background: var(--mini-bar);
@@ -883,6 +960,7 @@ body{
   font-weight:900;
   color: var(--mini-ink);
   padding: 0 8px;
+  cursor:pointer;
 }
 .mini-clue-text{
   flex:1;

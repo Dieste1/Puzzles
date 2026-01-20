@@ -13,7 +13,7 @@
 
 <body>
   <header class="top-header" id="topHeader">
-    <h1 id="siteTitle">🗞️ Games</h1>
+    <h1 id="siteTitle">NYT Aliego's Edition</h1>
   </header>
 
   <main class="main" id="mainRoot">
@@ -22,7 +22,7 @@
     <section class="view is-active" id="view-home">
       <div class="feed">
 
-        <div class="game-card mint" data-goto="strands-intro">
+        <div class="game-card mint" data-goto="strands-intro" role="button" tabindex="0" aria-label="Open Strands">
           <h2>Strands</h2>
           <p>Find hidden words and uncover the theme.</p>
           <div class="meta">
@@ -31,7 +31,7 @@
           </div>
         </div>
 
-        <div class="game-card gray" data-goto="wordle-intro">
+        <div class="game-card gray" data-goto="wordle-intro" role="button" tabindex="0" aria-label="Open Wordle">
           <h2>Wordle</h2>
           <p>Guess your way to the correct word.</p>
           <div class="meta">
@@ -40,7 +40,7 @@
           </div>
         </div>
 
-        <div class="game-card purple" data-goto="connections-intro">
+        <div class="game-card purple" data-goto="connections-intro" role="button" tabindex="0" aria-label="Open Connections">
           <h2>Connections</h2>
           <p>Group words that share a common thread.</p>
           <div class="meta">
@@ -49,7 +49,7 @@
           </div>
         </div>
 
-        <div class="game-card blue" data-goto="mini-intro">
+        <div class="game-card blue" data-goto="mini-intro" role="button" tabindex="0" aria-label="Open The Mini">
           <h2>The Mini</h2>
           <p>Solve the puzzle in seconds.</p>
           <div class="meta">
@@ -58,23 +58,26 @@
           </div>
         </div>
 
-        <div class="game-card pink" data-goto="reveal">
+        <!-- FINAL REVEAL CARD (locked styling; JS still enforces lock) -->
+        <div class="game-card pink is-locked" data-goto="reveal" role="button" tabindex="0" aria-label="Open Final Reveal">
+          <div class="locked-badge" aria-hidden="true">🔒</div>
           <h2>Final Reveal</h2>
           <p>A message just for you.</p>
           <div class="meta">
             <span>Locked</span>
             <span>💝</span>
           </div>
+          <div class="locked-overlay" aria-hidden="true"></div>
         </div>
 
       </div>
     </section>
 
-    <!-- MINI INTRO (NEW) -->
+    <!-- MINI INTRO -->
     <section class="view" id="view-mini-intro">
       <div class="mini-intro">
         <div class="intro-top">
-          <button class="icon-btn light" data-goto="home" aria-label="Back">←</button>
+          <button class="icon-btn light" type="button" data-goto="home" aria-label="Back">←</button>
         </div>
 
         <div class="intro-center">
@@ -88,7 +91,7 @@
           <h2 class="mini-title">The Mini Crossword</h2>
           <p class="mini-sub">How quickly can you<br/>solve the clues?</p>
 
-          <button class="pill-btn" id="miniPlay">Play</button>
+          <button class="pill-btn" type="button" id="miniPlay">Play</button>
 
           <div class="mini-footer">
             <div class="mini-date">February 14, 2026</div>
@@ -98,11 +101,11 @@
       </div>
     </section>
 
-    <!-- MINI GAME (NEW) -->
+    <!-- MINI GAME -->
     <section class="view" id="view-mini">
       <div class="mini-game">
         <div class="mini-topbar">
-          <button class="mini-back" data-goto="mini-intro" aria-label="Back">←</button>
+          <button class="mini-back" type="button" data-goto="mini-intro" aria-label="Back">←</button>
 
           <div class="mini-timer" id="miniTimer">0:00</div>
 
@@ -115,15 +118,28 @@
           </div>
         </div>
 
-        <div id="miniCrossword" class="mini-crossword"></div>
+        <div id="miniCrossword" class="mini-crossword" aria-label="Mini Crossword Grid"></div>
 
         <!-- hidden input for mobile typing -->
-        <input id="miniHiddenInput" class="mini-hidden-input" maxlength="1" autocomplete="off" autocapitalize="characters" spellcheck="false" />
+        <input
+          id="miniHiddenInput"
+          class="mini-hidden-input"
+          maxlength="1"
+          autocomplete="off"
+          autocapitalize="characters"
+          spellcheck="false"
+          inputmode="text"
+        />
 
-        <div class="mini-cluebar">
-          <button class="mini-clue-btn" id="miniPrevClue" aria-label="Previous clue">‹</button>
-          <div class="mini-clue-text" id="miniClueText">Jotted (down)</div>
-          <button class="mini-clue-btn" id="miniNextClue" aria-label="Next clue">›</button>
+        <!-- tiny direction hint (app.js toggles direction by tapping same cell) -->
+        <div class="mini-direction-hint" aria-hidden="true">
+          Tap the same square to toggle Across/Down
+        </div>
+
+        <div class="mini-cluebar" aria-label="Mini clue">
+          <button class="mini-clue-btn" type="button" id="miniPrevClue" aria-label="Previous clue">‹</button>
+          <div class="mini-clue-text" id="miniClueText">1 ACROSS — ___ of a kind</div>
+          <button class="mini-clue-btn" type="button" id="miniNextClue" aria-label="Next clue">›</button>
         </div>
       </div>
     </section>
@@ -132,7 +148,7 @@
     <section class="view" id="view-wordle-intro">
       <div class="wordle-intro">
         <div class="intro-top">
-          <button class="icon-btn light" data-goto="home" aria-label="Back">←</button>
+          <button class="icon-btn light" type="button" data-goto="home" aria-label="Back">←</button>
         </div>
 
         <div class="intro-center">
@@ -151,7 +167,7 @@
           <h2 class="wordle-title">Wordle</h2>
           <p class="wordle-sub">Get 6 chances to guess a 5-letter<br/>word.</p>
 
-          <button class="pill-btn" id="wordlePlay">Play</button>
+          <button class="pill-btn" type="button" id="wordlePlay">Play</button>
           <button class="outline-btn" type="button">Subscribe</button>
 
           <div class="wordle-footer">
@@ -176,7 +192,7 @@
     <section class="view" id="view-wordle">
       <div class="wordle-game">
         <div class="wordle-topbar">
-          <button class="wordle-back" data-goto="wordle-intro" aria-label="Back">←</button>
+          <button class="wordle-back" type="button" data-goto="wordle-intro" aria-label="Back">←</button>
 
           <div class="wordle-icons">
             <button class="wordle-icon" type="button" aria-label="Hint">💡</button>
@@ -188,11 +204,19 @@
           <button class="wordle-subscribe" type="button">Subscribe to Games</button>
         </div>
 
-        <div id="wordleBoard" class="wordle-board nyt"></div>
+        <div id="wordleBoard" class="wordle-board nyt" aria-label="Wordle board"></div>
 
-        <p id="wordleMsg" class="wordle-msg"></p>
+        <p id="wordleMsg" class="wordle-msg" aria-live="polite"></p>
 
-        <input id="wordleHiddenInput" class="wordle-hidden-input" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" />
+        <input
+          id="wordleHiddenInput"
+          class="wordle-hidden-input"
+          maxlength="5"
+          autocomplete="off"
+          autocapitalize="characters"
+          spellcheck="false"
+          inputmode="text"
+        />
 
         <div id="wordleKeyboard" class="wordle-kb" aria-label="Keyboard"></div>
       </div>
@@ -202,15 +226,15 @@
     <section class="view" id="view-connections-intro">
       <div class="connections-intro">
         <div class="intro-top">
-          <button class="icon-btn light" data-goto="home" aria-label="Back">←</button>
+          <button class="icon-btn light" type="button" data-goto="home" aria-label="Back">←</button>
         </div>
 
         <div class="intro-center">
           <div class="conn-mark" aria-hidden="true">▦</div>
           <h2 class="intro-title">Connections</h2>
-          <p class="intro-sub">Subscribe for unlimited<br/>play.</p>
+          <p class="intro-sub">Create four groups<br/>of four.</p>
 
-          <button class="pill-btn" id="connectionsPlay">Play</button>
+          <button class="pill-btn" type="button" id="connectionsPlay">Play</button>
           <button class="outline-btn" type="button">Subscribe</button>
 
           <div class="intro-footer">
@@ -226,7 +250,7 @@
     <section class="view" id="view-connections">
       <div class="connections-game">
         <div class="conn-topbar">
-          <button class="conn-back" data-goto="connections-intro" aria-label="Back">←</button>
+          <button class="conn-back" type="button" data-goto="connections-intro" aria-label="Back">←</button>
 
           <div class="conn-icons">
             <button class="conn-icon" type="button" aria-label="Hint">💡</button>
@@ -240,24 +264,25 @@
 
         <div class="conn-title">Create four groups of four!</div>
 
-        <div id="connGrid" class="conn-grid nyt"></div>
+        <!-- app.js will inject solved groups above the grid -->
+        <div id="connGrid" class="conn-grid nyt" aria-label="Connections word grid"></div>
 
         <div class="conn-status">
           <div class="mistakes">
             <span>Mistakes Remaining:</span>
-            <span class="dots">
+            <span class="dots" aria-hidden="true">
               <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
             </span>
           </div>
         </div>
 
         <div class="conn-actions">
-          <button id="connShuffle" class="conn-action">Shuffle</button>
-          <button id="connClear" class="conn-action secondary">Deselect All</button>
-          <button id="connSubmit" class="conn-action secondary">Submit</button>
+          <button id="connShuffle" type="button" class="conn-action">Shuffle</button>
+          <button id="connClear" type="button" class="conn-action secondary">Deselect All</button>
+          <button id="connSubmit" type="button" class="conn-action secondary">Submit</button>
         </div>
 
-        <p id="connMsg" class="conn-msg"></p>
+        <p id="connMsg" class="conn-msg" aria-live="polite"></p>
       </div>
     </section>
 
@@ -265,7 +290,7 @@
     <section class="view" id="view-strands-intro">
       <div class="strands-intro">
         <div class="intro-top">
-          <button class="icon-btn light" data-goto="home" aria-label="Back">←</button>
+          <button class="icon-btn light" type="button" data-goto="home" aria-label="Back">←</button>
         </div>
 
         <div class="intro-center">
@@ -275,7 +300,7 @@
           <h2 class="intro-title">Strands</h2>
           <p class="intro-sub">Find hidden words and uncover the day’s theme.</p>
 
-          <button class="pill-btn" id="strandsPlay">Play</button>
+          <button class="pill-btn" type="button" id="strandsPlay">Play</button>
 
           <div class="intro-footer">
             <div class="intro-date">February 14, 2026</div>
@@ -290,7 +315,7 @@
     <section class="view" id="view-strands">
       <div class="card light-card">
         <div class="top-row light-top">
-          <button class="icon-btn" data-goto="strands-intro" aria-label="Back">←</button>
+          <button class="icon-btn" type="button" data-goto="strands-intro" aria-label="Back">←</button>
           <div class="spacer"></div>
           <div class="top-icons">
             <button class="tiny-btn" type="button">?</button>
@@ -305,14 +330,14 @@
 
         <p class="help light-help" id="spanThemeHelp"></p>
 
-        <div id="spanGrid" class="span-grid nyt"></div>
+        <div id="spanGrid" class="span-grid nyt" aria-label="Strands grid"></div>
 
         <div class="strands-bottom">
-          <button class="hint-btn" id="spanClear" type="button">Hint</button>
+          <button class="hint-btn" id="spanClear" type="button">Clear</button>
           <div class="progress" id="spanProgress">0 of 5 theme words found.</div>
         </div>
 
-        <p id="spanMsg" class="msg light-msg"></p>
+        <p id="spanMsg" class="msg light-msg" aria-live="polite"></p>
       </div>
     </section>
 
@@ -320,12 +345,14 @@
     <section class="view" id="view-reveal">
       <div class="card">
         <div class="top-row">
-          <button class="icon-btn" data-goto="home" aria-label="Back">←</button>
+          <button class="icon-btn" type="button" data-goto="home" aria-label="Back">←</button>
           <div class="spacer"></div>
         </div>
 
         <h2 class="h1">Final Reveal 🎁</h2>
-        <button id="revealBtn" class="primary">Open</button>
+        <p class="help">This unlocks after you solve all four puzzles.</p>
+
+        <button id="revealBtn" type="button" class="primary">Open</button>
         <div id="revealContent" class="reveal-content hidden"></div>
       </div>
     </section>
@@ -333,12 +360,12 @@
   </main>
 
   <!-- BOTTOM NAV -->
-  <nav class="bottom-nav">
-    <button data-view="home" aria-label="Home">🏠</button>
-    <button data-view="mini-intro" aria-label="Mini">🧩</button>
-    <button data-view="wordle-intro" aria-label="Wordle">⬜</button>
-    <button data-view="connections-intro" aria-label="Connections">🟪</button>
-    <button data-view="strands-intro" aria-label="Strands">🧵</button>
+  <nav class="bottom-nav" aria-label="Bottom navigation">
+    <button type="button" data-view="home" aria-label="Home">🏠</button>
+    <button type="button" data-view="mini-intro" aria-label="Mini">🧩</button>
+    <button type="button" data-view="wordle-intro" aria-label="Wordle">⬜</button>
+    <button type="button" data-view="connections-intro" aria-label="Connections">🟪</button>
+    <button type="button" data-view="strands-intro" aria-label="Strands">🧵</button>
   </nav>
 
   <script src="app.js"></script>
