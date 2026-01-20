@@ -13,6 +13,8 @@
 
   --black:#111;
   --shadow: 0 14px 35px rgba(0,0,0,.28);
+
+  --nav-h: 86px; /* used to calc full-height screens */
 }
 
 *{box-sizing:border-box}
@@ -23,6 +25,7 @@ body{
   font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
 }
 
+/* Header */
 .top-header{
   text-align:center;
   padding:14px 0 10px;
@@ -30,10 +33,18 @@ body{
   font-weight:800;
   letter-spacing:.2px;
 }
+body.header-hidden .top-header{
+  display:none;
+}
 
 .main{
   padding:16px;
-  padding-bottom:86px;
+  padding-bottom:var(--nav-h);
+}
+body.header-hidden .main{
+  padding-top:0;          /* remove the header spacing */
+  padding-left:16px;
+  padding-right:16px;
 }
 
 /* ---------- Smooth transitions between views ---------- */
@@ -183,7 +194,7 @@ body{
   font-size:18px;
 }
 
-/* ---------- Wordle (simple placeholder tiles) ---------- */
+/* ---------- Wordle ---------- */
 .wordle-board{
   display:grid;
   grid-template-rows:repeat(6,1fr);
@@ -222,9 +233,9 @@ body{
   letter-spacing:.5px;
 }
 
-/* ---------- Strands intro (mint screen like NYT) ---------- */
+/* ---------- Strands intro (full screen) ---------- */
 .strands-intro{
-  min-height: calc(100vh - 160px);
+  min-height: calc(100vh - var(--nav-h));
   background: var(--mint);
   color:#000;
   border-radius: 22px;
@@ -232,6 +243,11 @@ body{
   box-shadow: var(--shadow);
   display:flex;
   flex-direction:column;
+}
+body.header-hidden .strands-intro{
+  border-radius: 0;        /* fill page edge-to-edge */
+  min-height: calc(100vh - var(--nav-h));
+  box-shadow: none;
 }
 .intro-top{ display:flex; align-items:center; }
 .intro-center{
@@ -297,7 +313,7 @@ body{
 .intro-date{ font-weight:900; font-size:18px; }
 .intro-small{ font-size:14px; margin-top:4px; }
 
-/* ---------- Strands game look (white-ish) ---------- */
+/* ---------- Strands game (full screen) ---------- */
 .light-card{
   background:#ffffff;
   color:#000;
@@ -305,6 +321,12 @@ body{
 .light-top .icon-btn{ color:#000; }
 .light-help{ color: rgba(0,0,0,.62); }
 .light-msg{ color: rgba(0,0,0,.62); }
+
+body.header-hidden .strands-full{
+  border-radius: 0;
+  min-height: calc(100vh - var(--nav-h));
+  box-shadow: none;
+}
 
 .top-icons{ display:flex; gap:10px; }
 .tiny-btn{

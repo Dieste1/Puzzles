@@ -43,6 +43,12 @@ function setActiveNav(name){
   });
 }
 
+function setHeaderVisibilityForView(name){
+  // Hide header ONLY on Strands intro + Strands game
+  const hide = (name === "strands-intro" || name === "strands");
+  document.body.classList.toggle("header-hidden", hide);
+}
+
 function showView(name){
   if(name === activeView) return;
 
@@ -63,9 +69,14 @@ function showView(name){
     next.classList.add("is-entered");
 
     activeView = name;
-    setActiveNav(name === "strands" ? "strands-intro" : name);
-    window.scrollTo({ top: 0 });
 
+    // bottom nav highlight (keep strands icon active for both screens)
+    setActiveNav(name === "strands" ? "strands-intro" : name);
+
+    // header visibility
+    setHeaderVisibilityForView(name);
+
+    window.scrollTo({ top: 0 });
   }, 140);
 }
 
@@ -75,6 +86,7 @@ requestAnimationFrame(()=>{
   document.getElementById("view-home").classList.add("is-entered");
 });
 setActiveNav("home");
+setHeaderVisibilityForView("home");
 
 document.querySelectorAll("[data-view]").forEach(btn=>{
   btn.addEventListener("click", ()=> showView(btn.dataset.view));
