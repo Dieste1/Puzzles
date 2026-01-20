@@ -1,24 +1,9 @@
 /* =========================
-   CONFIG — EDIT THIS ONLY
+   CONFIG
    ========================= */
 const CONFIG = {
-  siteTitle: "🗞️ Games",
-
-  // WORDLE
-  wordleSolution: "HEART", // 5 letters
-
-  // CONNECTIONS (4 groups x 4 words)
-  connectionsGroups: [
-    { title: "Date Night Vibes", words: ["JAZZ","MARTINI","CANDLE","DANCE"] },
-    { title: "Places", words: ["MONTREAL","OLDPORT","PLATEAU","MILEEND"] },
-    { title: "You", words: ["KIND","FUNNY","SMART","WARM"] },
-    { title: "Us", words: ["ALWAYS","TOGETHER","FOREVER","US"] }
-  ],
-
-  // STRANDS
   strands: {
-    theme: "Our Love Story",
-    rows: 6,
+    themeTitle: "Our Love Story",
     cols: 6,
     grid: [
       "L","O","V","E","S","U",
@@ -28,158 +13,120 @@ const CONFIG = {
       "E","H","E","A","R","T",
       "S","M","I","L","E","S"
     ],
-    strandsWord: "TOGETHERFOREVER",
-    themeWords: ["LOVE","HEART","SMILES","MORE"]
+    themeWords: ["LOVE","HEART","SMILES","MORE"],
+    strandsWord: "TOGETHERFOREVER"
   },
 
-  // MINI (5x5)
-  mini: {
-    // # = black square, letters are solution
-    solution: [
-      "L","O","V","E","#",
-      "A","#","R","#","T",
-      "D","A","T","E","#",
-      "#","H","#","U","G",
-      "S","#","M","I","L"
-    ]
-  },
+  wordleSolution: "HEART",
+  connectionsWords: [
+    "JAZZ","MARTINI","CANDLE","DANCE",
+    "MONTREAL","OLDPORT","PLATEAU","MILEEND",
+    "KIND","FUNNY","SMART","WARM",
+    "ALWAYS","TOGETHER","FOREVER","US"
+  ],
 
-  // FINAL REVEAL
-  requireSolveBeforeReveal: true,
   finalRevealHtml: `
-    <h3>❤️ Surprise</h3>
-    <p>Meet me at <strong>8:00</strong> — I planned something special.</p>
-    <p style="opacity:.75;margin:0;">Dress cozy. Bring your smile.</p>
+    <h3 style="margin:0 0 8px;">❤️ Surprise</h3>
+    <p style="margin:0;">Meet me at <strong>8:00</strong> — I planned something special.</p>
   `
 };
 
 /* =========================
-   NAV / VIEWS
+   VIEW ROUTER (with transition)
    ========================= */
-const views = ["home","mini","wordle","connections","strands","reveal"];
-const state = {
-  solvedWordle: false,
-  solvedConnections: false,
-  solvedStrandsAny: false
-};
+const views = ["home","mini","wordle","connections","strands-intro","strands","reveal"];
+let activeView = "home";
 
-function showView(name){
-  views.forEach(v=>{
-    const el = document.getElementById(`view-${v}`);
-    if(!el) return;
-    el.classList.toggle("hidden", v !== name);
-  });
+function setActiveNav(name){
   document.querySelectorAll(".bottom-nav button").forEach(b=>{
     b.classList.toggle("active", b.dataset.view === name);
   });
-  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-document.querySelectorAll("[data-goto]").forEach(card=>{
-  card.addEventListener("click", ()=> showView(card.dataset.goto));
-});
+function showView(name){
+  if(name === activeView) return;
 
-document.querySelectorAll(".bottom-nav button").forEach(btn=>{
+  const current = document.getElementById(`view-${activeView}`);
+  const next = document.getElementById(`view-${name}`);
+
+  // hide current (remove entered -> fades out)
+  current.classList.remove("is-entered");
+
+  // after fade out, swap display
+  setTimeout(()=>{
+    current.classList.remove("is-active");
+    next.classList.add("is-active");
+
+    // force reflow so transition triggers
+    void next.offsetWidth;
+
+    next.classList.add("is-entered");
+
+    activeView = name;
+    setActiveNav(name === "strands" ? "strands-intro" : name);
+    window.scrollTo({ top: 0 });
+
+  }, 140);
+}
+
+// initialize
+document.getElementById("view-home").classList.add("is-active");
+requestAnimationFrame(()=>{
+  document.getElementById("view-home").classList.add("is-entered");
+});
+setActiveNav("home");
+
+document.querySelectorAll("[data-view]").forEach(btn=>{
   btn.addEventListener("click", ()=> showView(btn.dataset.view));
 });
-
-document.getElementById("siteTitle").textContent = CONFIG.siteTitle;
+document.querySelectorAll("[data-goto]").forEach(el=>{
+  el.addEventListener("click", ()=> showView(el.dataset.goto));
+});
 
 /* =========================
-   MINI (simple crossword)
-   - tap a cell, type letter keys
-   - blocks (#) are black
+   MINI (simple)
    ========================= */
 const miniGrid = document.getElementById("miniGrid");
 const miniReveal = document.getElementById("miniReveal");
-const miniReset = document.getElementById("miniReset");
-const miniMsg = document.getElementById("miniMsg");
+const MINI_FILL = [
+  "L","O","V","E","S",
+  "H","E","A","R","T",
+  "S","M","I","L","E",
+  "S","A","L","W","A",
+  "Y","S","U","S","!"
+];
 
-let miniActive = -1;
-let miniEntries = Array(25).fill("");
-
-function renderMini(){
+function buildMini(){
   miniGrid.innerHTML = "";
-  CONFIG.mini.solution.forEach((ch, idx)=>{
-    const d = document.createElement("div");
-    d.className = "mini-cell";
-    if(ch === "#") d.classList.add("block");
-
-    const val = (ch === "#") ? "" : (miniEntries[idx] || "");
-    d.textContent = val;
-
-    if(idx === miniActive) d.classList.add("active");
-
-    d.addEventListener("click", ()=>{
-      if(ch === "#") return;
-      miniActive = idx;
-      miniMsg.textContent = "";
-      renderMini();
-    });
-
-    miniGrid.appendChild(d);
-  });
-}
-
-function miniResetAll(){
-  miniEntries = Array(25).fill("");
-  miniActive = -1;
-  miniMsg.textContent = "";
-  renderMini();
-}
-
-document.addEventListener("keydown", (e)=>{
-  const miniVisible = !document.getElementById("view-mini").classList.contains("hidden");
-  if(!miniVisible) return;
-  if(miniActive < 0) return;
-
-  const sol = CONFIG.mini.solution[miniActive];
-  if(sol === "#") return;
-
-  if(e.key === "Backspace"){
-    miniEntries[miniActive] = "";
-    renderMini();
-    return;
+  for(let i=0;i<25;i++){
+    const c = document.createElement("div");
+    c.className = "mini-cell";
+    c.textContent = " ";
+    c.dataset.letter = MINI_FILL[i] || " ";
+    miniGrid.appendChild(c);
   }
-
-  if(/^[a-zA-Z]$/.test(e.key)){
-    miniEntries[miniActive] = e.key.toUpperCase();
-    // move forward to next non-block
-    for(let i=miniActive+1; i<25; i++){
-      if(CONFIG.mini.solution[i] !== "#"){
-        miniActive = i;
-        break;
-      }
-    }
-    renderMini();
-  }
-});
+}
+buildMini();
 
 miniReveal.addEventListener("click", ()=>{
-  CONFIG.mini.solution.forEach((ch, i)=>{
-    miniEntries[i] = (ch === "#") ? "" : ch;
+  document.querySelectorAll(".mini-cell").forEach(c=>{
+    c.textContent = c.dataset.letter;
   });
-  miniMsg.textContent = "Revealed ✅";
-  renderMini();
 });
-miniReset.addEventListener("click", miniResetAll);
-
-renderMini();
 
 /* =========================
-   WORDLE
+   WORDLE (basic)
    ========================= */
 const wordleBoard = document.getElementById("wordleBoard");
 const wordleInput = document.getElementById("wordleInput");
 const wordleSubmit = document.getElementById("wordleSubmit");
 const wordleMsg = document.getElementById("wordleMsg");
-const wordleReset = document.getElementById("wordleReset");
 
 let wordleRow = 0;
 let wordleDone = false;
-const SOL = CONFIG.wordleSolution.trim().toUpperCase();
+const SOL = CONFIG.wordleSolution.toUpperCase();
 
-function buildWordleBoard(){
+function buildWordle(){
   wordleBoard.innerHTML = "";
   for(let r=0;r<6;r++){
     const row = document.createElement("div");
@@ -187,396 +134,187 @@ function buildWordleBoard(){
     for(let c=0;c<5;c++){
       const t = document.createElement("div");
       t.className = "tile";
-      t.textContent = "";
       row.appendChild(t);
     }
     wordleBoard.appendChild(row);
   }
 }
-
-function wordleSetMsg(text, kind=""){
-  wordleMsg.textContent = text;
-  wordleMsg.style.color = kind==="ok" ? "rgba(34,197,94,.95)"
-                      : kind==="bad" ? "rgba(239,68,68,.95)"
-                      : kind==="warn"? "rgba(245,158,11,.95)"
-                      : "";
-}
-
-function evaluateGuess(guess){
-  const solArr = SOL.split("");
-  const guessArr = guess.split("");
-  const result = Array(5).fill("bad");
-
-  for(let i=0;i<5;i++){
-    if(guessArr[i] === solArr[i]){
-      result[i] = "ok";
-      solArr[i] = null;
-      guessArr[i] = null;
-    }
-  }
-
-  for(let i=0;i<5;i++){
-    if(guessArr[i] == null) continue;
-    const idx = solArr.indexOf(guessArr[i]);
-    if(idx !== -1){
-      result[i] = "warn";
-      solArr[idx] = null;
-    }
-  }
-  return result;
-}
-
-function renderGuess(guess, statuses){
-  const rowEl = wordleBoard.children[wordleRow];
-  for(let i=0;i<5;i++){
-    const tile = rowEl.children[i];
-    tile.textContent = guess[i];
-    tile.classList.add(statuses[i]);
-  }
-}
+buildWordle();
 
 function submitWordle(){
   if(wordleDone) return;
-
-  const raw = wordleInput.value.trim().toUpperCase();
-  if(raw.length !== 5) return wordleSetMsg("Need 5 letters.", "warn");
-  if(!/^[A-Z]+$/.test(raw)) return wordleSetMsg("Letters only.", "warn");
-
-  const statuses = evaluateGuess(raw);
-  renderGuess(raw, statuses);
-
-  if(raw === SOL){
-    wordleDone = true;
-    state.solvedWordle = true;
-    wordleSetMsg("You got it! ✅", "ok");
-    updateRevealGate();
+  const guess = wordleInput.value.trim().toUpperCase();
+  if(!/^[A-Z]{5}$/.test(guess)){
+    wordleMsg.textContent = "Enter 5 letters.";
     return;
   }
-
+  const rowEl = wordleBoard.children[wordleRow];
+  for(let i=0;i<5;i++){
+    rowEl.children[i].textContent = guess[i];
+  }
+  if(guess === SOL){
+    wordleDone = true;
+    wordleMsg.textContent = "You got it! 💘";
+    return;
+  }
   wordleRow++;
   wordleInput.value = "";
   if(wordleRow >= 6){
     wordleDone = true;
-    wordleSetMsg(`Out of tries! The word was ${SOL}.`, "bad");
+    wordleMsg.textContent = `Out of tries! It was ${SOL}.`;
   } else {
-    wordleSetMsg("");
+    wordleMsg.textContent = "";
   }
 }
-
 wordleSubmit.addEventListener("click", submitWordle);
-wordleInput.addEventListener("keydown", (e)=>{
-  if(e.key === "Enter") submitWordle();
-});
-wordleReset.addEventListener("click", ()=>{
-  wordleRow = 0;
-  wordleDone = false;
-  state.solvedWordle = false;
-  buildWordleBoard();
-  wordleInput.value = "";
-  wordleSetMsg("");
-  updateRevealGate();
-});
-
-buildWordleBoard();
+wordleInput.addEventListener("keydown", (e)=>{ if(e.key==="Enter") submitWordle(); });
 
 /* =========================
-   CONNECTIONS
+   CONNECTIONS (simple selection UI)
    ========================= */
 const connGrid = document.getElementById("connGrid");
 const connSubmit = document.getElementById("connSubmit");
 const connClear = document.getElementById("connClear");
-const connReset = document.getElementById("connReset");
-const connSolved = document.getElementById("connSolved");
 const connMsg = document.getElementById("connMsg");
 
 let connSelected = new Set();
-let connSolvedGroups = [];
 
-function shuffle(arr){
-  const a = arr.slice();
-  for(let i=a.length-1;i>0;i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-function allConnWords(){
-  return CONFIG.connectionsGroups.flatMap(g=>g.words.map(w=>w.toUpperCase()));
-}
-
-let connWords = shuffle(allConnWords());
-
-function connSetMsg(text, kind=""){
-  connMsg.textContent = text;
-  connMsg.style.color = kind==="ok" ? "rgba(34,197,94,.95)"
-                    : kind==="bad" ? "rgba(239,68,68,.95)"
-                    : kind==="warn"? "rgba(245,158,11,.95)"
-                    : "";
-}
-
-function renderConn(){
+function renderConnections(){
   connGrid.innerHTML = "";
-  connWords.forEach(w=>{
-    const btn = document.createElement("button");
-    btn.className = "conn-word";
-    btn.type = "button";
-    btn.textContent = w;
-
-    const isSolved = connSolvedGroups.some(g=>g.words.includes(w));
-    if(isSolved){
-      btn.classList.add("disabled");
-      btn.disabled = true;
-    }
-    if(connSelected.has(w)) btn.classList.add("selected");
-
-    btn.addEventListener("click", ()=>{
-      if(btn.disabled) return;
+  CONFIG.connectionsWords.forEach(w=>{
+    const b = document.createElement("button");
+    b.className = "conn-word";
+    b.textContent = w;
+    b.addEventListener("click", ()=>{
       if(connSelected.has(w)) connSelected.delete(w);
       else{
-        if(connSelected.size >= 4) return connSetMsg("Pick only 4.", "warn");
+        if(connSelected.size >= 4){
+          connMsg.textContent = "Pick only 4.";
+          return;
+        }
         connSelected.add(w);
       }
-      connSetMsg("");
-      renderConn();
+      connMsg.textContent = "";
+      b.style.opacity = connSelected.has(w) ? "0.6" : "1";
     });
-
-    connGrid.appendChild(btn);
-  });
-
-  connSolved.innerHTML = "";
-  connSolvedGroups.forEach(g=>{
-    const box = document.createElement("div");
-    box.className = "solved-pill";
-    box.innerHTML = `<strong>✅ ${g.title}</strong><div class="words">${g.words.join(" · ")}</div>`;
-    connSolved.appendChild(box);
+    connGrid.appendChild(b);
   });
 }
+renderConnections();
 
-function submitConn(){
-  if(connSelected.size !== 4) return connSetMsg("Select exactly 4 words.", "warn");
-  const pick = Array.from(connSelected);
-
-  const match = CONFIG.connectionsGroups.find(g=>{
-    const set = new Set(g.words.map(x=>x.toUpperCase()));
-    return pick.every(w=>set.has(w));
-  });
-
-  if(!match) return connSetMsg("Not a correct group. Try again.", "bad");
-
-  const solvedWords = match.words.map(w=>w.toUpperCase());
-  if(connSolvedGroups.some(g=>g.title === match.title)) return connSetMsg("Already solved.", "warn");
-
-  connSolvedGroups.push({ title: match.title, words: solvedWords });
-  connSelected.clear();
-  connSetMsg("Nice! Group solved ✅", "ok");
-
-  if(connSolvedGroups.length === 4){
-    state.solvedConnections = true;
-    connSetMsg("All groups solved! 🎉", "ok");
-    updateRevealGate();
-  }
-  renderConn();
-}
-
-connSubmit.addEventListener("click", submitConn);
 connClear.addEventListener("click", ()=>{
   connSelected.clear();
-  connSetMsg("");
-  renderConn();
-});
-connReset.addEventListener("click", ()=>{
-  connSelected.clear();
-  connSolvedGroups = [];
-  state.solvedConnections = false;
-  connWords = shuffle(allConnWords());
-  connSetMsg("");
-  renderConn();
-  updateRevealGate();
+  connMsg.textContent = "";
+  renderConnections();
 });
 
-renderConn();
+connSubmit.addEventListener("click", ()=>{
+  if(connSelected.size !== 4){
+    connMsg.textContent = "Select exactly 4.";
+    return;
+  }
+  connMsg.textContent = "Nice — now wire in your group logic ✅";
+});
 
 /* =========================
-   STRANDS (tap path + submit)
+   STRANDS — Intro -> Play -> Game
    ========================= */
-const spanGridEl = document.getElementById("spanGrid");
-const spanReset = document.getElementById("spanReset");
-const spanSubmit = document.getElementById("spanSubmit");
-const spanClear = document.getElementById("spanClear");
-const spanMsg = document.getElementById("spanMsg");
+const strandsPlay = document.getElementById("strandsPlay");
 const spanThemeHelp = document.getElementById("spanThemeHelp");
-const spanWordList = document.getElementById("spanWordList");
-const spanFoundCount = document.getElementById("spanFoundCount");
+const spanThemeTitle = document.getElementById("spanThemeTitle");
+const spanGridEl = document.getElementById("spanGrid");
+const spanMsg = document.getElementById("spanMsg");
+const spanClear = document.getElementById("spanClear");
+const spanProgress = document.getElementById("spanProgress");
 
 const SP = CONFIG.strands;
+spanThemeTitle.textContent = SP.themeTitle;
+
 let spanSelected = [];
 let spanFoundWords = new Set();
-let spanFoundCells = new Map(); // idx -> "found" | "strands"
 
-function spanSetMsg(text, kind=""){
-  spanMsg.textContent = text;
-  spanMsg.style.color = kind==="ok" ? "rgba(34,197,94,.95)"
-                : kind==="bad" ? "rgba(239,68,68,.95)"
-                : kind==="warn"? "rgba(245,158,11,.95)"
-                : "";
-}
-
-function idxToRC(idx){
-  return { r: Math.floor(idx / SP.cols), c: idx % SP.cols };
-}
-
-function isAdjacent(a, b){
+function idxToRC(idx){ return { r: Math.floor(idx / SP.cols), c: idx % SP.cols }; }
+function isAdjacent(a,b){
   const A = idxToRC(a), B = idxToRC(b);
-  return Math.abs(A.r - B.r) <= 1 && Math.abs(A.c - B.c) <= 1 && !(A.r===B.r && A.c===B.c);
+  return Math.abs(A.r-B.r)<=1 && Math.abs(A.c-B.c)<=1 && !(A.r===B.r && A.c===B.c);
+}
+function selectionWord(){
+  return spanSelected.map(i=>SP.grid[i]).join("").toUpperCase();
 }
 
-function spanWordFromSelection(){
-  return spanSelected.map(i => SP.grid[i]).join("").toUpperCase();
+function updateProgress(){
+  const total = SP.themeWords.length + 1; // includes strandsWord
+  spanProgress.textContent = `${spanFoundWords.size} of ${total} theme words found.`;
 }
 
-function renderSpanWordList(){
-  spanWordList.innerHTML = "";
-  const all = [...SP.themeWords.map(w=>w.toUpperCase()), SP.strandsWord.toUpperCase()];
-  all.forEach(w=>{
-    const chip = document.createElement("div");
-    chip.className = "span-word" + (spanFoundWords.has(w) ? " done" : "");
-    chip.textContent = w === SP.strandsWord.toUpperCase() ? `⭐ ${w}` : w;
-    spanWordList.appendChild(chip);
-  });
-  spanFoundCount.textContent = String(spanFoundWords.size);
-}
-
-function renderSpanGrid(){
-  spanGridEl.style.setProperty("--cols", SP.cols);
+function renderStrands(){
   spanGridEl.innerHTML = "";
-
   SP.grid.forEach((ch, idx)=>{
     const cell = document.createElement("div");
     cell.className = "span-cell";
     cell.textContent = ch.toUpperCase();
 
     if(spanSelected.includes(idx)) cell.classList.add("selected");
-    const status = spanFoundCells.get(idx);
-    if(status === "found") cell.classList.add("found");
-    if(status === "strands") cell.classList.add("strands");
 
     cell.addEventListener("click", ()=>{
-      if(spanFoundCells.has(idx)) return;
-
+      // undo last tap
       if(spanSelected.includes(idx)){
-        if(spanSelected[spanSelected.length - 1] === idx){
+        if(spanSelected[spanSelected.length-1] === idx){
           spanSelected.pop();
-          spanSetMsg("");
-          renderSpanGrid();
-        } else {
-          spanSetMsg("Undo only the last letter.", "warn");
+          renderStrands();
+          spanMsg.textContent = selectionWord();
         }
         return;
       }
+      // adjacency
+      if(spanSelected.length){
+        const last = spanSelected[spanSelected.length-1];
+        if(!isAdjacent(last, idx)) return;
+      }
+      spanSelected.push(idx);
+      renderStrands();
+      spanMsg.textContent = selectionWord();
 
-      if(spanSelected.length > 0){
-        const last = spanSelected[spanSelected.length - 1];
-        if(!isAdjacent(last, idx)){
-          spanSetMsg("Letters must touch.", "warn");
-          return;
+      // auto-check if it matches any word
+      const w = selectionWord();
+      const themeSet = new Set(SP.themeWords.map(x=>x.toUpperCase()));
+      const big = SP.strandsWord.toUpperCase();
+      if(themeSet.has(w) || w === big){
+        if(!spanFoundWords.has(w)){
+          spanFoundWords.add(w);
+          spanMsg.textContent = (w===big) ? "STRANDS FOUND! ⭐" : "Nice!";
+          spanSelected = [];
+          renderStrands();
+          updateProgress();
         }
       }
-
-      spanSelected.push(idx);
-      spanSetMsg(spanWordFromSelection());
-      renderSpanGrid();
     });
 
     spanGridEl.appendChild(cell);
   });
+
+  spanThemeHelp.textContent = `Today’s theme: ${SP.themeTitle}`;
 }
 
-function spanClearSelection(){
+renderStrands();
+updateProgress();
+
+spanClear.addEventListener("click", ()=>{
   spanSelected = [];
-  spanSetMsg("");
-  renderSpanGrid();
-}
+  spanMsg.textContent = "";
+  renderStrands();
+});
 
-function spanSubmitSelection(){
-  if(spanSelected.length < 4) return spanSetMsg("Select at least 4 letters.", "warn");
-  const w = spanWordFromSelection();
-
-  const themeSet = new Set(SP.themeWords.map(x=>x.toUpperCase()));
-  const strandWord = SP.strandsWord.toUpperCase();
-
-  if(!themeSet.has(w) && w !== strandWord){
-    return spanSetMsg("Not a theme word.", "bad");
-  }
-  if(spanFoundWords.has(w)){
-    return spanSetMsg("Already found.", "warn");
-  }
-
-  spanFoundWords.add(w);
-  state.solvedStrandsAny = true;
-
-  spanSelected.forEach(i=>{
-    spanFoundCells.set(i, w === strandWord ? "strands" : "found");
-  });
-
-  spanSetMsg(w === strandWord ? "STRANDS FOUND! ⭐🎉" : "Nice! ✅", "ok");
-  spanSelected = [];
-  renderSpanGrid();
-  renderSpanWordList();
-  updateRevealGate();
-}
-
-function spanResetAll(){
-  spanSelected = [];
-  spanFoundWords = new Set();
-  spanFoundCells = new Map();
-  state.solvedStrandsAny = false;
-  spanSetMsg("");
-  renderSpanGrid();
-  renderSpanWordList();
-  updateRevealGate();
-}
-
-spanThemeHelp.textContent = `Theme: ${SP.theme}. Tap letters to spell words. ⭐ marks the strands.`;
-renderSpanGrid();
-renderSpanWordList();
-
-spanClear.addEventListener("click", spanClearSelection);
-spanSubmit.addEventListener("click", spanSubmitSelection);
-spanReset.addEventListener("click", spanResetAll);
+// Strands flow
+strandsPlay.addEventListener("click", ()=>{
+  showView("strands");
+});
 
 /* =========================
    FINAL REVEAL
    ========================= */
-const revealBtn = document.getElementById("revealBtn");
-const revealGate = document.getElementById("revealGate");
-const revealContent = document.getElementById("revealContent");
-
-function anySolved(){
-  return state.solvedWordle || state.solvedConnections || state.solvedStrandsAny;
-}
-
-function updateRevealGate(){
-  if(!CONFIG.requireSolveBeforeReveal){
-    revealGate.textContent = "Ready when you are 💝";
-    return;
-  }
-  revealGate.textContent = anySolved()
-    ? "Unlocked 💘"
-    : "Solve at least one puzzle first 😉";
-}
-
-revealBtn.addEventListener("click", ()=>{
-  updateRevealGate();
-  if(CONFIG.requireSolveBeforeReveal && !anySolved()){
-    revealContent.classList.add("hidden");
-    return;
-  }
-  revealContent.innerHTML = CONFIG.finalRevealHtml;
-  revealContent.classList.remove("hidden");
+document.getElementById("revealBtn").addEventListener("click", ()=>{
+  const el = document.getElementById("revealContent");
+  el.innerHTML = CONFIG.finalRevealHtml;
+  el.classList.remove("hidden");
 });
-
-updateRevealGate();
-
-/* Default view */
-showView("home");

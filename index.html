@@ -6,177 +6,202 @@
   <title>Aliego’s Puzzle Pack</title>
 
   <link rel="stylesheet" href="style.css" />
-
   <meta name="theme-color" content="#2b2b2b">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
+
 <body>
+  <header class="top-header">
+    <h1 id="siteTitle">🗞️ Games</h1>
+  </header>
 
-<header class="top-header">
-  <h1 id="siteTitle">🗞️ Games</h1>
-</header>
+  <main class="main">
 
-<main class="main">
+    <!-- HOME -->
+    <section class="view is-active" id="view-home">
+      <div class="feed">
 
-  <!-- HOME -->
-  <section class="view" id="view-home">
-    <div class="feed">
-
-      <div class="game-card yellow" data-goto="mini">
-        <h2>The Mini</h2>
-        <p>Solve the puzzle in seconds.</p>
-        <div class="meta">
-          <span>Saturday, Feb 14</span>
-          <span>By Diego Steiner</span>
+        <div class="game-card mint" data-goto="strands-intro">
+          <h2>Strands</h2>
+          <p>Find hidden words and uncover the theme.</p>
+          <div class="meta">
+            <span>Monday, Jan 19</span>
+            <span>By YOU</span>
+          </div>
         </div>
-      </div>
 
-      <div class="game-card gray" data-goto="wordle">
-        <h2>Wordle</h2>
-        <p>Ready for your next guess.</p>
-        <div class="meta">
-          <span>Saturday, Feb 14</span>
-          <span>By Diego Steiner</span>
+        <div class="game-card gray" data-goto="wordle">
+          <h2>Wordle</h2>
+          <p>Ready for your next guess.</p>
+          <div class="meta">
+            <span>Monday, Jan 19</span>
+            <span>Guess 1 of 6</span>
+          </div>
         </div>
-      </div>
 
-      <div class="game-card purple" data-goto="connections">
-        <h2>Connections</h2>
-        <p>Group words that share a common thread.</p>
-        <div class="meta">
-          <span>Saturday, Feb 14</span>
-          <span>By Diego Steiner</span>
+        <div class="game-card purple" data-goto="connections">
+          <h2>Connections</h2>
+          <p>Group words that share a common thread.</p>
+          <div class="meta">
+            <span>Monday, Jan 19</span>
+            <span>By YOU</span>
+          </div>
         </div>
-      </div>
 
-      <div class="game-card mint" data-goto="strands">
-        <h2>Strands</h2>
-        <p>Find hidden words and uncover the day's theme.</p>
-        <div class="meta">
-          <span>Saturday, Feb 14</span>
-          <span>By Diego Steiner</span>
+        <div class="game-card yellow" data-goto="mini">
+          <h2>The Mini</h2>
+          <p>Solve the puzzle in seconds.</p>
+          <div class="meta">
+            <span>Monday, Jan 19</span>
+            <span>By YOU</span>
+          </div>
         </div>
-      </div>
 
-      <div class="game-card pink" data-goto="reveal">
-        <h2>Final Reveal</h2>
-        <p>A message just for you.</p>
-        <div class="meta">
-          <span>Locked</span>
-          <span>💝</span>
+        <div class="game-card pink" data-goto="reveal">
+          <h2>Final Reveal</h2>
+          <p>A message just for you.</p>
+          <div class="meta">
+            <span>Locked</span>
+            <span>💝</span>
+          </div>
         </div>
+
       </div>
+    </section>
 
-    </div>
-  </section>
+    <!-- MINI -->
+    <section class="view" id="view-mini">
+      <div class="card">
+        <div class="top-row">
+          <button class="icon-btn" data-goto="home" aria-label="Back">←</button>
+          <div class="spacer"></div>
+        </div>
 
-  <!-- MINI -->
-  <section class="view hidden" id="view-mini">
-    <div class="card">
-      <div class="top-row">
-        <h2>The Mini 🧩</h2>
-        <button class="ghost" id="miniReset">Reset</button>
-      </div>
-      <p class="help">Tap a square, type letters. Black squares are blocks.</p>
+        <h2 class="h1">The Mini</h2>
+        <p class="help">Tap Reveal to show the filled grid (placeholder mini).</p>
 
-      <div class="mini-grid" id="miniGrid" aria-label="Mini crossword grid"></div>
-
-      <div class="row">
+        <div class="mini-grid" id="miniGrid"></div>
         <button class="primary" id="miniReveal">Reveal</button>
-        <p id="miniMsg" class="msg"></p>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- WORDLE -->
-  <section class="view hidden" id="view-wordle">
-    <div class="card">
-      <div class="top-row">
-        <h2>Wordle</h2>
-        <button class="ghost" id="wordleReset">Reset</button>
+    <!-- WORDLE -->
+    <section class="view" id="view-wordle">
+      <div class="card">
+        <div class="top-row">
+          <button class="icon-btn" data-goto="home" aria-label="Back">←</button>
+          <div class="spacer"></div>
+        </div>
+
+        <h2 class="h1">Wordle</h2>
+        <div id="wordleBoard" class="wordle-board"></div>
+        <div class="row">
+          <input id="wordleInput" class="text" maxlength="5" placeholder="Guess…" />
+          <button id="wordleSubmit" class="primary">Enter</button>
+        </div>
+        <p id="wordleMsg" class="msg"></p>
       </div>
-      <p class="help">Type 5 letters and hit Enter.</p>
+    </section>
 
-      <div id="wordleBoard" class="wordle-board" aria-label="Wordle board"></div>
+    <!-- CONNECTIONS -->
+    <section class="view" id="view-connections">
+      <div class="card">
+        <div class="top-row">
+          <button class="icon-btn" data-goto="home" aria-label="Back">←</button>
+          <div class="spacer"></div>
+        </div>
 
-      <div class="row">
-        <input id="wordleInput" class="text" maxlength="5" placeholder="Guess…" autocomplete="off" />
-        <button id="wordleSubmit" class="primary">Enter</button>
+        <h2 class="h1">Connections</h2>
+        <div id="connGrid" class="conn-grid"></div>
+        <div class="row">
+          <button id="connSubmit" class="primary">Submit</button>
+          <button id="connClear" class="ghost">Clear</button>
+        </div>
+        <p id="connMsg" class="msg"></p>
       </div>
+    </section>
 
-      <p id="wordleMsg" class="msg" role="status" aria-live="polite"></p>
-    </div>
-  </section>
+    <!-- STRANDS INTRO (pre-game screen like NYT) -->
+    <section class="view" id="view-strands-intro">
+      <div class="strands-intro">
+        <div class="intro-top">
+          <button class="icon-btn light" data-goto="home" aria-label="Back">←</button>
+        </div>
 
-  <!-- CONNECTIONS -->
-  <section class="view hidden" id="view-connections">
-    <div class="card">
-      <div class="top-row">
-        <h2>Connections</h2>
-        <button class="ghost" id="connReset">Reset</button>
+        <div class="intro-center">
+          <div class="strands-mark" aria-hidden="true">
+            <span class="mark-a">N</span><span class="mark-b">N</span>
+          </div>
+          <h2 class="intro-title">Strands</h2>
+          <p class="intro-sub">Find hidden words and uncover the day’s theme.</p>
+
+          <button class="pill-btn" id="strandsPlay">Play</button>
+
+          <div class="intro-footer">
+            <div class="intro-date">January 19, 2026</div>
+            <div class="intro-small">No. 687</div>
+            <div class="intro-small">Puzzle by You</div>
+          </div>
+        </div>
       </div>
-      <p class="help">Pick 4 words that belong together, then submit.</p>
+    </section>
 
-      <div id="connGrid" class="conn-grid" aria-label="Connections grid"></div>
+    <!-- STRANDS GAME -->
+    <section class="view" id="view-strands">
+      <div class="card light-card">
+        <div class="top-row light-top">
+          <button class="icon-btn" data-goto="strands-intro" aria-label="Back">←</button>
+          <div class="spacer"></div>
+          <div class="top-icons">
+            <button class="tiny-btn" type="button">?</button>
+            <button class="tiny-btn" type="button">⚙︎</button>
+          </div>
+        </div>
 
-      <div class="row">
-        <button id="connSubmit" class="primary">Submit</button>
-        <button id="connClear" class="ghost">Clear</button>
+        <div class="banner">
+          <div class="banner-top">TODAY’S THEME</div>
+          <div class="banner-title" id="spanThemeTitle">Our Love Story</div>
+        </div>
+
+        <p class="help light-help" id="spanThemeHelp"></p>
+
+        <div id="spanGrid" class="span-grid nyt"></div>
+
+        <div class="strands-bottom">
+          <button class="hint-btn" id="spanClear" type="button">Hint</button>
+          <div class="progress" id="spanProgress">0 of 5 theme words found.</div>
+        </div>
+
+        <p id="spanMsg" class="msg light-msg"></p>
       </div>
+    </section>
 
-      <div id="connSolved" class="conn-solved"></div>
-      <p id="connMsg" class="msg" role="status" aria-live="polite"></p>
-    </div>
-  </section>
+    <!-- FINAL REVEAL -->
+    <section class="view" id="view-reveal">
+      <div class="card">
+        <div class="top-row">
+          <button class="icon-btn" data-goto="home" aria-label="Back">←</button>
+          <div class="spacer"></div>
+        </div>
 
-  <!-- STRANDS -->
-  <section class="view hidden" id="view-strands">
-    <div class="card">
-      <div class="top-row">
-        <h2>Strands</h2>
-        <button class="ghost" id="spanReset">Reset</button>
+        <h2 class="h1">Final Reveal 🎁</h2>
+        <button id="revealBtn" class="primary">Open</button>
+        <div id="revealContent" class="reveal-content hidden"></div>
       </div>
+    </section>
 
-      <p id="spanThemeHelp" class="help"></p>
+  </main>
 
-      <div id="spanGrid" class="span-grid" aria-label="Strands grid"></div>
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button data-view="home" aria-label="Home">🏠</button>
+    <button data-view="mini" aria-label="Mini">🧩</button>
+    <button data-view="wordle" aria-label="Wordle">⬜</button>
+    <button data-view="connections" aria-label="Connections">🟪</button>
+    <button data-view="strands-intro" aria-label="Strands">🧵</button>
+  </nav>
 
-      <div class="row">
-        <button id="spanSubmit" class="primary">Submit</button>
-        <button id="spanClear" class="ghost">Clear</button>
-        <div class="pill">Found: <span id="spanFoundCount">0</span></div>
-      </div>
-
-      <div class="card subtle">
-        <h3 style="margin:0 0 10px">Words</h3>
-        <div id="spanWordList" class="span-wordlist"></div>
-        <p id="spanMsg" class="msg" role="status" aria-live="polite"></p>
-      </div>
-    </div>
-  </section>
-
-  <!-- FINAL REVEAL -->
-  <section class="view hidden" id="view-reveal">
-    <div class="card">
-      <h2>Final Reveal 🎁</h2>
-      <p id="revealGate" class="msg"></p>
-      <button id="revealBtn" class="primary">Open</button>
-      <div id="revealContent" class="reveal-content hidden"></div>
-    </div>
-  </section>
-
-</main>
-
-<!-- BOTTOM NAV -->
-<nav class="bottom-nav">
-  <button data-view="home" class="active">🏠</button>
-  <button data-view="mini">🧩</button>
-  <button data-view="wordle">⬜</button>
-  <button data-view="connections">🟪</button>
-  <button data-view="strands">🧵</button>
-</nav>
-
-<script src="app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
