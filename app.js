@@ -34,14 +34,28 @@ const CONFIG = {
 /* =========================
    VIEW ROUTER (with transition + header hiding)
    ========================= */
-const views = ["home","mini","wordle","connections-intro","connections","strands-intro","strands","reveal"];
+const views = [
+  "home",
+  "mini",
+  "wordle-intro",
+  "wordle",
+  "connections-intro",
+  "connections",
+  "strands-intro",
+  "strands",
+  "reveal"
+];
 let activeView = "home";
 
 const topHeader = document.getElementById("topHeader");
 const mainRoot = document.getElementById("mainRoot");
 
 // pages that should hide the top header and go full-bleed
-const immersiveViews = new Set(["strands-intro","strands","connections-intro","connections"]);
+const immersiveViews = new Set([
+  "strands-intro","strands",
+  "connections-intro","connections",
+  "wordle-intro","wordle"
+]);
 
 function setActiveNav(name){
   document.querySelectorAll(".bottom-nav button").forEach(b=>{
@@ -75,11 +89,18 @@ function showView(name){
     const navName =
       (name === "strands") ? "strands-intro" :
       (name === "connections") ? "connections-intro" :
+      (name === "wordle") ? "wordle-intro" :
       name;
 
     setActiveNav(navName);
     applyImmersiveMode(name);
     window.scrollTo({ top: 0 });
+
+    // Wordle: focus hidden input so iOS keyboard can appear if user taps
+    if(name === "wordle"){
+      const hi = document.getElementById("wordleHiddenInput");
+      if(hi) hi.focus({ preventScroll: true });
+    }
 
   }, 140);
 }
@@ -129,16 +150,20 @@ miniReveal.addEventListener("click", ()=>{
 });
 
 /* =========================
-   WORDLE (basic)
+   WORDLE — Intro -> Play -> Game (NYT-ish pages)
    ========================= */
-const wordleBoard = document.getElementById("wordleBoard");
-const wordleInput = document.getElementById("wordleInput");
-const wordleSubmit = document.getElementById("wordleSubmit");
-const wordleMsg = document.getElementById("wordleMsg");
+const wordlePlay = document.getElementById("wordlePlay");
 
+const wordleBoard = document.getElementById("wordleBoard");
+const wordleMsg = document.getElementById("wordleMsg");
+const wordleHiddenInput = document.getElementById("wordleHiddenInput");
+const wordleKeyboard = document.getElementById("wordleKeyboard");
+
+const SOL = CONFIG.wordleSolution.toUpperCase();
 let wordleRow = 0;
 let wordleDone = false;
-const SOL = CONFIG.wordleSolution.toUpperCase();
+let currentGuess = [];
+let keyState = new Map(); // letter -> "correct" | "present" | "absent"
 
 function buildWordle(){
   wordleBoard.innerHTML = "";
@@ -147,7 +172,7 @@ function buildWordle(){
     row.className = "wordle-row";
     for(let c=0;c<5;c++){
       const t = document.createElement("div");
-      t.className = "tile";
+      t.className = "wordle-tile";
       row.appendChild(t);
     }
     wordleBoard.appendChild(row);
@@ -155,33 +180,187 @@ function buildWordle(){
 }
 buildWordle();
 
-function submitWordle(){
-  if(wordleDone) return;
-  const guess = wordleInput.value.trim().toUpperCase();
-  if(!/^[A-Z]{5}$/.test(guess)){
-    wordleMsg.textContent = "Enter 5 letters.";
-    return;
-  }
+function buildKeyboard(){
+  const rows = [
+    ["Q","W","E","R","T","Y","U","I","O","P"],
+    ["A","S","D","F","G","H","J","K","L"],
+    ["ENTER","Z","X","C","V","B","N","M","⌫"]
+  ];
+  wordleKeyboard.innerHTML = "";
+  rows.forEach((r)=>{
+    const row = document.createElement("div");
+    row.className = "kb-row";
+    r.forEach((k)=>{
+      const b = document.createElement("button");
+      b.className = "kb-key";
+      b.type = "button";
+      b.textContent = k;
+      if(k === "ENTER" || k === "⌫") b.classList.add("wide");
+
+      b.addEventListener("click", ()=>{
+        handleWordleKey(k);
+      });
+
+      row.appendChild(b);
+    });
+    wordleKeyboard.appendChild(row);
+  });
+  renderKeyboardStates();
+}
+buildKeyboard();
+
+function renderKeyboardStates(){
+  document.querySelectorAll(".kb-key").forEach(b=>{
+    const key = b.textContent;
+    if(key.length === 1 && /[A-Z]/.test(key)){
+      b.classList.remove("correct","present","absent");
+      const st = keyState.get(key);
+      if(st) b.classList.add(st);
+    }
+  });
+}
+
+function setMsg(text){
+  wordleMsg.textContent = text || "";
+}
+
+function renderCurrentRow(){
   const rowEl = wordleBoard.children[wordleRow];
   for(let i=0;i<5;i++){
-    rowEl.children[i].textContent = guess[i];
-  }
-  if(guess === SOL){
-    wordleDone = true;
-    wordleMsg.textContent = "You got it! 💘";
-    return;
-  }
-  wordleRow++;
-  wordleInput.value = "";
-  if(wordleRow >= 6){
-    wordleDone = true;
-    wordleMsg.textContent = `Out of tries! It was ${SOL}.`;
-  } else {
-    wordleMsg.textContent = "";
+    const tile = rowEl.children[i];
+    const ch = currentGuess[i] || "";
+    tile.textContent = ch;
+    tile.classList.toggle("filled", !!ch);
   }
 }
-wordleSubmit.addEventListener("click", submitWordle);
-wordleInput.addEventListener("keydown", (e)=>{ if(e.key==="Enter") submitWordle(); });
+
+function colorRow(guess){
+  // Wordle evaluation with duplicate handling
+  const res = Array(5).fill("absent");
+  const solArr = SOL.split("");
+  const used = Array(5).fill(false);
+
+  // first pass: correct
+  for(let i=0;i<5;i++){
+    if(guess[i] === solArr[i]){
+      res[i] = "correct";
+      used[i] = true;
+    }
+  }
+  // second pass: present
+  for(let i=0;i<5;i++){
+    if(res[i] === "correct") continue;
+    const idx = solArr.findIndex((ch, j)=> !used[j] && ch === guess[i]);
+    if(idx !== -1){
+      res[i] = "present";
+      used[idx] = true;
+    }
+  }
+
+  const rowEl = wordleBoard.children[wordleRow];
+  for(let i=0;i<5;i++){
+    const tile = rowEl.children[i];
+    tile.classList.remove("correct","present","absent");
+    tile.classList.add(res[i]);
+  }
+
+  // update keyboard state (never downgrade)
+  const rank = { absent: 1, present: 2, correct: 3 };
+  for(let i=0;i<5;i++){
+    const L = guess[i];
+    const next = res[i];
+    const cur = keyState.get(L);
+    if(!cur || rank[next] > rank[cur]){
+      keyState.set(L, next);
+    }
+  }
+  renderKeyboardStates();
+}
+
+function submitWordle(){
+  if(wordleDone) return;
+
+  if(currentGuess.length !== 5){
+    setMsg("Enter 5 letters.");
+    return;
+  }
+
+  const guess = currentGuess.join("");
+  setMsg("");
+
+  // color + check win
+  colorRow(guess);
+
+  if(guess === SOL){
+    wordleDone = true;
+    setMsg("You got it! 💘");
+    return;
+  }
+
+  wordleRow++;
+  currentGuess = [];
+
+  if(wordleRow >= 6){
+    wordleDone = true;
+    setMsg(`Out of tries! It was ${SOL}.`);
+    return;
+  }
+
+  renderCurrentRow();
+}
+
+function handleWordleKey(k){
+  if(wordleDone) return;
+
+  if(k === "ENTER"){
+    submitWordle();
+    return;
+  }
+  if(k === "⌫" || k === "BACKSPACE"){
+    currentGuess.pop();
+    setMsg("");
+    renderCurrentRow();
+    return;
+  }
+  if(typeof k === "string" && k.length === 1 && /[A-Z]/i.test(k)){
+    if(currentGuess.length >= 5) return;
+    currentGuess.push(k.toUpperCase());
+    setMsg("");
+    renderCurrentRow();
+  }
+}
+
+document.addEventListener("keydown", (e)=>{
+  if(activeView !== "wordle") return;
+
+  const key = e.key;
+  if(key === "Enter") handleWordleKey("ENTER");
+  else if(key === "Backspace") handleWordleKey("BACKSPACE");
+  else if(/^[a-zA-Z]$/.test(key)) handleWordleKey(key.toUpperCase());
+});
+
+if(wordleHiddenInput){
+  // Keep iOS keyboard usable if user taps into game area
+  wordleHiddenInput.addEventListener("input", ()=>{
+    const val = (wordleHiddenInput.value || "").toUpperCase().replace(/[^A-Z]/g,"");
+    // take newest characters up to 5
+    currentGuess = val.slice(0,5).split("");
+    renderCurrentRow();
+    wordleHiddenInput.value = "";
+  });
+}
+
+wordlePlay.addEventListener("click", ()=>{
+  // reset quick (so Play always starts clean)
+  wordleRow = 0;
+  wordleDone = false;
+  currentGuess = [];
+  keyState = new Map();
+  buildWordle();
+  buildKeyboard();
+  setMsg("");
+  showView("wordle");
+});
 
 /* =========================
    CONNECTIONS — Intro -> Play -> Game (NYT-ish UI)

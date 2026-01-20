@@ -31,9 +31,9 @@
           </div>
         </div>
 
-        <div class="game-card gray" data-goto="wordle">
+        <div class="game-card gray" data-goto="wordle-intro">
           <h2>Wordle</h2>
-          <p>Ready for your next guess.</p>
+          <p>Guess your way to the correct word.</p>
           <div class="meta">
             <span>Saturday, Feb 14</span>
             <span>By Diego Steiner</span>
@@ -86,21 +86,75 @@
       </div>
     </section>
 
-    <!-- WORDLE -->
-    <section class="view" id="view-wordle">
-      <div class="card">
-        <div class="top-row">
-          <button class="icon-btn" data-goto="home" aria-label="Back">←</button>
-          <div class="spacer"></div>
+    <!-- WORDLE INTRO (NEW) -->
+    <section class="view" id="view-wordle-intro">
+      <div class="wordle-intro">
+        <div class="intro-top">
+          <button class="icon-btn light" data-goto="home" aria-label="Back">←</button>
         </div>
 
-        <h2 class="h1">Wordle</h2>
-        <div id="wordleBoard" class="wordle-board"></div>
-        <div class="row">
-          <input id="wordleInput" class="text" maxlength="5" placeholder="Guess…" />
-          <button id="wordleSubmit" class="primary">Enter</button>
+        <div class="intro-center">
+          <div class="wordle-logo" aria-hidden="true">
+            <div class="w-row">
+              <span class="w-cell"></span><span class="w-cell"></span><span class="w-cell"></span>
+            </div>
+            <div class="w-row">
+              <span class="w-cell"></span><span class="w-cell w-yellow"></span><span class="w-cell w-green"></span>
+            </div>
+            <div class="w-row">
+              <span class="w-cell w-green"></span><span class="w-cell w-green"></span><span class="w-cell w-green"></span>
+            </div>
+          </div>
+
+          <h2 class="wordle-title">Wordle</h2>
+          <p class="wordle-sub">Get 6 chances to guess a 5-letter<br/>word.</p>
+
+          <button class="pill-btn" id="wordlePlay">Play</button>
+          <button class="outline-btn" type="button">Subscribe</button>
+
+          <div class="wordle-footer">
+            <div class="intro-date">January 20, 2026</div>
+            <div class="intro-small">No. 1676</div>
+            <div class="intro-small">Edited by Tracy Bennett</div>
+          </div>
         </div>
-        <p id="wordleMsg" class="msg"></p>
+
+        <div class="wordle-banner" role="button" aria-label="Subscribe">
+          <div class="banner-dot" aria-hidden="true">⊘</div>
+          <div class="banner-text">
+            <div class="banner-title">Subscribe for no pre-game ads</div>
+            <div class="banner-sub">Access all archives and more.</div>
+          </div>
+          <div class="banner-arrow" aria-hidden="true">›</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WORDLE GAME (NEW LOOK) -->
+    <section class="view" id="view-wordle">
+      <div class="wordle-game">
+        <div class="wordle-topbar">
+          <button class="wordle-back" data-goto="wordle-intro" aria-label="Back">←</button>
+
+          <div class="wordle-icons">
+            <button class="wordle-icon" type="button" aria-label="Hint">💡</button>
+            <button class="wordle-icon" type="button" aria-label="Stats">📊</button>
+            <button class="wordle-icon" type="button" aria-label="Help">?</button>
+            <button class="wordle-icon" type="button" aria-label="Settings">⚙︎</button>
+          </div>
+
+          <button class="wordle-subscribe" type="button">Subscribe to Games</button>
+        </div>
+
+        <div id="wordleBoard" class="wordle-board nyt"></div>
+
+        <p id="wordleMsg" class="wordle-msg"></p>
+
+        <!-- Hidden text input for mobile keyboard focus (optional) -->
+        <input id="wordleHiddenInput" class="wordle-hidden-input" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" />
+
+        <!-- On-screen keyboard -->
+        <div id="wordleKeyboard" class="wordle-kb" aria-label="Keyboard"></div>
       </div>
     </section>
 
@@ -124,14 +178,6 @@
             <div class="intro-small">No. 953</div>
             <div class="intro-small">By Wyna Liu</div>
           </div>
-        </div>
-
-        <div class="subscribe-card">
-          <div class="sub-left">
-            <div class="sub-title">Subscribe for no pre-game ads</div>
-            <div class="sub-sub">Access all archives and more.</div>
-          </div>
-          <div class="sub-arrow">›</div>
         </div>
       </div>
     </section>
@@ -250,7 +296,7 @@
   <nav class="bottom-nav">
     <button data-view="home" aria-label="Home">🏠</button>
     <button data-view="mini" aria-label="Mini">🧩</button>
-    <button data-view="wordle" aria-label="Wordle">⬜</button>
+    <button data-view="wordle-intro" aria-label="Wordle">⬜</button>
     <button data-view="connections-intro" aria-label="Connections">🟪</button>
     <button data-view="strands-intro" aria-label="Strands">🧵</button>
   </nav>
