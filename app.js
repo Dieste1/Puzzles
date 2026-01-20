@@ -2,15 +2,10 @@
    CONFIG — EDIT THIS ONLY
    ========================= */
 const CONFIG = {
-  siteTitle: "Aliego's Puzzle Pack",
-  siteSubtitle: "Solve the puzzles to unlock the final surprise.",
+  siteTitle: "🗞️ Games",
 
   // WORDLE
   wordleSolution: "HEART", // 5 letters
-  // Keep guesses to words your person might try (or use a bigger list).
-  wordleAllowedGuesses: [
-    "HEART","HONEY","SWEET","LOVEY","ANGEL","CANDY","DATED","SMILE","HUGGY","ROSES","KISSES","CRUSH","ADORE"
-  ],
 
   // CONNECTIONS (4 groups x 4 words)
   connectionsGroups: [
@@ -20,18 +15,9 @@ const CONFIG = {
     { title: "Us", words: ["ALWAYS","TOGETHER","FOREVER","US"] }
   ],
 
-  // SPELLING BEE
-  beeCenter: "A",
-  beeOuter: ["L","O","V","E","R","T"], // 6 letters
-  // Provide your own valid words (must be uppercase, 4+ letters, include center)
-  beeValidWords: [
-    "VALOR","LATER","ALERT","TRAVEL","RELATE","OVAL","ORAL","LAVA","ALOE","VOTER"
-  ],
-
-    // SPANAGRAM / STRANDS-LITE
-  spanagram: {
+  // STRANDS
+  strands: {
     theme: "Our Love Story",
-    // Grid is row-major. Example 6x6 = 36 letters.
     rows: 6,
     cols: 6,
     grid: [
@@ -42,50 +28,143 @@ const CONFIG = {
       "E","H","E","A","R","T",
       "S","M","I","L","E","S"
     ],
-    // include your spanagram as one of the words (long one)
-    spanagramWord: "TOGETHERFOREVER",
+    strandsWord: "TOGETHERFOREVER",
     themeWords: ["LOVE","HEART","SMILES","MORE"]
   },
 
+  // MINI (5x5)
+  mini: {
+    // # = black square, letters are solution
+    solution: [
+      "L","O","V","E","#",
+      "A","#","R","#","T",
+      "D","A","T","E","#",
+      "#","H","#","U","G",
+      "S","#","M","I","L"
+    ]
+  },
 
   // FINAL REVEAL
-  requireSolveBeforeReveal: true, // if true, requires any puzzle solved
+  requireSolveBeforeReveal: true,
   finalRevealHtml: `
     <h3>❤️ Surprise</h3>
     <p>Meet me at <strong>8:00</strong> — I planned something special.</p>
-    <p style="color:#a3a3b2;margin:0;">Dress cozy. Bring your smile.</p>
+    <p style="opacity:.75;margin:0;">Dress cozy. Bring your smile.</p>
   `
 };
 
 /* =========================
    NAV / VIEWS
    ========================= */
-const views = ["home","wordle","connections","bee","spanagram","reveal"];
+const views = ["home","mini","wordle","connections","strands","reveal"];
 const state = {
   solvedWordle: false,
   solvedConnections: false,
-  solvedBeeAny: false
+  solvedStrandsAny: false
 };
 
 function showView(name){
   views.forEach(v=>{
-    document.getElementById(`view-${v}`).classList.toggle("hidden", v !== name);
+    const el = document.getElementById(`view-${v}`);
+    if(!el) return;
+    el.classList.toggle("hidden", v !== name);
   });
-  document.querySelectorAll(".tab").forEach(b=>{
+  document.querySelectorAll(".bottom-nav button").forEach(b=>{
     b.classList.toggle("active", b.dataset.view === name);
   });
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-document.querySelectorAll(".tab").forEach(btn=>{
-  btn.addEventListener("click", ()=> showView(btn.dataset.view));
+document.querySelectorAll("[data-goto]").forEach(card=>{
+  card.addEventListener("click", ()=> showView(card.dataset.goto));
 });
-document.querySelectorAll("[data-goto]").forEach(btn=>{
-  btn.addEventListener("click", ()=> showView(btn.dataset.goto));
+
+document.querySelectorAll(".bottom-nav button").forEach(btn=>{
+  btn.addEventListener("click", ()=> showView(btn.dataset.view));
 });
 
 document.getElementById("siteTitle").textContent = CONFIG.siteTitle;
-document.getElementById("siteSubtitle").textContent = CONFIG.siteSubtitle;
+
+/* =========================
+   MINI (simple crossword)
+   - tap a cell, type letter keys
+   - blocks (#) are black
+   ========================= */
+const miniGrid = document.getElementById("miniGrid");
+const miniReveal = document.getElementById("miniReveal");
+const miniReset = document.getElementById("miniReset");
+const miniMsg = document.getElementById("miniMsg");
+
+let miniActive = -1;
+let miniEntries = Array(25).fill("");
+
+function renderMini(){
+  miniGrid.innerHTML = "";
+  CONFIG.mini.solution.forEach((ch, idx)=>{
+    const d = document.createElement("div");
+    d.className = "mini-cell";
+    if(ch === "#") d.classList.add("block");
+
+    const val = (ch === "#") ? "" : (miniEntries[idx] || "");
+    d.textContent = val;
+
+    if(idx === miniActive) d.classList.add("active");
+
+    d.addEventListener("click", ()=>{
+      if(ch === "#") return;
+      miniActive = idx;
+      miniMsg.textContent = "";
+      renderMini();
+    });
+
+    miniGrid.appendChild(d);
+  });
+}
+
+function miniResetAll(){
+  miniEntries = Array(25).fill("");
+  miniActive = -1;
+  miniMsg.textContent = "";
+  renderMini();
+}
+
+document.addEventListener("keydown", (e)=>{
+  const miniVisible = !document.getElementById("view-mini").classList.contains("hidden");
+  if(!miniVisible) return;
+  if(miniActive < 0) return;
+
+  const sol = CONFIG.mini.solution[miniActive];
+  if(sol === "#") return;
+
+  if(e.key === "Backspace"){
+    miniEntries[miniActive] = "";
+    renderMini();
+    return;
+  }
+
+  if(/^[a-zA-Z]$/.test(e.key)){
+    miniEntries[miniActive] = e.key.toUpperCase();
+    // move forward to next non-block
+    for(let i=miniActive+1; i<25; i++){
+      if(CONFIG.mini.solution[i] !== "#"){
+        miniActive = i;
+        break;
+      }
+    }
+    renderMini();
+  }
+});
+
+miniReveal.addEventListener("click", ()=>{
+  CONFIG.mini.solution.forEach((ch, i)=>{
+    miniEntries[i] = (ch === "#") ? "" : ch;
+  });
+  miniMsg.textContent = "Revealed ✅";
+  renderMini();
+});
+miniReset.addEventListener("click", miniResetAll);
+
+renderMini();
 
 /* =========================
    WORDLE
@@ -114,7 +193,6 @@ function buildWordleBoard(){
     wordleBoard.appendChild(row);
   }
 }
-buildWordleBoard();
 
 function wordleSetMsg(text, kind=""){
   wordleMsg.textContent = text;
@@ -124,25 +202,19 @@ function wordleSetMsg(text, kind=""){
                       : "";
 }
 
-function isAllowedWord(w){
-  return /^[A-Z]{5}$/.test(w); // any 5-letter input
-}
-
 function evaluateGuess(guess){
-  // returns array of 5 statuses: ok, warn, bad (Wordle-style with duplicates handling)
   const solArr = SOL.split("");
   const guessArr = guess.split("");
   const result = Array(5).fill("bad");
 
-  // First pass: exact matches
   for(let i=0;i<5;i++){
     if(guessArr[i] === solArr[i]){
       result[i] = "ok";
-      solArr[i] = null; // consumed
+      solArr[i] = null;
       guessArr[i] = null;
     }
   }
-  // Second pass: present elsewhere
+
   for(let i=0;i<5;i++){
     if(guessArr[i] == null) continue;
     const idx = solArr.indexOf(guessArr[i]);
@@ -165,10 +237,10 @@ function renderGuess(guess, statuses){
 
 function submitWordle(){
   if(wordleDone) return;
+
   const raw = wordleInput.value.trim().toUpperCase();
   if(raw.length !== 5) return wordleSetMsg("Need 5 letters.", "warn");
   if(!/^[A-Z]+$/.test(raw)) return wordleSetMsg("Letters only.", "warn");
-  if(!isAllowedWord(raw)) return wordleSetMsg("warn");
 
   const statuses = evaluateGuess(raw);
   renderGuess(raw, statuses);
@@ -176,7 +248,8 @@ function submitWordle(){
   if(raw === SOL){
     wordleDone = true;
     state.solvedWordle = true;
-    wordleSetMsg("You got it! 💘", "ok");
+    wordleSetMsg("You got it! ✅", "ok");
+    updateRevealGate();
     return;
   }
 
@@ -201,7 +274,10 @@ wordleReset.addEventListener("click", ()=>{
   buildWordleBoard();
   wordleInput.value = "";
   wordleSetMsg("");
+  updateRevealGate();
 });
+
+buildWordleBoard();
 
 /* =========================
    CONNECTIONS
@@ -246,20 +322,18 @@ function renderConn(){
     btn.className = "conn-word";
     btn.type = "button";
     btn.textContent = w;
-    btn.dataset.word = w;
 
     const isSolved = connSolvedGroups.some(g=>g.words.includes(w));
     if(isSolved){
       btn.classList.add("disabled");
       btn.disabled = true;
     }
-
     if(connSelected.has(w)) btn.classList.add("selected");
 
     btn.addEventListener("click", ()=>{
       if(btn.disabled) return;
       if(connSelected.has(w)) connSelected.delete(w);
-      else {
+      else{
         if(connSelected.size >= 4) return connSetMsg("Pick only 4.", "warn");
         connSelected.add(w);
       }
@@ -283,13 +357,12 @@ function submitConn(){
   if(connSelected.size !== 4) return connSetMsg("Select exactly 4 words.", "warn");
   const pick = Array.from(connSelected);
 
-  // Check against groups
   const match = CONFIG.connectionsGroups.find(g=>{
     const set = new Set(g.words.map(x=>x.toUpperCase()));
     return pick.every(w=>set.has(w));
   });
 
-  if(!match) return connSetMsg("Not a correct group. Try again 💛", "bad");
+  if(!match) return connSetMsg("Not a correct group. Try again.", "bad");
 
   const solvedWords = match.words.map(w=>w.toUpperCase());
   if(connSolvedGroups.some(g=>g.title === match.title)) return connSetMsg("Already solved.", "warn");
@@ -301,6 +374,7 @@ function submitConn(){
   if(connSolvedGroups.length === 4){
     state.solvedConnections = true;
     connSetMsg("All groups solved! 🎉", "ok");
+    updateRevealGate();
   }
   renderConn();
 }
@@ -318,120 +392,13 @@ connReset.addEventListener("click", ()=>{
   connWords = shuffle(allConnWords());
   connSetMsg("");
   renderConn();
+  updateRevealGate();
 });
 
 renderConn();
 
 /* =========================
-   SPELLING BEE
-   ========================= */
-const beeLetters = document.getElementById("beeLetters");
-const beeInput = document.getElementById("beeInput");
-const beeSubmit = document.getElementById("beeSubmit");
-const beeReset = document.getElementById("beeReset");
-const beeFound = document.getElementById("beeFound");
-const beeMsg = document.getElementById("beeMsg");
-const beeCount = document.getElementById("beeCount");
-const beeScore = document.getElementById("beeScore");
-
-const beeCenter = CONFIG.beeCenter.toUpperCase();
-const beeOuter = CONFIG.beeOuter.map(x=>x.toUpperCase());
-const beeAllowedLetters = new Set([beeCenter, ...beeOuter]);
-const beeValid = new Set(CONFIG.beeValidWords.map(w=>w.toUpperCase()));
-
-let beeFoundSet = new Set();
-let beePoints = 0;
-
-function renderBeeLetters(){
-  // Display 7 letters with center in middle (grid 3x3). Simple layout:
-  // Outer letters around, center in middle.
-  const layout = [
-    beeOuter[0], beeOuter[1], beeOuter[2],
-    beeOuter[3], beeCenter,   beeOuter[4],
-    "",          beeOuter[5], ""
-  ];
-  beeLetters.innerHTML = "";
-  layout.forEach(ch=>{
-    const div = document.createElement("div");
-    div.className = "bee-letter" + (ch === beeCenter ? " center" : "");
-    div.textContent = ch;
-    beeLetters.appendChild(div);
-  });
-}
-
-function beeSetMsg(text, kind=""){
-  beeMsg.textContent = text;
-  beeMsg.style.color = kind==="ok" ? "rgba(34,197,94,.95)"
-                  : kind==="bad" ? "rgba(239,68,68,.95)"
-                  : kind==="warn"? "rgba(245,158,11,.95)"
-                  : "";
-}
-
-function isBeeWordValid(w){
-  if(w.length < 4) return false;
-  if(!w.includes(beeCenter)) return false;
-  for(const ch of w){
-    if(!beeAllowedLetters.has(ch)) return false;
-  }
-  return beeValid.has(w);
-}
-
-function addBeeWordChip(w){
-  const chip = document.createElement("div");
-  chip.className = "word-chip";
-  chip.textContent = w;
-  beeFound.appendChild(chip);
-}
-
-function updateBeeStats(){
-  beeCount.textContent = String(beeFoundSet.size);
-  beeScore.textContent = String(beePoints);
-}
-
-function submitBee(){
-  const w = beeInput.value.trim().toUpperCase();
-  if(!/^[A-Z]+$/.test(w)) return beeSetMsg("Letters only.", "warn");
-  if(beeFoundSet.has(w)) return beeSetMsg("Already found.", "warn");
-
-  if(!isBeeWordValid(w)){
-    return beeSetMsg("Not in the list (or missing center letter).", "bad");
-  }
-
-  beeFoundSet.add(w);
-  state.solvedBeeAny = true;
-
-  // scoring: 1 point for 4 letters, + length-4 for longer
-  let pts = 1 + Math.max(0, w.length - 4);
-  beePoints += pts;
-
-  addBeeWordChip(w);
-  updateBeeStats();
-  beeInput.value = "";
-  beeSetMsg(`Nice! +${pts} points 🐝`, "ok");
-}
-
-beeSubmit.addEventListener("click", submitBee);
-beeInput.addEventListener("keydown", (e)=>{
-  if(e.key === "Enter") submitBee();
-});
-beeReset.addEventListener("click", ()=>{
-  beeFoundSet = new Set();
-  beePoints = 0;
-  state.solvedBeeAny = false;
-  beeFound.innerHTML = "";
-  beeInput.value = "";
-  beeSetMsg("");
-  updateBeeStats();
-});
-
-renderBeeLetters();
-updateBeeStats();
-
-/* =========================
-   SPANAGRAM (Strands-lite)
-   - click letters to form a path
-   - must be adjacent (including diagonals)
-   - submit to check against word list
+   STRANDS (tap path + submit)
    ========================= */
 const spanGridEl = document.getElementById("spanGrid");
 const spanReset = document.getElementById("spanReset");
@@ -442,10 +409,10 @@ const spanThemeHelp = document.getElementById("spanThemeHelp");
 const spanWordList = document.getElementById("spanWordList");
 const spanFoundCount = document.getElementById("spanFoundCount");
 
-const SP = CONFIG.spanagram;
-let spanSelected = []; // indices
+const SP = CONFIG.strands;
+let spanSelected = [];
 let spanFoundWords = new Set();
-let spanFoundCells = new Map(); // idx -> "found" | "spanagram"
+let spanFoundCells = new Map(); // idx -> "found" | "strands"
 
 function spanSetMsg(text, kind=""){
   spanMsg.textContent = text;
@@ -470,11 +437,11 @@ function spanWordFromSelection(){
 
 function renderSpanWordList(){
   spanWordList.innerHTML = "";
-  const all = [...SP.themeWords.map(w=>w.toUpperCase()), SP.spanagramWord.toUpperCase()];
+  const all = [...SP.themeWords.map(w=>w.toUpperCase()), SP.strandsWord.toUpperCase()];
   all.forEach(w=>{
     const chip = document.createElement("div");
     chip.className = "span-word" + (spanFoundWords.has(w) ? " done" : "");
-    chip.textContent = w === SP.spanagramWord.toUpperCase() ? `⭐ ${w}` : w;
+    chip.textContent = w === SP.strandsWord.toUpperCase() ? `⭐ ${w}` : w;
     spanWordList.appendChild(chip);
   });
   spanFoundCount.textContent = String(spanFoundWords.size);
@@ -492,29 +459,26 @@ function renderSpanGrid(){
     if(spanSelected.includes(idx)) cell.classList.add("selected");
     const status = spanFoundCells.get(idx);
     if(status === "found") cell.classList.add("found");
-    if(status === "spanagram") cell.classList.add("spanagram");
+    if(status === "strands") cell.classList.add("strands");
 
     cell.addEventListener("click", ()=>{
-      // can't select already-found cells (keeps it simple)
       if(spanFoundCells.has(idx)) return;
 
-      // if already selected, allow undo last only
       if(spanSelected.includes(idx)){
         if(spanSelected[spanSelected.length - 1] === idx){
           spanSelected.pop();
           spanSetMsg("");
           renderSpanGrid();
         } else {
-          spanSetMsg("You can only undo the last letter.", "warn");
+          spanSetMsg("Undo only the last letter.", "warn");
         }
         return;
       }
 
-      // adjacency rule
       if(spanSelected.length > 0){
         const last = spanSelected[spanSelected.length - 1];
         if(!isAdjacent(last, idx)){
-          spanSetMsg("Letters must touch (adjacent).", "warn");
+          spanSetMsg("Letters must touch.", "warn");
           return;
         }
       }
@@ -539,47 +503,47 @@ function spanSubmitSelection(){
   const w = spanWordFromSelection();
 
   const themeSet = new Set(SP.themeWords.map(x=>x.toUpperCase()));
-  const spanWord = SP.spanagramWord.toUpperCase();
+  const strandWord = SP.strandsWord.toUpperCase();
 
-  if(!themeSet.has(w) && w !== spanWord){
-    return spanSetMsg("Not a theme word. Try again 🧵", "bad");
+  if(!themeSet.has(w) && w !== strandWord){
+    return spanSetMsg("Not a theme word.", "bad");
   }
   if(spanFoundWords.has(w)){
     return spanSetMsg("Already found.", "warn");
   }
 
   spanFoundWords.add(w);
+  state.solvedStrandsAny = true;
 
-  // mark cells
   spanSelected.forEach(i=>{
-    spanFoundCells.set(i, w === spanWord ? "spanagram" : "found");
+    spanFoundCells.set(i, w === strandWord ? "strands" : "found");
   });
 
-  spanSetMsg(w === spanWord ? "SPANAGRAM FOUND! ⭐🎉" : "Nice! ✅", "ok");
+  spanSetMsg(w === strandWord ? "STRANDS FOUND! ⭐🎉" : "Nice! ✅", "ok");
   spanSelected = [];
   renderSpanGrid();
   renderSpanWordList();
+  updateRevealGate();
 }
 
 function spanResetAll(){
   spanSelected = [];
   spanFoundWords = new Set();
   spanFoundCells = new Map();
+  state.solvedStrandsAny = false;
   spanSetMsg("");
   renderSpanGrid();
   renderSpanWordList();
+  updateRevealGate();
 }
 
-if(SP){
-  spanThemeHelp.textContent = `Theme: ${SP.theme}. Tap letters to spell words. ⭐ marks the spanagram.`;
-  renderSpanGrid();
-  renderSpanWordList();
+spanThemeHelp.textContent = `Theme: ${SP.theme}. Tap letters to spell words. ⭐ marks the strands.`;
+renderSpanGrid();
+renderSpanWordList();
 
-  spanClear.addEventListener("click", spanClearSelection);
-  spanSubmit.addEventListener("click", spanSubmitSelection);
-  spanReset.addEventListener("click", spanResetAll);
-}
-
+spanClear.addEventListener("click", spanClearSelection);
+spanSubmit.addEventListener("click", spanSubmitSelection);
+spanReset.addEventListener("click", spanResetAll);
 
 /* =========================
    FINAL REVEAL
@@ -589,7 +553,7 @@ const revealGate = document.getElementById("revealGate");
 const revealContent = document.getElementById("revealContent");
 
 function anySolved(){
-  return state.solvedWordle || state.solvedConnections || state.solvedBeeAny;
+  return state.solvedWordle || state.solvedConnections || state.solvedStrandsAny;
 }
 
 function updateRevealGate(){
@@ -598,7 +562,7 @@ function updateRevealGate(){
     return;
   }
   revealGate.textContent = anySolved()
-    ? "You’ve solved at least one puzzle… you’ve earned this 💘"
+    ? "Unlocked 💘"
     : "Solve at least one puzzle first 😉";
 }
 
@@ -613,3 +577,6 @@ revealBtn.addEventListener("click", ()=>{
 });
 
 updateRevealGate();
+
+/* Default view */
+showView("home");
