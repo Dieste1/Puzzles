@@ -12,11 +12,11 @@
 </head>
 
 <body>
-  <header class="top-header">
+  <header class="top-header" id="topHeader">
     <h1 id="siteTitle">🗞️ Games</h1>
   </header>
 
-  <main class="main">
+  <main class="main" id="mainRoot">
 
     <!-- HOME -->
     <section class="view is-active" id="view-home">
@@ -40,7 +40,7 @@
           </div>
         </div>
 
-        <div class="game-card purple" data-goto="connections">
+        <div class="game-card purple" data-goto="connections-intro">
           <h2>Connections</h2>
           <p>Group words that share a common thread.</p>
           <div class="meta">
@@ -104,21 +104,74 @@
       </div>
     </section>
 
-    <!-- CONNECTIONS -->
-    <section class="view" id="view-connections">
-      <div class="card">
-        <div class="top-row">
-          <button class="icon-btn" data-goto="home" aria-label="Back">←</button>
-          <div class="spacer"></div>
+    <!-- CONNECTIONS INTRO -->
+    <section class="view" id="view-connections-intro">
+      <div class="connections-intro">
+        <div class="intro-top">
+          <button class="icon-btn light" data-goto="home" aria-label="Back">←</button>
         </div>
 
-        <h2 class="h1">Connections</h2>
-        <div id="connGrid" class="conn-grid"></div>
-        <div class="row">
-          <button id="connSubmit" class="primary">Submit</button>
-          <button id="connClear" class="ghost">Clear</button>
+        <div class="intro-center">
+          <div class="conn-mark" aria-hidden="true">▦</div>
+          <h2 class="intro-title">Connections</h2>
+          <p class="intro-sub">Subscribe for unlimited<br/>play.</p>
+
+          <button class="pill-btn" id="connectionsPlay">Play</button>
+          <button class="outline-btn" type="button">Subscribe</button>
+
+          <div class="intro-footer">
+            <div class="intro-date">January 19, 2026</div>
+            <div class="intro-small">No. 953</div>
+            <div class="intro-small">By Wyna Liu</div>
+          </div>
         </div>
-        <p id="connMsg" class="msg"></p>
+
+        <div class="subscribe-card">
+          <div class="sub-left">
+            <div class="sub-title">Subscribe for no pre-game ads</div>
+            <div class="sub-sub">Access all archives and more.</div>
+          </div>
+          <div class="sub-arrow">›</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONNECTIONS GAME (NYT-ish layout) -->
+    <section class="view" id="view-connections">
+      <div class="connections-game">
+        <div class="conn-topbar">
+          <button class="conn-back" data-goto="connections-intro" aria-label="Back">←</button>
+
+          <div class="conn-icons">
+            <button class="conn-icon" type="button" aria-label="Hint">💡</button>
+            <button class="conn-icon" type="button" aria-label="Stats">📊</button>
+            <button class="conn-icon" type="button" aria-label="Help">?</button>
+            <button class="conn-icon" type="button" aria-label="Settings">⚙︎</button>
+          </div>
+
+          <button class="conn-subscribe" type="button">Subscribe to Games</button>
+        </div>
+
+        <div class="conn-title">Create four groups of four!</div>
+
+        <div id="connGrid" class="conn-grid nyt"></div>
+
+        <div class="conn-status">
+          <div class="mistakes">
+            <span>Mistakes Remaining:</span>
+            <span class="dots">
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </span>
+          </div>
+        </div>
+
+        <div class="conn-actions">
+          <button id="connShuffle" class="conn-action">Shuffle</button>
+          <button id="connClear" class="conn-action secondary">Deselect All</button>
+          <button id="connSubmit" class="conn-action secondary">Submit</button>
+        </div>
+
+        <p id="connMsg" class="conn-msg"></p>
       </div>
     </section>
 
@@ -149,7 +202,7 @@
 
     <!-- STRANDS GAME -->
     <section class="view" id="view-strands">
-      <div class="card light-card strands-full">
+      <div class="card light-card">
         <div class="top-row light-top">
           <button class="icon-btn" data-goto="strands-intro" aria-label="Back">←</button>
           <div class="spacer"></div>
@@ -198,7 +251,7 @@
     <button data-view="home" aria-label="Home">🏠</button>
     <button data-view="mini" aria-label="Mini">🧩</button>
     <button data-view="wordle" aria-label="Wordle">⬜</button>
-    <button data-view="connections" aria-label="Connections">🟪</button>
+    <button data-view="connections-intro" aria-label="Connections">🟪</button>
     <button data-view="strands-intro" aria-label="Strands">🧵</button>
   </nav>
 

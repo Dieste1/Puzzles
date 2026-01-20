@@ -32,10 +32,16 @@ const CONFIG = {
 };
 
 /* =========================
-   VIEW ROUTER (with transition)
+   VIEW ROUTER (with transition + header hiding)
    ========================= */
-const views = ["home","mini","wordle","connections","strands-intro","strands","reveal"];
+const views = ["home","mini","wordle","connections-intro","connections","strands-intro","strands","reveal"];
 let activeView = "home";
+
+const topHeader = document.getElementById("topHeader");
+const mainRoot = document.getElementById("mainRoot");
+
+// pages that should hide the top header and go full-bleed
+const immersiveViews = new Set(["strands-intro","strands","connections-intro","connections"]);
 
 function setActiveNav(name){
   document.querySelectorAll(".bottom-nav button").forEach(b=>{
@@ -43,10 +49,10 @@ function setActiveNav(name){
   });
 }
 
-function setHeaderVisibilityForView(name){
-  // Hide header ONLY on Strands intro + Strands game
-  const hide = (name === "strands-intro" || name === "strands");
-  document.body.classList.toggle("header-hidden", hide);
+function applyImmersiveMode(viewName){
+  const isImm = immersiveViews.has(viewName);
+  topHeader.classList.toggle("is-hidden", isImm);
+  mainRoot.classList.toggle("is-immersive", isImm);
 }
 
 function showView(name){
@@ -55,38 +61,34 @@ function showView(name){
   const current = document.getElementById(`view-${activeView}`);
   const next = document.getElementById(`view-${name}`);
 
-  // hide current (remove entered -> fades out)
   current.classList.remove("is-entered");
 
-  // after fade out, swap display
   setTimeout(()=>{
     current.classList.remove("is-active");
     next.classList.add("is-active");
-
-    // force reflow so transition triggers
     void next.offsetWidth;
-
     next.classList.add("is-entered");
 
     activeView = name;
 
-    // bottom nav highlight (keep strands icon active for both screens)
-    setActiveNav(name === "strands" ? "strands-intro" : name);
+    // nav highlight: for game pages, highlight their intro icon
+    const navName =
+      (name === "strands") ? "strands-intro" :
+      (name === "connections") ? "connections-intro" :
+      name;
 
-    // header visibility
-    setHeaderVisibilityForView(name);
-
+    setActiveNav(navName);
+    applyImmersiveMode(name);
     window.scrollTo({ top: 0 });
+
   }, 140);
 }
 
-// initialize
+// init
 document.getElementById("view-home").classList.add("is-active");
-requestAnimationFrame(()=>{
-  document.getElementById("view-home").classList.add("is-entered");
-});
+requestAnimationFrame(()=> document.getElementById("view-home").classList.add("is-entered"));
 setActiveNav("home");
-setHeaderVisibilityForView("home");
+applyImmersiveMode("home");
 
 document.querySelectorAll("[data-view]").forEach(btn=>{
   btn.addEventListener("click", ()=> showView(btn.dataset.view));
@@ -182,21 +184,36 @@ wordleSubmit.addEventListener("click", submitWordle);
 wordleInput.addEventListener("keydown", (e)=>{ if(e.key==="Enter") submitWordle(); });
 
 /* =========================
-   CONNECTIONS (simple selection UI)
+   CONNECTIONS — Intro -> Play -> Game (NYT-ish UI)
    ========================= */
+const connectionsPlay = document.getElementById("connectionsPlay");
 const connGrid = document.getElementById("connGrid");
 const connSubmit = document.getElementById("connSubmit");
 const connClear = document.getElementById("connClear");
+const connShuffle = document.getElementById("connShuffle");
 const connMsg = document.getElementById("connMsg");
 
 let connSelected = new Set();
+let connWords = [...CONFIG.connectionsWords];
+
+function shuffleArray(arr){
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
 function renderConnections(){
   connGrid.innerHTML = "";
-  CONFIG.connectionsWords.forEach(w=>{
+  connWords.forEach(w=>{
     const b = document.createElement("button");
     b.className = "conn-word";
     b.textContent = w;
+
+    if(connSelected.has(w)) b.classList.add("selected");
+
     b.addEventListener("click", ()=>{
       if(connSelected.has(w)) connSelected.delete(w);
       else{
@@ -207,8 +224,9 @@ function renderConnections(){
         connSelected.add(w);
       }
       connMsg.textContent = "";
-      b.style.opacity = connSelected.has(w) ? "0.6" : "1";
+      renderConnections();
     });
+
     connGrid.appendChild(b);
   });
 }
@@ -220,12 +238,23 @@ connClear.addEventListener("click", ()=>{
   renderConnections();
 });
 
+connShuffle.addEventListener("click", ()=>{
+  connWords = shuffleArray(connWords);
+  connMsg.textContent = "";
+  renderConnections();
+});
+
 connSubmit.addEventListener("click", ()=>{
   if(connSelected.size !== 4){
     connMsg.textContent = "Select exactly 4.";
     return;
   }
   connMsg.textContent = "Nice — now wire in your group logic ✅";
+});
+
+// Connections flow
+connectionsPlay.addEventListener("click", ()=>{
+  showView("connections");
 });
 
 /* =========================
@@ -255,7 +284,7 @@ function selectionWord(){
 }
 
 function updateProgress(){
-  const total = SP.themeWords.length + 1; // includes strandsWord
+  const total = SP.themeWords.length + 1;
   spanProgress.textContent = `${spanFoundWords.size} of ${total} theme words found.`;
 }
 
@@ -269,7 +298,6 @@ function renderStrands(){
     if(spanSelected.includes(idx)) cell.classList.add("selected");
 
     cell.addEventListener("click", ()=>{
-      // undo last tap
       if(spanSelected.includes(idx)){
         if(spanSelected[spanSelected.length-1] === idx){
           spanSelected.pop();
@@ -278,7 +306,6 @@ function renderStrands(){
         }
         return;
       }
-      // adjacency
       if(spanSelected.length){
         const last = spanSelected[spanSelected.length-1];
         if(!isAdjacent(last, idx)) return;
@@ -287,7 +314,6 @@ function renderStrands(){
       renderStrands();
       spanMsg.textContent = selectionWord();
 
-      // auto-check if it matches any word
       const w = selectionWord();
       const themeSet = new Set(SP.themeWords.map(x=>x.toUpperCase()));
       const big = SP.strandsWord.toUpperCase();
@@ -317,7 +343,6 @@ spanClear.addEventListener("click", ()=>{
   renderStrands();
 });
 
-// Strands flow
 strandsPlay.addEventListener("click", ()=>{
   showView("strands");
 });
