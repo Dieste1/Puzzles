@@ -1240,7 +1240,11 @@ if(connSubmit){
 }
 
 /* =========================
-   STRANDS — completion + solved flag
+   STRANDS — NYT-style drag selection + spanagram
+   - Smooth pointer (drag) selection
+   - Backtrack by dragging to previous cell
+   - Lock theme words (blue) + spanagram (yellow)
+   - No hint logic (just selection + validation)
    ========================= */
 const spanThemeHelp = $("#spanThemeHelp");
 const spanThemeTitle = $("#spanThemeTitle");
@@ -1250,102 +1254,323 @@ const spanClear = $("#spanClear");
 const spanProgress = $("#spanProgress");
 
 const SP = CONFIG.strands;
-if(spanThemeTitle) spanThemeTitle.textContent = SP.themeTitle;
+if (spanThemeTitle) spanThemeTitle.textContent = SP.themeTitle;
 
-let spanSelected = [];
-let spanFoundWords = new Set();
+// --- state
+let spanSelecting = false;
+let spanPointerId = null;
 
+let spanPath = []; // live selection: [idx, idx, ...]
+let spanFoundWords = new Set(); // words found (includes spanagram)
+let spanFoundPaths = []; // [{ word, type: "theme"|"spanagram", indices: [...] }]
+
+// --- helpers
 function sIdxToRC(idx){ return { r: Math.floor(idx / SP.cols), c: idx % SP.cols }; }
 function isAdjacent(a,b){
   const A = sIdxToRC(a), B = sIdxToRC(b);
-  return Math.abs(A.r-B.r)<=1 && Math.abs(A.c-B.c)<=1 && !(A.r===B.r && A.c===B.c);
+  return Math.abs(A.r-B.r) <= 1 && Math.abs(A.c-B.c) <= 1 && !(A.r === B.r && A.c === B.c);
 }
-function selectionWord(){
-  return spanSelected.map(i=>SP.grid[i]).join("").toUpperCase();
+function selectionWord(indices){
+  return indices.map(i => SP.grid[i]).join("").toUpperCase();
 }
+function setSpanMsg(t){
+  if(spanMsg) spanMsg.textContent = t || "";
+}
+
 function updateProgress(){
-  const total = SP.themeWords.length + 1;
+  const total = (SP.themeWords?.length || 0) + 1; // + spanagram
   if(spanProgress) spanProgress.textContent = `${spanFoundWords.size} of ${total} theme words found.`;
 
   if(spanFoundWords.size >= total && !Progress.state.strandsSolved){
     Progress.mark("strandsSolved", true);
     toast("Strands solved ✅");
     haptic(25);
-    if(spanMsg) spanMsg.textContent = "Theme complete! ⭐";
+    setSpanMsg("Theme complete! ⭐");
     if(Progress.allSolved()) toast("Final Reveal unlocked 🎁");
   }
 }
 
-function resetStrands(showToast=false){
-  spanSelected = [];
-  spanFoundWords = new Set();
-  if(spanMsg) spanMsg.textContent = "";
-  renderStrands();
-  updateProgress();
-  if(showToast) toast("Strands ready 🧵");
-}
-
-function renderStrands(){
+// --- grid build (once)
+function buildStrandsGrid(){
   if(!spanGridEl) return;
 
   spanGridEl.innerHTML = "";
+
   SP.grid.forEach((ch, idx)=>{
     const cell = document.createElement("div");
     cell.className = "span-cell";
-    cell.textContent = ch.toUpperCase();
-    if(spanSelected.includes(idx)) cell.classList.add("selected");
-
-    cell.addEventListener("click", ()=>{
-      if(spanSelected.includes(idx)){
-        if(spanSelected[spanSelected.length-1] === idx){
-          spanSelected.pop();
-          renderStrands();
-          if(spanMsg) spanMsg.textContent = selectionWord();
-          haptic(6);
-        }
-        return;
-      }
-      if(spanSelected.length){
-        const last = spanSelected[spanSelected.length-1];
-        if(!isAdjacent(last, idx)) return;
-      }
-      spanSelected.push(idx);
-      renderStrands();
-      if(spanMsg) spanMsg.textContent = selectionWord();
-      haptic(6);
-
-      const w = selectionWord();
-      const themeSet = new Set(SP.themeWords.map(x=>x.toUpperCase()));
-      const big = SP.strandsWord.toUpperCase();
-
-      if(themeSet.has(w) || w === big){
-        if(!spanFoundWords.has(w)){
-          spanFoundWords.add(w);
-          if(spanMsg) spanMsg.textContent = (w===big) ? "STRANDS FOUND! ⭐" : "Nice!";
-          spanSelected = [];
-          renderStrands();
-          haptic(16);
-          updateProgress();
-        }
-      }
-    });
-
+    cell.textContent = String(ch || "").toUpperCase();
+    cell.dataset.idx = String(idx);
     spanGridEl.appendChild(cell);
   });
 
   if(spanThemeHelp) spanThemeHelp.textContent = `Today’s theme: ${SP.themeTitle}`;
 }
-renderStrands();
-updateProgress();
+
+// --- SVG overlay for "bubbles + connectors"
+function ensureSpanSvg(){
+  if(!spanGridEl) return null;
+  let svg = spanGridEl.querySelector("svg.span-svg");
+  if(svg) return svg;
+
+  // Make sure the grid is a positioning context (CSS will reinforce this later)
+  spanGridEl.style.position = spanGridEl.style.position || "relative";
+
+  svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("class", "span-svg");
+  svg.setAttribute("aria-hidden", "true");
+  svg.style.position = "absolute";
+  svg.style.left = "0";
+  svg.style.top = "0";
+  svg.style.width = "100%";
+  svg.style.height = "100%";
+  svg.style.pointerEvents = "none";
+  svg.style.overflow = "visible";
+  spanGridEl.appendChild(svg);
+  return svg;
+}
+
+function cellElByIdx(idx){
+  return spanGridEl ? spanGridEl.querySelector(`.span-cell[data-idx="${idx}"]`) : null;
+}
+
+function cellCenter(idx){
+  const cell = cellElByIdx(idx);
+  if(!cell || !spanGridEl) return null;
+  const gridRect = spanGridEl.getBoundingClientRect();
+  const r = cell.getBoundingClientRect();
+  return {
+    x: (r.left - gridRect.left) + (r.width / 2),
+    y: (r.top  - gridRect.top)  + (r.height / 2),
+    w: r.width,
+    h: r.height
+  };
+}
+
+function clearSvg(svg){
+  while(svg && svg.firstChild) svg.removeChild(svg.firstChild);
+}
+
+function svgEl(name){
+  return document.createElementNS("http://www.w3.org/2000/svg", name);
+}
+
+function drawPath(svg, indices, type, opts = {}){
+  if(!svg || !indices || indices.length === 0) return;
+
+  const centers = indices.map(cellCenter).filter(Boolean);
+  if(!centers.length) return;
+
+  // sizes tuned visually; CSS will refine colors later
+  const r = opts.radius ?? Math.max(14, Math.min(centers[0].w, centers[0].h) * 0.55);
+  const stroke = opts.stroke ?? Math.max(10, r * 0.95);
+
+  // connectors
+  for(let i=0;i<centers.length-1;i++){
+    const a = centers[i], b = centers[i+1];
+    const line = svgEl("line");
+    line.setAttribute("x1", String(a.x));
+    line.setAttribute("y1", String(a.y));
+    line.setAttribute("x2", String(b.x));
+    line.setAttribute("y2", String(b.y));
+    line.setAttribute("stroke-width", String(stroke));
+    line.setAttribute("stroke-linecap", "round");
+    line.setAttribute("class", `span-link ${type} ${opts.preview ? "preview" : ""}`.trim());
+    svg.appendChild(line);
+  }
+
+  // bubbles
+  centers.forEach((p)=>{
+    const c = svgEl("circle");
+    c.setAttribute("cx", String(p.x));
+    c.setAttribute("cy", String(p.y));
+    c.setAttribute("r", String(r));
+    c.setAttribute("class", `span-bubble ${type} ${opts.preview ? "preview" : ""}`.trim());
+    svg.appendChild(c);
+  });
+}
+
+function updateStrandsVisual(){
+  if(!spanGridEl) return;
+  const svg = ensureSpanSvg();
+  if(!svg) return;
+
+  clearSvg(svg);
+
+  // Found paths first (so live preview draws on top)
+  spanFoundPaths.forEach(p=>{
+    drawPath(svg, p.indices, p.type, { preview: false });
+  });
+
+  // Live selection on top
+  if(spanPath.length){
+    drawPath(svg, spanPath, "preview", { preview: true });
+  }
+}
+
+// --- selection mechanics (pointer drag)
+function idxFromPoint(clientX, clientY){
+  const el = document.elementFromPoint(clientX, clientY);
+  const cell = el ? el.closest(".span-cell") : null;
+  if(!cell || !spanGridEl || !spanGridEl.contains(cell)) return null;
+  const idx = Number(cell.dataset.idx);
+  return Number.isFinite(idx) ? idx : null;
+}
+
+function beginSelect(idx){
+  spanPath = [idx];
+  setSpanMsg(selectionWord(spanPath));
+  updateStrandsVisual();
+  haptic(6);
+}
+
+function tryExtendPath(idx){
+  if(spanPath.length === 0) return beginSelect(idx);
+
+  const last = spanPath[spanPath.length - 1];
+  if(idx === last) return;
+
+  // backtrack if dragging to previous cell
+  if(spanPath.length >= 2 && idx === spanPath[spanPath.length - 2]){
+    spanPath.pop();
+    setSpanMsg(selectionWord(spanPath));
+    updateStrandsVisual();
+    haptic(4);
+    return;
+  }
+
+  // don't reuse a cell in the same selection
+  if(spanPath.includes(idx)) return;
+
+  if(isAdjacent(last, idx)){
+    spanPath.push(idx);
+    setSpanMsg(selectionWord(spanPath));
+    updateStrandsVisual();
+    haptic(4);
+  }
+}
+
+function finalizeSelection(){
+  if(!spanPath.length){
+    setSpanMsg("");
+    updateStrandsVisual();
+    return;
+  }
+
+  const w = selectionWord(spanPath);
+  const themeSet = new Set((SP.themeWords || []).map(x => String(x).toUpperCase()));
+  const spanagram = String(SP.strandsWord || "").toUpperCase();
+
+  let type = null;
+  if(w === spanagram) type = "spanagram";
+  else if(themeSet.has(w)) type = "theme";
+
+  if(type){
+    if(!spanFoundWords.has(w)){
+      spanFoundWords.add(w);
+      spanFoundPaths.push({ word: w, type, indices: [...spanPath] });
+
+      setSpanMsg(type === "spanagram" ? "SPANAGRAM! ⭐" : "Nice!");
+      toast(type === "spanagram" ? "Spanagram found ⭐" : "Theme word found ✅");
+      haptic(18);
+
+      updateProgress();
+    }else{
+      setSpanMsg("Already found.");
+      haptic(8);
+    }
+  }else{
+    setSpanMsg("");
+    haptic(8);
+  }
+
+  spanPath = [];
+  updateStrandsVisual();
+}
+
+// --- wire events
+function wireStrandsPointerEvents(){
+  if(!spanGridEl) return;
+
+  // prevent native gestures while selecting
+  spanGridEl.style.touchAction = "none";
+
+  spanGridEl.addEventListener("pointerdown", (e)=>{
+    const idx = idxFromPoint(e.clientX, e.clientY);
+    if(idx == null) return;
+
+    spanSelecting = true;
+    spanPointerId = e.pointerId;
+
+    spanGridEl.setPointerCapture?.(e.pointerId);
+    e.preventDefault();
+
+    beginSelect(idx);
+  });
+
+  spanGridEl.addEventListener("pointermove", (e)=>{
+    if(!spanSelecting) return;
+    if(spanPointerId != null && e.pointerId !== spanPointerId) return;
+
+    const idx = idxFromPoint(e.clientX, e.clientY);
+    if(idx == null) return;
+
+    e.preventDefault();
+    tryExtendPath(idx);
+  });
+
+  function end(e){
+    if(!spanSelecting) return;
+    if(spanPointerId != null && e.pointerId !== spanPointerId) return;
+
+    spanSelecting = false;
+    spanPointerId = null;
+
+    e.preventDefault();
+    finalizeSelection();
+  }
+
+  spanGridEl.addEventListener("pointerup", end);
+  spanGridEl.addEventListener("pointercancel", end);
+  spanGridEl.addEventListener("lostpointercapture", (e)=>{
+    if(spanSelecting){
+      spanSelecting = false;
+      spanPointerId = null;
+      finalizeSelection();
+    }
+  });
+
+  // keep overlay aligned on resize/orientation changes
+  window.addEventListener("resize", ()=> updateStrandsVisual());
+  window.addEventListener("orientationchange", ()=> setTimeout(()=> updateStrandsVisual(), 150));
+}
+
+function resetStrands(showToast=false){
+  spanSelecting = false;
+  spanPointerId = null;
+  spanPath = [];
+  spanFoundWords = new Set();
+  spanFoundPaths = [];
+  setSpanMsg("");
+  updateProgress();
+  updateStrandsVisual();
+  if(showToast) toast("Strands ready 🧵");
+}
+
+// init
+buildStrandsGrid();
+wireStrandsPointerEvents();
+resetStrands(false);
 
 if(spanClear){
   spanClear.addEventListener("click", ()=>{
-    spanSelected = [];
-    if(spanMsg) spanMsg.textContent = "";
+    spanPath = [];
+    setSpanMsg("");
+    updateStrandsVisual();
     haptic(6);
-    renderStrands();
   });
 }
+
 
 /* =========================
    FINAL REVEAL

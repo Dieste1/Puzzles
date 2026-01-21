@@ -34,6 +34,16 @@
   --mini-line: rgba(15, 42, 85, .35);
   --mini-active:#ffdf33;
   --mini-word:#bfe3ff;
+
+  /* ---------- Strands path colors (NEW) ---------- */
+  --span-preview: rgba(0,0,0,.14);
+  --span-preview-stroke: rgba(0,0,0,.18);
+
+  --span-theme: rgba(86,183,255,.40);         /* blue-ish fill */
+  --span-theme-stroke: rgba(86,183,255,.46);  /* blue-ish stroke */
+
+  --span-spanagram: rgba(241,196,15,.52);     /* yellow fill */
+  --span-spanagram-stroke: rgba(241,196,15,.58); /* yellow stroke */
 }
 
 *{box-sizing:border-box}
@@ -333,6 +343,7 @@ body{
   padding:10px 0;
 }
 
+/* ---------- STRANDS GRID (UPDATED for SVG overlay) ---------- */
 .span-grid.nyt{
   display:grid;
   grid-template-columns:repeat(6, 1fr);
@@ -340,9 +351,16 @@ body{
   padding: 18px 10px 10px;
   justify-items:center;
 
-  /* Helps mobile: tells browser taps are intended */
-  touch-action: manipulation;
+  /* NEW: svg overlay needs this */
+  position: relative;
+
+  /* We handle gestures in JS; avoid browser interference */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
+
+/* letters sit ABOVE the svg bubbles/lines */
 .span-cell{
   width: 18px;
   height: 18px;
@@ -352,10 +370,18 @@ body{
   font-size: 26px;
   font-weight:500;
   color:#000;
-  user-select:none;
   cursor:pointer;
   -webkit-tap-highlight-color: transparent;
+
+  position: relative;
+  z-index: 2;
+
+  /* helps dragging feel */
+  user-select:none;
+  -webkit-user-select:none;
 }
+
+/* old click-select outline (harmless if unused) */
 .span-cell.selected{ outline: 3px solid rgba(0,0,0,.18); border-radius: 999px; }
 
 .strands-bottom{
@@ -1017,3 +1043,54 @@ body{
   background:#2a2a2a;
 }
 .hidden{display:none}
+
+/* ======================================================================
+   STRANDS OVERLAY (NEW)
+   - SVG circles + connectors that match the NYT “pill path” look
+   - Letters stay above the overlay
+   ====================================================================== */
+svg.span-svg{
+  position:absolute;
+  inset: 0;
+  width:100%;
+  height:100%;
+  z-index: 1;
+  pointer-events:none;
+}
+
+/* base */
+.span-link,
+.span-bubble{
+  transition: opacity 120ms ease, filter 120ms ease;
+}
+
+/* PREVIEW (while dragging) */
+.span-bubble.preview{
+  fill: var(--span-preview);
+  filter: blur(.0px);
+}
+.span-link.preview{
+  stroke: var(--span-preview-stroke);
+}
+
+/* THEME WORD (blue) */
+.span-bubble.theme{
+  fill: var(--span-theme);
+}
+.span-link.theme{
+  stroke: var(--span-theme-stroke);
+}
+
+/* SPANAGRAM (yellow) */
+.span-bubble.spanagram{
+  fill: var(--span-spanagram);
+}
+.span-link.spanagram{
+  stroke: var(--span-spanagram-stroke);
+}
+
+/* Slightly stronger emphasis for locked paths */
+.span-bubble.theme,
+.span-bubble.spanagram{
+  filter: saturate(1.05);
+}
