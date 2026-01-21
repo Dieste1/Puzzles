@@ -313,6 +313,24 @@ body{
 .light-help{ color: rgba(0,0,0,.62); }
 .light-msg{ color: rgba(0,0,0,.62); }
 
+/* Make the Strands view fill the screen */
+#view-strands{
+  min-height: calc(100vh - 86px); /* 86px = bottom nav space you already reserve */
+}
+
+/* Make the white card stretch to fill the view */
+#view-strands .card.light-card{
+  min-height: calc(100vh - 86px - 32px); /* subtract 16px top + 16px bottom margin */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Push the bottom controls to the bottom of the card */
+#view-strands .strands-bottom{
+  margin-top: auto;   /* instead of margin-top:14px; */
+  padding-top: 10px;  /* keep your spacing */
+}
+
 .top-icons{ display:flex; gap:10px; }
 .tiny-btn{
   border:1px solid rgba(0,0,0,.2);
@@ -1097,3 +1115,5 @@ svg.span-svg{
 .span-bubble.spanagram{
   filter: saturate(1.05);
 }
+
+
