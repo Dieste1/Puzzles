@@ -52,15 +52,60 @@ const CONFIG = {
 };
 
 /* =========================
-   SAFETY: helper selectors
+   HELPERS
    ========================= */
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
 /* =========================
-   PROGRESS + LOCKING (localStorage)
+   HAPTICS (light taps)
    ========================= */
-const STORE_KEY = "aliego_puzzle_pack_v1";
+function haptic(ms = 10){
+  try{
+    if(typeof navigator !== "undefined" && navigator.vibrate){
+      navigator.vibrate(ms);
+    }
+  }catch(_){}
+}
+
+/* =========================
+   DOUBLE-TAP ZOOM GUARD (iOS)
+   - Prevents double-tap zoom ONLY on game surfaces
+   - Does not interfere with normal scrolling
+   ========================= */
+function preventDoubleTapZoom(el){
+  if(!el) return;
+  let lastTap = 0;
+  let lastX = 0;
+  let lastY = 0;
+
+  el.addEventListener("touchend", (e)=>{
+    // ignore multi-touch (pinch)
+    if(e.touches && e.touches.length) return;
+    const now = Date.now();
+
+    const touch = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : null;
+    const x = touch ? touch.clientX : 0;
+    const y = touch ? touch.clientY : 0;
+
+    const dt = now - lastTap;
+    const dx = Math.abs(x - lastX);
+    const dy = Math.abs(y - lastY);
+
+    // A "double tap" is quick + basically same spot
+    if(dt > 0 && dt < 320 && dx < 24 && dy < 24){
+      e.preventDefault(); // stops iOS zoom
+    }
+
+    lastTap = now;
+    lastX = x; lastY = y;
+  }, { passive: false });
+}
+
+/* =========================
+   PROGRESS + LOCKING
+   ========================= */
+const STORE_KEY = "aliego_puzzle_pack_v2";
 
 const Progress = {
   state: {
@@ -86,17 +131,17 @@ const Progress = {
     this.state[key] = !!val;
     this.save();
     updateHomeLockUI();
+    updateHomeBadges();
   },
   allSolved(){
     const s = this.state;
     return !!(s.miniSolved && s.wordleSolved && s.connectionsSolved && s.strandsSolved);
   }
 };
-
 Progress.load();
 
 /* =========================
-   TOAST (small, no HTML changes needed)
+   TOAST
    ========================= */
 let toastEl = null;
 let toastTimer = null;
@@ -131,7 +176,6 @@ function toast(msg){
   el.textContent = msg;
   el.style.opacity = "1";
   el.style.transform = "translateX(-50%) translateY(0)";
-
   if(toastTimer) clearTimeout(toastTimer);
   toastTimer = setTimeout(()=>{
     el.style.opacity = "0";
@@ -140,7 +184,7 @@ function toast(msg){
 }
 
 /* =========================
-   VIEW ROUTER (with transition + header hiding)
+   VIEW ROUTER
    ========================= */
 const views = [
   "home",
@@ -190,12 +234,44 @@ function updateHomeLockUI(){
   if(spans[1]) spans[1].textContent = unlocked ? "🎁" : "💝";
   card.style.opacity = unlocked ? "1" : "0.88";
 }
-updateHomeLockUI();
 
 function canOpenReveal(){
   return Progress.allSolved();
 }
 
+/* =========================
+   HOME "COMPLETED ✓" BADGES (no HTML change)
+   ========================= */
+const BADGE_MAP = [
+  { goto: "mini-intro", key: "miniSolved" },
+  { goto: "wordle-intro", key: "wordleSolved" },
+  { goto: "connections-intro", key: "connectionsSolved" },
+  { goto: "strands-intro", key: "strandsSolved" }
+];
+
+function ensureBadge(card){
+  let b = card.querySelector(".home-badge");
+  if(b) return b;
+  b = document.createElement("div");
+  b.className = "home-badge";
+  b.textContent = "✓ Completed";
+  card.appendChild(b);
+  return b;
+}
+
+function updateHomeBadges(){
+  BADGE_MAP.forEach(({ goto, key })=>{
+    const card = document.querySelector(`.game-card[data-goto="${goto}"]`);
+    if(!card) return;
+    const badge = ensureBadge(card);
+    const on = !!Progress.state[key];
+    badge.style.display = on ? "inline-flex" : "none";
+  });
+}
+
+/* =========================
+   VIEW SWITCH
+   ========================= */
 function showView(name){
   if(!views.includes(name)) return;
   if(name === activeView) return;
@@ -234,7 +310,6 @@ function showView(name){
     if(name === "wordle") {
       const hi = $("#wordleHiddenInput");
       if(hi) hi.focus({ preventScroll: true });
-      // NEW: ensure keyboard fits after transitions
       requestAnimationFrame(()=> tuneWordleKeyboardLayout());
       setTimeout(()=> tuneWordleKeyboardLayout(), 180);
     }
@@ -250,16 +325,74 @@ function showView(name){
 }
 
 // init view
-const homeView = document.getElementById("view-home");
+const homeView = $("#view-home");
 if(homeView){
   homeView.classList.add("is-active");
   requestAnimationFrame(()=> homeView.classList.add("is-entered"));
 }
 setActiveNav("home");
 applyImmersiveMode("home");
+updateHomeLockUI();
+updateHomeBadges();
+
+function resetAllProgress(){
+  Progress.state = {
+    miniSolved: false,
+    wordleSolved: false,
+    connectionsSolved: false,
+    strandsSolved: false
+  };
+  Progress.save();
+  updateHomeLockUI();
+  updateHomeBadges();
+  toast("Progress reset.");
+  haptic(20);
+}
+
+function enableHomeResetGesture(){
+  const home = document.getElementById("view-home");
+  if(!home) return;
+
+  let timer = null;
+
+  home.addEventListener("touchstart", (e)=>{
+    const card = e.target.closest(".game-card");
+    if(!card) return;
+
+    // long press anywhere on a card = reset prompt
+    timer = setTimeout(()=>{
+      const ok = confirm("Reset all puzzle progress?");
+      if(ok) resetAllProgress();
+    }, 650);
+  }, { passive: true });
+
+  ["touchend","touchcancel","scroll"].forEach(evt=>{
+    home.addEventListener(evt, ()=> {
+      if(timer) clearTimeout(timer);
+      timer = null;
+    }, { passive: true });
+  });
+
+  home.addEventListener("mousedown", (e)=>{
+    const card = e.target.closest(".game-card");
+    if(!card) return;
+    timer = setTimeout(()=>{
+      const ok = confirm("Reset all puzzle progress?");
+      if(ok) resetAllProgress();
+    }, 650);
+  });
+
+  home.addEventListener("mouseup", ()=>{
+    if(timer) clearTimeout(timer);
+    timer = null;
+  });
+}
+
+enableHomeResetGesture();
+
 
 /* =========================
-   CLICK + TOUCH DELEGATION
+   CLICK DELEGATION (SAFE ON iOS)
    ========================= */
 function delegateNav(e){
   const navBtn = e.target.closest("[data-view]");
@@ -460,7 +593,6 @@ function buildMiniEntries(){
   }
   return entries;
 }
-
 const MINI_ENTRIES = buildMiniEntries();
 
 const MINI_ACROSS_CLUES = [
@@ -505,7 +637,6 @@ function renderMini(){
   if(!miniCrossword) return;
 
   miniCrossword.innerHTML = "";
-
   const word = new Set(getMiniWordIndices(miniSelected));
   setMiniClueFromSelection();
 
@@ -539,6 +670,7 @@ function renderMini(){
       if(miniSelected === i){
         miniDir = (miniDir === "across") ? "down" : "across";
         toast(miniDir === "across" ? "Across" : "Down");
+        haptic(8);
       }
       miniSelected = i;
       renderMini();
@@ -551,6 +683,7 @@ function renderMini(){
   if(!Progress.state.miniSolved && miniAllFilledCorrect()){
     Progress.mark("miniSolved", true);
     toast("Mini solved ✅");
+    haptic(20);
     if(Progress.allSolved()) toast("Final Reveal unlocked 🎁");
   }
 }
@@ -569,11 +702,13 @@ function setMiniLetter(ch){
   miniLetters[miniSelected] = ch.toUpperCase();
   moveToNextInActiveWord();
   renderMini();
+  haptic(6);
 }
 function clearMiniLetter(){
   if(isBlock(miniSelected)) return;
   miniLetters[miniSelected] = "";
   renderMini();
+  haptic(6);
 }
 
 document.addEventListener("keydown", (e)=>{
@@ -588,13 +723,6 @@ if(miniHiddenInput){
     if(v) setMiniLetter(v.slice(-1));
     miniHiddenInput.value = "";
   });
-
-  const miniView = $("#view-mini");
-  if(miniView){
-    miniView.addEventListener("touchstart", ()=>{
-      miniHiddenInput.focus({ preventScroll:true });
-    }, { passive:true });
-  }
 }
 
 if(miniPrevClue){
@@ -605,6 +733,7 @@ if(miniPrevClue){
     if(entry){
       miniSelected = entry.start;
       renderMini();
+      haptic(6);
     }
   });
 }
@@ -616,6 +745,7 @@ if(miniNextClue){
     if(entry){
       miniSelected = entry.start;
       renderMini();
+      haptic(6);
     }
   });
 }
@@ -623,8 +753,7 @@ if(miniNextClue){
 miniReset();
 
 /* =========================
-   WORDLE — reset + input + solved flag
-   + NEW: NYT-like keyboard sizing
+   WORDLE — + NYT-like keyboard fit + FLIP ANIM
    ========================= */
 const wordleBoard = $("#wordleBoard");
 const wordleMsg = $("#wordleMsg");
@@ -652,11 +781,8 @@ function buildWordle(){
   }
 }
 
-/* ---------- NEW: Wordle keyboard layout tuning ---------- */
 function tuneWordleKeyboardLayout(){
   if(!wordleKeyboard) return;
-
-  // Make the keyboard area feel like NYT (centered, max width)
   wordleKeyboard.style.maxWidth = "520px";
   wordleKeyboard.style.marginLeft = "auto";
   wordleKeyboard.style.marginRight = "auto";
@@ -664,7 +790,6 @@ function tuneWordleKeyboardLayout(){
   const rows = $$("#wordleKeyboard .kb-row");
   if(!rows.length) return;
 
-  // Reduce gaps a bit on smaller screens (NYT-like tightness)
   const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
   const isSmall = vw <= 390;
 
@@ -676,15 +801,12 @@ function tuneWordleKeyboardLayout(){
     const keys = Array.from(row.querySelectorAll(".kb-key"));
     if(!keys.length) return;
 
-    // NYT-ish proportions: wide keys a bit bigger than letters
-    // (tweak these if you want even closer match)
-    const flexMap = (k) => (k.classList.contains("wide") ? 1.5 : 1);
-
     keys.forEach(k=>{
-      k.style.flexGrow = String(flexMap(k));
+      const wide = k.classList.contains("wide");
+      k.style.flexGrow = String(wide ? 1.5 : 1);
       k.style.flexShrink = "1";
-      k.style.flexBasis = "0px";     // critical: lets flex truly distribute width
-      k.style.minWidth = "0px";      // prevent overflow on small screens
+      k.style.flexBasis = "0px";
+      k.style.minWidth = "0px";
       k.style.paddingLeft = "0px";
       k.style.paddingRight = "0px";
       k.style.height = isSmall ? "54px" : "58px";
@@ -705,7 +827,6 @@ function buildKeyboard(){
   ];
 
   wordleKeyboard.innerHTML = "";
-
   rows.forEach((r)=>{
     const row = document.createElement("div");
     row.className = "kb-row";
@@ -715,12 +836,8 @@ function buildKeyboard(){
       b.className = "kb-key";
       b.type = "button";
       b.textContent = k;
-
       if(k === "ENTER" || k === "⌫") b.classList.add("wide");
-
-      // helpful for debugging / styling hooks if you want later
       b.dataset.key = k;
-
       b.addEventListener("click", ()=> handleWordleKey(k));
       row.appendChild(b);
     });
@@ -728,12 +845,10 @@ function buildKeyboard(){
     wordleKeyboard.appendChild(row);
   });
 
-  // Apply sizing + then states
   tuneWordleKeyboardLayout();
   renderKeyboardStates();
 }
 
-// keep keyboard fitting on rotation / resize
 window.addEventListener("resize", ()=>{
   if(activeView === "wordle") tuneWordleKeyboardLayout();
 });
@@ -766,7 +881,8 @@ function renderCurrentRow(){
   }
 }
 
-function colorRow(guess){
+/* NEW: compute result first, then animate flips, then apply final colors */
+function evaluateGuess(guess){
   const res = Array(5).fill("absent");
   const solArr = SOL.split("");
   const used = Array(5).fill(false);
@@ -785,14 +901,10 @@ function colorRow(guess){
       used[idx] = true;
     }
   }
+  return res;
+}
 
-  const rowEl = wordleBoard.children[wordleRow];
-  for(let i=0;i<5;i++){
-    const tile = rowEl.children[i];
-    tile.classList.remove("correct","present","absent");
-    tile.classList.add(res[i]);
-  }
-
+function applyKeyStates(guess, res){
   const rank = { absent: 1, present: 2, correct: 3 };
   for(let i=0;i<5;i++){
     const L = guess[i];
@@ -803,22 +915,60 @@ function colorRow(guess){
   renderKeyboardStates();
 }
 
+/* NEW: flip animation sequence */
+function flipRevealRow(guess, res){
+  if(!wordleBoard) return;
+  const rowEl = wordleBoard.children[wordleRow];
+  if(!rowEl) return;
+
+  for(let i=0;i<5;i++){
+    const tile = rowEl.children[i];
+
+    // reset classes for reruns
+    tile.classList.remove("correct","present","absent","flip","flip-done");
+
+    // put letter (already present), start flip
+    const delay = i * 110;
+
+    setTimeout(()=>{
+      tile.classList.add("flip");    // CSS handles keyframes
+      haptic(6);
+    }, delay);
+
+    // halfway point: apply color class
+    setTimeout(()=>{
+      tile.classList.add(res[i]);
+      tile.classList.add("flip-done");
+    }, delay + 190);
+  }
+
+  // update keyboard states near end of animation
+  setTimeout(()=>{
+    applyKeyStates(guess, res);
+  }, 700);
+}
+
 function submitWordle(){
   if(wordleDone) return;
+
   if(currentGuess.length !== 5){
     setMsg("Enter 5 letters.");
     return;
   }
+
   const guess = currentGuess.join("");
+  const res = evaluateGuess(guess);
+
   setMsg("");
-  colorRow(guess);
+  flipRevealRow(guess, res);
 
   if(guess === SOL){
     wordleDone = true;
-    setMsg("You got it! 💘");
+    setTimeout(()=> setMsg("You got it! 💘"), 740);
     if(!Progress.state.wordleSolved){
       Progress.mark("wordleSolved", true);
       toast("Wordle solved ✅");
+      haptic(25);
       if(Progress.allSolved()) toast("Final Reveal unlocked 🎁");
     }
     return;
@@ -829,11 +979,12 @@ function submitWordle(){
 
   if(wordleRow >= 6){
     wordleDone = true;
-    setMsg(`Out of tries! It was ${SOL}.`);
+    setTimeout(()=> setMsg(`Out of tries! It was ${SOL}.`), 740);
     return;
   }
 
-  renderCurrentRow();
+  // wait until the flip finishes before showing next row typing feel
+  setTimeout(()=> renderCurrentRow(), 760);
 }
 
 function handleWordleKey(k){
@@ -843,12 +994,14 @@ function handleWordleKey(k){
   if(k === "⌫" || k === "BACKSPACE"){
     currentGuess.pop();
     setMsg("");
+    haptic(6);
     return renderCurrentRow();
   }
   if(typeof k === "string" && k.length === 1 && /[A-Z]/i.test(k)){
     if(currentGuess.length >= 5) return;
     currentGuess.push(k.toUpperCase());
     setMsg("");
+    haptic(6);
     renderCurrentRow();
   }
 }
@@ -867,13 +1020,6 @@ if(wordleHiddenInput){
     renderCurrentRow();
     wordleHiddenInput.value = "";
   });
-
-  const wordleView = $("#view-wordle");
-  if(wordleView){
-    wordleView.addEventListener("touchstart", ()=>{
-      wordleHiddenInput.focus({ preventScroll:true });
-    }, { passive:true });
-  }
 }
 
 function resetWordle(){
@@ -884,7 +1030,6 @@ function resetWordle(){
   buildWordle();
   buildKeyboard();
   setMsg("");
-  // ensure layout after first paint
   requestAnimationFrame(()=> tuneWordleKeyboardLayout());
 }
 
@@ -974,8 +1119,8 @@ function renderConnections(){
   if(!connGrid) return;
 
   renderConnSolved();
-
   connGrid.innerHTML = "";
+
   remainingConnWords().forEach(w=>{
     const b = document.createElement("button");
     b.className = "conn-word";
@@ -989,11 +1134,13 @@ function renderConnections(){
       else{
         if(connSelected.size >= 4){
           if(connMsg) connMsg.textContent = "Pick only 4.";
+          haptic(8);
           return;
         }
         connSelected.add(w);
       }
       if(connMsg) connMsg.textContent = "";
+      haptic(6);
       renderConnections();
     });
 
@@ -1031,6 +1178,7 @@ if(connClear){
   connClear.addEventListener("click", ()=>{
     connSelected.clear();
     if(connMsg) connMsg.textContent = "";
+    haptic(6);
     renderConnections();
   });
 }
@@ -1038,6 +1186,7 @@ if(connShuffle){
   connShuffle.addEventListener("click", ()=>{
     connWords = shuffleArray(connWords);
     if(connMsg) connMsg.textContent = "";
+    haptic(6);
     renderConnections();
   });
 }
@@ -1045,6 +1194,7 @@ if(connSubmit){
   connSubmit.addEventListener("click", ()=>{
     if(connSelected.size !== 4){
       if(connMsg) connMsg.textContent = "Select exactly 4.";
+      haptic(8);
       return;
     }
 
@@ -1056,6 +1206,7 @@ if(connSubmit){
       if(already){
         if(connMsg) connMsg.textContent = "You already found that group.";
         connSelected.clear();
+        haptic(8);
         renderConnections();
         return;
       }
@@ -1064,6 +1215,7 @@ if(connSubmit){
       connSolvedGroups.push({ name: match.name, words: [...match.words] });
       connSelected.clear();
       if(connMsg) connMsg.textContent = "Nice! ✅";
+      haptic(16);
       renderConnections();
 
       if(connSolvedGroups.length === 4){
@@ -1071,6 +1223,7 @@ if(connSubmit){
         if(!Progress.state.connectionsSolved){
           Progress.mark("connectionsSolved", true);
           toast("Connections solved ✅");
+          haptic(25);
           if(Progress.allSolved()) toast("Final Reveal unlocked 🎁");
         }
       }
@@ -1080,12 +1233,9 @@ if(connSubmit){
     connMistakes = Math.max(0, connMistakes - 1);
     if(connMsg) connMsg.textContent = connMistakes ? "Not quite — try again." : "No mistakes left.";
     toast(connMistakes ? `Mistakes left: ${connMistakes}` : "Out of mistakes");
+    haptic(12);
     connSelected.clear();
     renderConnections();
-
-    if(connMistakes === 0){
-      if(connMsg) connMsg.textContent = "Out of mistakes — shuffle and keep exploring ❤️";
-    }
   });
 }
 
@@ -1120,6 +1270,7 @@ function updateProgress(){
   if(spanFoundWords.size >= total && !Progress.state.strandsSolved){
     Progress.mark("strandsSolved", true);
     toast("Strands solved ✅");
+    haptic(25);
     if(spanMsg) spanMsg.textContent = "Theme complete! ⭐";
     if(Progress.allSolved()) toast("Final Reveal unlocked 🎁");
   }
@@ -1150,6 +1301,7 @@ function renderStrands(){
           spanSelected.pop();
           renderStrands();
           if(spanMsg) spanMsg.textContent = selectionWord();
+          haptic(6);
         }
         return;
       }
@@ -1160,6 +1312,7 @@ function renderStrands(){
       spanSelected.push(idx);
       renderStrands();
       if(spanMsg) spanMsg.textContent = selectionWord();
+      haptic(6);
 
       const w = selectionWord();
       const themeSet = new Set(SP.themeWords.map(x=>x.toUpperCase()));
@@ -1171,6 +1324,7 @@ function renderStrands(){
           if(spanMsg) spanMsg.textContent = (w===big) ? "STRANDS FOUND! ⭐" : "Nice!";
           spanSelected = [];
           renderStrands();
+          haptic(16);
           updateProgress();
         }
       }
@@ -1188,23 +1342,35 @@ if(spanClear){
   spanClear.addEventListener("click", ()=>{
     spanSelected = [];
     if(spanMsg) spanMsg.textContent = "";
+    haptic(6);
     renderStrands();
   });
 }
 
 /* =========================
-   FINAL REVEAL — locked until solved
+   FINAL REVEAL
    ========================= */
 const revealBtn = $("#revealBtn");
 if(revealBtn){
   revealBtn.addEventListener("click", ()=>{
     if(!canOpenReveal()){
       toast("Solve all 4 puzzles first 💝");
+      haptic(10);
       return;
     }
     const el = $("#revealContent");
     if(!el) return;
     el.innerHTML = CONFIG.finalRevealHtml;
     el.classList.remove("hidden");
+    haptic(20);
   });
 }
+
+/* =========================
+   APPLY DOUBLE-TAP ZOOM GUARD
+   ========================= */
+preventDoubleTapZoom($("#wordleBoard"));
+preventDoubleTapZoom($("#wordleKeyboard"));
+preventDoubleTapZoom($("#miniCrossword"));
+preventDoubleTapZoom($("#connGrid"));
+preventDoubleTapZoom($("#spanGrid"));
