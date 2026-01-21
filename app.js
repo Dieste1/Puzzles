@@ -298,7 +298,6 @@ function delegateNav(e){
 }
 
 document.addEventListener("click", (e)=>{ delegateNav(e); });
-document.addEventListener("touchstart", (e)=>{ delegateNav(e); }, { passive:true });
 
 /* =========================
    MINI — Across/Down + Clues
