@@ -823,7 +823,7 @@ function tuneWordleKeyboardLayout(){
 
     keys.forEach(k=>{
       const wide = k.classList.contains("wide");
-      k.style.flexGrow = String(wide ? 1.5 : 1);
+      k.style.flexGrow = String(wide ? 2 : 1);
       k.style.flexShrink = "1";
       k.style.flexBasis = "0px";
       k.style.minWidth = "0px";
