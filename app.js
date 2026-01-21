@@ -715,9 +715,19 @@ function clearMiniLetter(){
 
 document.addEventListener("keydown", (e)=>{
   if(activeView !== "mini") return;
-  if(e.key === "Backspace") return clearMiniLetter();
+
+  // ✅ Always allow delete (even when hidden input is focused)
+  if(e.key === "Backspace"){
+    e.preventDefault();
+    return clearMiniLetter();
+  }
+
+  // ✅ Prevent double-typing when the hidden input is handling letters
+  if(document.activeElement === miniHiddenInput) return;
+
   if(/^[a-zA-Z]$/.test(e.key)) setMiniLetter(e.key);
 });
+
 
 if(miniHiddenInput){
   miniHiddenInput.addEventListener("input", ()=>{
@@ -725,7 +735,15 @@ if(miniHiddenInput){
     if(v) setMiniLetter(v.slice(-1));
     miniHiddenInput.value = "";
   });
+
+  miniHiddenInput.addEventListener("keydown", (e)=>{
+    if(e.key === "Backspace"){
+      e.preventDefault();
+      clearMiniLetter();
+    }
+  });
 }
+
 
 if(miniPrevClue){
   miniPrevClue.addEventListener("click", ()=>{
