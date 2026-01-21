@@ -347,18 +347,19 @@ body{
 .span-grid.nyt{
   display:grid;
   grid-template-columns:repeat(6, 1fr);
-  gap:20px;
-  padding: 18px 10px 10px;
+
+  /* tighter spacing so 8 rows fit comfortably */
+  gap:16px;
+
+  padding: 14px 8px 8px;
   justify-items:center;
 
-  /* NEW: svg overlay needs this */
   position: relative;
-
-  /* We handle gestures in JS; avoid browser interference */
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
 }
+
 
 /* letters sit ABOVE the svg bubbles/lines */
 .span-cell{
@@ -367,19 +368,21 @@ body{
   border-radius: 999px;
   display:grid;
   place-items:center;
-  font-size: 26px;
+
+  /* slightly smaller text for 8 rows */
+  font-size: 24px;
   font-weight:500;
+
   color:#000;
   cursor:pointer;
-  -webkit-tap-highlight-color: transparent;
 
   position: relative;
   z-index: 2;
 
-  /* helps dragging feel */
   user-select:none;
   -webkit-user-select:none;
 }
+
 
 /* old click-select outline (harmless if unused) */
 .span-cell.selected{ outline: 3px solid rgba(0,0,0,.18); border-radius: 999px; }

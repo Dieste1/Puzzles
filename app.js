@@ -2,20 +2,22 @@
    CONFIG
    ========================= */
 const CONFIG = {
-  strands: {
-    themeTitle: "Our Love Story",
-    cols: 6,
-    grid: [
-      "L","O","V","E","S","U",
-      "T","O","G","E","T","H",
-      "E","R","F","O","R","E",
-      "V","E","R","M","O","R",
-      "E","H","E","A","R","T",
-      "S","M","I","L","E","S"
-    ],
-    themeWords: ["LOVE","HEART","SMILES","MORE"],
-    strandsWord: "TOGETHERFOREVER"
-  },
+strands: {
+  themeTitle: "Our Love Story",
+  cols: 6, // 8 rows inferred from 48 letters
+  grid: [
+    "R","S","E","L","I","M",
+    "E","E","R","O","E","S",
+    "G","V","F","V","O","L",
+    "N","E","R","C","F","E",
+    "I","H","T","O","F","R",
+    "P","E","E","E","E","O",
+    "S","L","E","G","O","M",
+    "T","R","A","E","H","T"
+  ],
+  themeWords: ["LOVE","HEART","SMILES","MORE","COFFEE","SLEEPING"],
+  strandsWord: "TOGETHERFOREVER"
+},
 
   wordleSolution: "HEART",
 
