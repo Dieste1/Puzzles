@@ -26,7 +26,6 @@ const CONFIG = {
     "ALWAYS","TOGETHER","FOREVER","US"
   ],
 
-  // NEW: Connections solution groups (fully wired)
   connectionsGroups: [
     { name: "Date Night Vibes", words: ["JAZZ","MARTINI","CANDLE","DANCE"] },
     { name: "Montreal Spots",   words: ["MONTREAL","OLDPORT","PLATEAU","MILEEND"] },
@@ -181,7 +180,6 @@ function applyImmersiveMode(viewName){
 }
 
 function updateHomeLockUI(){
-  // Update the Final Reveal card's "Locked" label visually without editing HTML.
   const card = document.querySelector('.game-card[data-goto="reveal"]');
   if(!card) return;
   const meta = card.querySelector(".meta");
@@ -190,11 +188,8 @@ function updateHomeLockUI(){
   const unlocked = Progress.allSolved();
   if(spans[0]) spans[0].textContent = unlocked ? "Unlocked" : "Locked";
   if(spans[1]) spans[1].textContent = unlocked ? "🎁" : "💝";
-
-  // optional: soften the card when locked
   card.style.opacity = unlocked ? "1" : "0.88";
 }
-
 updateHomeLockUI();
 
 function canOpenReveal(){
@@ -205,10 +200,8 @@ function showView(name){
   if(!views.includes(name)) return;
   if(name === activeView) return;
 
-  // Lock gate
   if(name === "reveal" && !canOpenReveal()){
     toast("Finish all 4 puzzles to unlock the final reveal 💝");
-    // keep user on home if they tried from a game end
     if(activeView !== "home") showView("home");
     return;
   }
@@ -238,11 +231,14 @@ function showView(name){
     applyImmersiveMode(name);
     window.scrollTo({ top: 0 });
 
-    // focus hidden inputs for mobile typing
     if(name === "wordle") {
       const hi = $("#wordleHiddenInput");
       if(hi) hi.focus({ preventScroll: true });
+      // NEW: ensure keyboard fits after transitions
+      requestAnimationFrame(()=> tuneWordleKeyboardLayout());
+      setTimeout(()=> tuneWordleKeyboardLayout(), 180);
     }
+
     if(name === "mini") {
       const mi = $("#miniHiddenInput");
       if(mi) mi.focus({ preventScroll: true });
@@ -264,7 +260,6 @@ applyImmersiveMode("home");
 
 /* =========================
    CLICK + TOUCH DELEGATION
-   (keeps "clickable" reliable on mobile)
    ========================= */
 function delegateNav(e){
   const navBtn = e.target.closest("[data-view]");
@@ -279,7 +274,6 @@ function delegateNav(e){
     return true;
   }
 
-  // play buttons
   if(e.target.closest("#miniPlay")){
     miniReset(true);
     showView("mini");
@@ -304,7 +298,6 @@ function delegateNav(e){
 }
 
 document.addEventListener("click", (e)=>{ delegateNav(e); });
-// extra: touchstart to reduce tap-delay and help iOS
 document.addEventListener("touchstart", (e)=>{ delegateNav(e); }, { passive:true });
 
 /* =========================
@@ -324,8 +317,7 @@ let miniLetters = new Array(MP.size * MP.size).fill("");
 let miniTimer = 0;
 let miniTimerId = null;
 
-// NEW: direction + clue model
-let miniDir = "across"; // "across" | "down"
+let miniDir = "across";
 let miniClueIndex = 0;
 
 function formatTime(s){
@@ -355,12 +347,10 @@ function isBlock(idx){ return MP.blocks.has(idx); }
 function acrossWordIndices(idx){
   if(isBlock(idx)) return [];
   const {r,c} = idxToRC(idx);
-
   let left = c;
   while(left-1 >= 0 && !isBlock(r*MP.size + (left-1))) left--;
   let right = c;
   while(right+1 < MP.size && !isBlock(r*MP.size + (right+1))) right++;
-
   const out = [];
   for(let x=left;x<=right;x++) out.push(r*MP.size + x);
   return out;
@@ -369,12 +359,10 @@ function acrossWordIndices(idx){
 function downWordIndices(idx){
   if(isBlock(idx)) return [];
   const {r,c} = idxToRC(idx);
-
   let up = r;
   while(up-1 >= 0 && !isBlock((up-1)*MP.size + c)) up--;
   let down = r;
   while(down+1 < MP.size && !isBlock((down+1)*MP.size + c)) down++;
-
   const out = [];
   for(let y=up;y<=down;y++) out.push(y*MP.size + c);
   return out;
@@ -423,24 +411,19 @@ function getMiniWordIndices(idx){
 function moveToNextInActiveWord(){
   const word = getMiniWordIndices(miniSelected);
   if(!word.length) return;
-
   const pos = word.indexOf(miniSelected);
   if(pos === -1) return;
-
   const next = word[pos+1];
   if(typeof next === "number"){
     miniSelected = next;
     return;
   }
-
-  // if at end, move to next non-block cell in reading order
   for(let i=miniSelected+1;i<MP.size*MP.size;i++){
     if(!isBlock(i)) { miniSelected = i; return; }
   }
 }
 
 function miniAllFilledCorrect(){
-  // Compare miniLetters to solution (ignore blocks)
   for(let i=0;i<MP.size*MP.size;i++){
     if(isBlock(i)) continue;
     const want = (MP.solution[i] || "").toUpperCase();
@@ -451,9 +434,7 @@ function miniAllFilledCorrect(){
   return true;
 }
 
-/* ----- Build clue lists from the fixed solution layout ----- */
 function buildMiniEntries(){
-  // Create across/down entries with numbers + indices
   const entries = { across: [], down: [] };
 
   function isStartAcross(i){
@@ -475,21 +456,14 @@ function buildMiniEntries(){
   for(let i=0;i<MP.size*MP.size;i++){
     const num = MINI_NUMS[i];
     if(!num) continue;
-
-    if(isStartAcross(i)){
-      entries.across.push({ num, start: i, indices: acrossWordIndices(i) });
-    }
-    if(isStartDown(i)){
-      entries.down.push({ num, start: i, indices: downWordIndices(i) });
-    }
+    if(isStartAcross(i)) entries.across.push({ num, start: i, indices: acrossWordIndices(i) });
+    if(isStartDown(i)) entries.down.push({ num, start: i, indices: downWordIndices(i) });
   }
-
   return entries;
 }
 
 const MINI_ENTRIES = buildMiniEntries();
 
-// Clues (hand-authored to match the embedded solution)
 const MINI_ACROSS_CLUES = [
   "___ of a kind",
   "Things you type",
@@ -525,9 +499,7 @@ function setMiniClueFromSelection(){
   const dirList = (miniDir === "across") ? MINI_ENTRIES.across : MINI_ENTRIES.down;
   miniClueIndex = findEntryIndexForCell(miniDir, miniSelected);
   const entry = dirList[miniClueIndex];
-  if(miniClueText && entry){
-    miniClueText.textContent = entryClueText(miniDir, entry, miniClueIndex);
-  }
+  if(miniClueText && entry) miniClueText.textContent = entryClueText(miniDir, entry, miniClueIndex);
 }
 
 function renderMini(){
@@ -565,7 +537,6 @@ function renderMini(){
     cell.appendChild(letter);
 
     cell.addEventListener("click", ()=>{
-      // Tap same cell toggles across/down
       if(miniSelected === i){
         miniDir = (miniDir === "across") ? "down" : "across";
         toast(miniDir === "across" ? "Across" : "Down");
@@ -578,11 +549,9 @@ function renderMini(){
     miniCrossword.appendChild(cell);
   }
 
-  // completion check
   if(!Progress.state.miniSolved && miniAllFilledCorrect()){
     Progress.mark("miniSolved", true);
     toast("Mini solved ✅");
-    // if everything done, allow reveal
     if(Progress.allSolved()) toast("Final Reveal unlocked 🎁");
   }
 }
@@ -610,14 +579,8 @@ function clearMiniLetter(){
 
 document.addEventListener("keydown", (e)=>{
   if(activeView !== "mini") return;
-
-  if(e.key === "Backspace"){
-    clearMiniLetter();
-    return;
-  }
-  if(/^[a-zA-Z]$/.test(e.key)){
-    setMiniLetter(e.key);
-  }
+  if(e.key === "Backspace") return clearMiniLetter();
+  if(/^[a-zA-Z]$/.test(e.key)) setMiniLetter(e.key);
 });
 
 if(miniHiddenInput){
@@ -627,7 +590,6 @@ if(miniHiddenInput){
     miniHiddenInput.value = "";
   });
 
-  // Mobile polish: tap anywhere in board area focuses input
   const miniView = $("#view-mini");
   if(miniView){
     miniView.addEventListener("touchstart", ()=>{
@@ -659,11 +621,11 @@ if(miniNextClue){
   });
 }
 
-// init mini
 miniReset();
 
 /* =========================
-   WORDLE — reset + basic input + solved flag
+   WORDLE — reset + input + solved flag
+   + NEW: NYT-like keyboard sizing
    ========================= */
 const wordleBoard = $("#wordleBoard");
 const wordleMsg = $("#wordleMsg");
@@ -691,30 +653,94 @@ function buildWordle(){
   }
 }
 
+/* ---------- NEW: Wordle keyboard layout tuning ---------- */
+function tuneWordleKeyboardLayout(){
+  if(!wordleKeyboard) return;
+
+  // Make the keyboard area feel like NYT (centered, max width)
+  wordleKeyboard.style.maxWidth = "520px";
+  wordleKeyboard.style.marginLeft = "auto";
+  wordleKeyboard.style.marginRight = "auto";
+
+  const rows = $$("#wordleKeyboard .kb-row");
+  if(!rows.length) return;
+
+  // Reduce gaps a bit on smaller screens (NYT-like tightness)
+  const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+  const isSmall = vw <= 390;
+
+  rows.forEach(row=>{
+    row.style.gap = isSmall ? "6px" : "8px";
+    row.style.paddingLeft = isSmall ? "6px" : "8px";
+    row.style.paddingRight = isSmall ? "6px" : "8px";
+
+    const keys = Array.from(row.querySelectorAll(".kb-key"));
+    if(!keys.length) return;
+
+    // NYT-ish proportions: wide keys a bit bigger than letters
+    // (tweak these if you want even closer match)
+    const flexMap = (k) => (k.classList.contains("wide") ? 1.5 : 1);
+
+    keys.forEach(k=>{
+      k.style.flexGrow = String(flexMap(k));
+      k.style.flexShrink = "1";
+      k.style.flexBasis = "0px";     // critical: lets flex truly distribute width
+      k.style.minWidth = "0px";      // prevent overflow on small screens
+      k.style.paddingLeft = "0px";
+      k.style.paddingRight = "0px";
+      k.style.height = isSmall ? "54px" : "58px";
+      k.style.borderRadius = "10px";
+      k.style.fontSize = isSmall ? "13px" : "14px";
+      k.style.letterSpacing = ".2px";
+    });
+  });
+}
+
 function buildKeyboard(){
   if(!wordleKeyboard) return;
+
   const rows = [
     ["Q","W","E","R","T","Y","U","I","O","P"],
     ["A","S","D","F","G","H","J","K","L"],
     ["ENTER","Z","X","C","V","B","N","M","⌫"]
   ];
+
   wordleKeyboard.innerHTML = "";
+
   rows.forEach((r)=>{
     const row = document.createElement("div");
     row.className = "kb-row";
+
     r.forEach((k)=>{
       const b = document.createElement("button");
       b.className = "kb-key";
       b.type = "button";
       b.textContent = k;
+
       if(k === "ENTER" || k === "⌫") b.classList.add("wide");
+
+      // helpful for debugging / styling hooks if you want later
+      b.dataset.key = k;
+
       b.addEventListener("click", ()=> handleWordleKey(k));
       row.appendChild(b);
     });
+
     wordleKeyboard.appendChild(row);
   });
+
+  // Apply sizing + then states
+  tuneWordleKeyboardLayout();
   renderKeyboardStates();
 }
+
+// keep keyboard fitting on rotation / resize
+window.addEventListener("resize", ()=>{
+  if(activeView === "wordle") tuneWordleKeyboardLayout();
+});
+window.addEventListener("orientationchange", ()=>{
+  if(activeView === "wordle") setTimeout(()=> tuneWordleKeyboardLayout(), 150);
+});
 
 function setMsg(t){ if(wordleMsg) wordleMsg.textContent = t || ""; }
 
@@ -843,7 +869,6 @@ if(wordleHiddenInput){
     wordleHiddenInput.value = "";
   });
 
-  // Mobile polish: tap game area focuses hidden input
   const wordleView = $("#view-wordle");
   if(wordleView){
     wordleView.addEventListener("touchstart", ()=>{
@@ -860,9 +885,10 @@ function resetWordle(){
   buildWordle();
   buildKeyboard();
   setMsg("");
+  // ensure layout after first paint
+  requestAnimationFrame(()=> tuneWordleKeyboardLayout());
 }
 
-// init wordle
 resetWordle();
 
 /* =========================
@@ -878,8 +904,8 @@ let connSelected = new Set();
 let connWords = [...CONFIG.connectionsWords];
 
 let connMistakes = 4;
-let connSolvedGroups = []; // {name, words}
-let connLockedWords = new Set(); // words that are already solved/removed
+let connSolvedGroups = [];
+let connLockedWords = new Set();
 
 function shuffleArray(arr){
   const a = [...arr];
@@ -935,7 +961,6 @@ function renderConnSolved(){
     box.appendChild(row);
   });
 
-  // update mistakes dots if present in DOM (no HTML change required)
   const dots = $$("#view-connections .dot");
   dots.forEach((d, i)=>{
     d.style.opacity = (i < connMistakes) ? "1" : "0.18";
@@ -1028,7 +1053,6 @@ if(connSubmit){
     const match = findMatchingGroup(selected);
 
     if(match){
-      // Already solved?
       const already = connSolvedGroups.some(g => normalizeSet(g.words) === normalizeSet(match.words));
       if(already){
         if(connMsg) connMsg.textContent = "You already found that group.";
@@ -1054,7 +1078,6 @@ if(connSubmit){
       return;
     }
 
-    // wrong group
     connMistakes = Math.max(0, connMistakes - 1);
     if(connMsg) connMsg.textContent = connMistakes ? "Not quite — try again." : "No mistakes left.";
     toast(connMistakes ? `Mistakes left: ${connMistakes}` : "Out of mistakes");
@@ -1095,16 +1118,11 @@ function updateProgress(){
   const total = SP.themeWords.length + 1;
   if(spanProgress) spanProgress.textContent = `${spanFoundWords.size} of ${total} theme words found.`;
 
-  // completion
   if(spanFoundWords.size >= total && !Progress.state.strandsSolved){
     Progress.mark("strandsSolved", true);
     toast("Strands solved ✅");
     if(spanMsg) spanMsg.textContent = "Theme complete! ⭐";
-    if(Progress.allSolved()){
-      toast("Final Reveal unlocked 🎁");
-      // optional: auto-open reveal once all solved
-      // showView("reveal");
-    }
+    if(Progress.allSolved()) toast("Final Reveal unlocked 🎁");
   }
 }
 
