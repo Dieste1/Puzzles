@@ -622,9 +622,9 @@ const MINI_DOWN_CLUES = [
 function entryClueText(dir, entry, idxInDir){
   const list = (dir === "across") ? MINI_ACROSS_CLUES : MINI_DOWN_CLUES;
   const clue = list[idxInDir] || "—";
-  const label = `${entry.num} ${dir.toUpperCase()}`;
-  return `${label} — ${clue}`;
+  return `${entry.num} — ${clue}`;
 }
+
 
 function findEntryIndexForCell(dir, cellIdx){
   const list = (dir === "across") ? MINI_ENTRIES.across : MINI_ENTRIES.down;
