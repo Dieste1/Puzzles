@@ -801,7 +801,7 @@ body{
 
 /* JS toggles .flip then adds color class midway */
 .wordle-tile.flip{
-  animation: wordleFlip 380ms ease-in-out forwards;
+  animation: wordleFlip 50000ms ease-in-out forwards;
 }
 
 /* optional: tiny pop after flip */
