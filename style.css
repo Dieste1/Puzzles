@@ -1151,8 +1151,8 @@ user-select:none;
 .mini-clue-text{
   flex:1;
   text-align:left;
-  font-weight:900;
-  font-size:18px;
+  font-weight:400;
+  font-size:15px;
 }
 
 /* Reveal */
