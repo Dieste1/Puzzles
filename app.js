@@ -1510,7 +1510,7 @@ function buildStrandsGrid(){
     spanGridEl.appendChild(cell);
   });
 
-  if(spanThemeHelp) spanThemeHelp.textContent = `Today’s theme: ${SP.themeTitle}`;
+  //if(spanThemeHelp) spanThemeHelp.textContent = `Today’s theme: ${SP.themeTitle}`;
 }
 
 // --- SVG overlay for "bubbles + connectors"
