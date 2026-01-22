@@ -462,6 +462,40 @@ body{
 }
 
 /* ---------- Connections game (NYT-ish) ---------- */
+
+/* === Connections layout tuning (NYT-like, larger tiles) === */
+.conn-grid.nyt{
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.conn-word{
+  min-height: 78px;
+  padding: 20px 10px;
+  font-size: 15px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Stronger selection feedback */
+.conn-word.selected{
+  outline: 3px solid rgba(255,255,255,.35);
+  opacity: 1;
+}
+
+/* Improve tap comfort on small phones */
+@media (max-width: 390px){
+  .conn-word{
+    min-height: 72px;
+    padding: 18px 10px;
+    font-size: 14px;
+  }
+}
+
 .connections-game{
   min-height: calc(100vh - 86px);
   background: var(--conn-bg);
@@ -801,7 +835,7 @@ body{
 
 /* JS toggles .flip then adds color class midway */
 .wordle-tile.flip{
-  animation: wordleFlip 50000ms ease-in-out forwards;
+  animation: wordleFlip 380ms ease-in-out forwards;
 }
 
 /* optional: tiny pop after flip */

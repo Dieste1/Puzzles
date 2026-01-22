@@ -316,6 +316,12 @@ function showView(name){
       setTimeout(()=> tuneWordleKeyboardLayout(), 180);
     }
 
+
+    if(name === "connections") {
+      requestAnimationFrame(()=> tuneConnectionsLayout());
+      setTimeout(()=> tuneConnectionsLayout(), 180);
+    }
+
     if(name === "mini") {
       const mi = $("#miniHiddenInput");
       if(mi) mi.focus({ preventScroll: true });
@@ -823,7 +829,7 @@ function tuneWordleKeyboardLayout(){
 
     keys.forEach(k=>{
       const wide = k.classList.contains("wide");
-      k.style.flexGrow = String(wide ? 2 : 1);
+      k.style.flexGrow = String(wide ? 1.5 : 1);
       k.style.flexShrink = "1";
       k.style.flexBasis = "0px";
       k.style.minWidth = "0px";
@@ -834,6 +840,41 @@ function tuneWordleKeyboardLayout(){
       k.style.fontSize = isSmall ? "13px" : "14px";
       k.style.letterSpacing = ".2px";
     });
+  });
+}
+
+function tuneConnectionsLayout(){
+  if(!connGrid) return;
+
+  // Center the grid like NYT and keep it comfortably wide
+  connGrid.style.maxWidth = "520px";
+  connGrid.style.marginLeft = "auto";
+  connGrid.style.marginRight = "auto";
+
+  const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+  const isSmall = vw <= 390;
+
+  // Spacing between tiles
+  connGrid.style.gap = isSmall ? "10px" : "12px";
+
+  // Make tiles larger + improve long-label fit
+  const tiles = Array.from(connGrid.querySelectorAll(".conn-word"));
+  tiles.forEach((btn)=>{
+    btn.style.borderRadius = "16px";
+    btn.style.padding = isSmall ? "18px 10px" : "20px 10px";
+    btn.style.minHeight = isSmall ? "72px" : "78px";
+
+    const text = (btn.textContent || "").trim();
+    const len = text.length;
+
+    let fs = isSmall ? 14 : 15;
+    if(len >= 11) fs = isSmall ? 13 : 14;
+    if(len >= 14) fs = isSmall ? 12 : 13;
+    if(len >= 18) fs = isSmall ? 11 : 12;
+
+    btn.style.fontSize = `${fs}px`;
+    btn.style.lineHeight = "1.05";
+    btn.style.letterSpacing = ".4px";
   });
 }
 
@@ -872,9 +913,19 @@ function buildKeyboard(){
 window.addEventListener("resize", ()=>{
   if(activeView === "wordle") tuneWordleKeyboardLayout();
 });
+
+window.addEventListener("resize", ()=>{
+  if(activeView === "connections") tuneConnectionsLayout();
+});
+
 window.addEventListener("orientationchange", ()=>{
   if(activeView === "wordle") setTimeout(()=> tuneWordleKeyboardLayout(), 150);
 });
+
+window.addEventListener("orientationchange", ()=>{
+  if(activeView === "connections") setTimeout(()=> tuneConnectionsLayout(), 150);
+});
+
 
 function setMsg(t){ if(wordleMsg) wordleMsg.textContent = t || ""; }
 
@@ -1166,6 +1217,9 @@ function renderConnections(){
 
     connGrid.appendChild(b);
   });
+
+  tuneConnectionsLayout();
+
 }
 
 function normalizeSet(setLike){
