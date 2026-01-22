@@ -1013,7 +1013,7 @@ background: var(--mini-blue);
 border-radius: 22px;
 margin: 16px;
 padding: 0;
-padding-bottom: 84px; /* space for fixed clue bar */
+padding-bottom: 0; /* clue bar is in-flow under grid */
 box-shadow: var(--shadow);
 display:flex;
 flex-direction:column;
@@ -1126,21 +1126,17 @@ user-select:none;
 }
 
 .mini-cluebar{
-/* Fixed above bottom nav, stays visible while typing (keyboard) */
-position: fixed;
-left: 16px;
-right: 16px;
-bottom: calc(env(safe-area-inset-bottom) + 86px);
-margin: 0;
-background: var(--mini-bar);
-display:flex;
-align-items:center;
-gap:10px;
-padding: 12px 10px;
-color: var(--mini-ink);
-z-index: 50;
-border-radius: 14px;
-box-shadow: 0 10px 24px rgba(0,0,0,.18);
+  /* In-flow: sits directly under the grid (between crossword and keyboard) */
+  position: relative;
+  margin: 12px 10px 0;
+  background: var(--mini-bar);
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding: 12px 10px;
+  color: var(--mini-ink);
+  border-radius: 14px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.18);
 }
 .mini-clue-btn{
   background:transparent;
