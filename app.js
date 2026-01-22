@@ -1175,12 +1175,12 @@ function ensureConnSolvedUI(){
   return box;
 }
 
-function renderConnSolved(){
+function renderConnSolved(hideLastWords=false){
   const box = ensureConnSolvedUI();
   if(!box) return;
   box.innerHTML = "";
 
-  connSolvedGroups.forEach((g)=>{
+  connSolvedGroups.forEach((g, idx)=>{
     const row = document.createElement("div");
     row.className = `conn-solved-row conn-tier-${g.tier}`;
 
@@ -1191,11 +1191,22 @@ function renderConnSolved(){
     const words = document.createElement("div");
     words.className = "conn-solved-words";
 
+    const isLast = (idx === connSolvedGroups.length - 1);
+    const hideThisGroup = !!(hideLastWords && isLast && g.animated === false);
+
     g.words.forEach(w=>{
       const span = document.createElement("span");
       span.className = "conn-solved-word";
       span.dataset.word = w;
       span.textContent = w;
+
+      if(hideThisGroup){
+        span.classList.add("is-hidden");
+      }else{
+        // always keep previously-solved groups visible so they don't "flash" on later clicks
+        span.classList.add("is-revealed");
+      }
+
       words.appendChild(span);
     });
 
@@ -1275,11 +1286,12 @@ function animateConnGroupSolve(selectedWords){
   });
 
   setTimeout(()=>{
-    clones.forEach(({ c, target })=>{
-      target.classList.add("is-revealed");
-      c.style.opacity = "0";
-    });
-  }, 330);
+  clones.forEach(({ c, target })=>{
+    target.classList.remove("is-hidden");
+    target.classList.add("is-revealed");
+    c.style.opacity = "0";
+  });
+}, 330);
 
   setTimeout(()=>{
     clones.forEach(({ c })=> c.remove());
@@ -1289,7 +1301,7 @@ function animateConnGroupSolve(selectedWords){
 function renderConnections(){
   if(!connGrid) return;
 
-  renderConnSolved();
+  renderConnSolved(false);
   connGrid.innerHTML = "";
 
   remainingConnWords().forEach(w=>{
@@ -1391,18 +1403,24 @@ if(connSubmit){
       setConnectionsAnimating(true);
 
       match.words.forEach(w=> connLockedWords.add(w));
-      connSolvedGroups.push({ name: match.name, words: [...match.words], tier });
+      connSolvedGroups.push({ name: match.name, words: [...match.words], tier, animated: false });
 
-      renderConnSolved();
-      animateConnGroupSolve([...match.words]);
+// Build solved bars (hide newest group's words so they can fly in)
+renderConnSolved(true);
+animateConnGroupSolve([...match.words]);
 
       connSelected.clear();
       if(connMsg) connMsg.textContent = "Nice! ✅";
       haptic(16);
 
       setTimeout(()=>{
-        renderConnections();
-        setConnectionsAnimating(false);
+  // mark newest group as fully revealed so it won't flash on later clicks
+  const last = connSolvedGroups[connSolvedGroups.length - 1];
+  if(last) last.animated = true;
+  renderConnSolved(false);
+
+  renderConnections();
+  setConnectionsAnimating(false);
 
         if(connSolvedGroups.length === 4){
           if(connMsg) connMsg.textContent = "You solved Connections! 🎉";
