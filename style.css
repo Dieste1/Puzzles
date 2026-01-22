@@ -1214,3 +1214,107 @@ svg.span-svg{
 .span-bubble.spanagram{
   filter: saturate(1.05);
 }
+
+/* ======================================================================
+   CONNECTIONS — NYT-style solved bar animation + fixed tier colors (NEW)
+   ====================================================================== */
+
+#connSolved{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin: 12px auto 12px;
+  max-width: 440px;
+}
+
+/* Big colored bar, like NYT */
+.conn-solved-row{
+  border-radius:14px;
+  padding: 16px 14px;
+  color:#111;
+  font-weight:900;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  gap:6px;
+
+  user-select:none;
+  -webkit-user-select:none;
+
+  transform: translateY(2px);
+  opacity: 0;
+  animation: connSolvedPop 220ms ease forwards;
+}
+
+@keyframes connSolvedPop{
+  to{ opacity:1; transform: translateY(0); }
+}
+
+.conn-solved-title{
+  font-size: 18px;
+  letter-spacing:.3px;
+  text-transform: uppercase;
+}
+
+.conn-solved-words{
+  font-size: 14px;
+  letter-spacing:.35px;
+  text-transform: uppercase;
+  font-weight: 900;
+  opacity: .92;
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+
+/* Individual word targets for fly-in */
+.conn-solved-word{
+  opacity: 0;                 /* revealed after fly-in */
+  transform: translateY(2px);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+.conn-solved-word.is-revealed{
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* comma separator */
+.conn-solved-word::after{
+  content: ",";
+  margin-left: 4px;
+}
+.conn-solved-word:last-child::after{
+  content:"";
+  margin:0;
+}
+
+/* Tier colors (NYT-ish) — fixed mapping via CONFIG.connectionsGroups[].tier */
+.conn-tier-0{ background: #f9df6d; } /* yellow */
+.conn-tier-1{ background: #a0c35a; } /* green  */
+.conn-tier-2{ background: #b0c4ef; } /* blue   */
+.conn-tier-3{ background: #ba81c5; } /* purple */
+
+/* Flying clones (animated tiles) */
+.conn-fly{
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  border-radius: 14px;
+  background: var(--conn-tile);
+  color:#111;
+  font-weight:900;
+  text-transform:uppercase;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow: 0 14px 35px rgba(0,0,0,.28);
+  will-change: transform, opacity;
+}
+
+/* While animating, prevent "ghost clicks" */
+#view-connections.is-animating .conn-grid,
+#view-connections.is-animating .conn-actions{
+  pointer-events:none;
+}

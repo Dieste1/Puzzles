@@ -1124,6 +1124,14 @@ let connMistakes = 4;
 let connSolvedGroups = [];
 let connLockedWords = new Set();
 
+let connAnimating = false;
+
+function setConnectionsAnimating(on){
+  connAnimating = !!on;
+  const view = document.getElementById("view-connections");
+  if(view) view.classList.toggle("is-animating", connAnimating);
+}
+
 function shuffleArray(arr){
   const a = [...arr];
   for(let i=a.length-1;i>0;i--){
@@ -1133,6 +1141,27 @@ function shuffleArray(arr){
   return a;
 }
 
+/* --- Stable tier mapping (lets you choose which group is purple, etc.)
+   Add optional `tier: 0|1|2|3` to CONFIG.connectionsGroups entries.
+   If omitted, tier defaults to the group's order in CONFIG.connectionsGroups.
+   0=yellow, 1=green, 2=blue, 3=purple
+*/
+function connKey(list){
+  return [...list].map(x=>String(x).toUpperCase()).sort().join("|");
+}
+function normalizeSet(setLike){
+  return connKey(setLike);
+}
+function buildConnTierMap(){
+  const map = new Map();
+  (CONFIG.connectionsGroups || []).forEach((g, i)=>{
+    map.set(connKey(g.words), (g.tier ?? i));
+  });
+  return map;
+}
+let CONN_GROUP_TIER = buildConnTierMap();
+
+/* --- Solved rows container (inserted above the grid) --- */
 function ensureConnSolvedUI(){
   const host = $("#view-connections .connections-game");
   if(!host) return null;
@@ -1142,10 +1171,6 @@ function ensureConnSolvedUI(){
 
   box = document.createElement("div");
   box.id = "connSolved";
-  box.style.display = "flex";
-  box.style.flexDirection = "column";
-  box.style.gap = "10px";
-  box.style.margin = "12px 0 12px";
   host.insertBefore(box, connGrid);
   return box;
 }
@@ -1155,23 +1180,24 @@ function renderConnSolved(){
   if(!box) return;
   box.innerHTML = "";
 
-  connSolvedGroups.forEach(g=>{
+  connSolvedGroups.forEach((g)=>{
     const row = document.createElement("div");
-    row.style.border = "1px solid rgba(255,255,255,.18)";
-    row.style.borderRadius = "14px";
-    row.style.padding = "10px 12px";
-    row.style.background = "rgba(255,255,255,.06)";
+    row.className = `conn-solved-row conn-tier-${g.tier}`;
 
     const title = document.createElement("div");
-    title.style.fontWeight = "900";
-    title.style.marginBottom = "6px";
+    title.className = "conn-solved-title";
     title.textContent = g.name;
 
     const words = document.createElement("div");
-    words.style.opacity = ".85";
-    words.style.fontWeight = "800";
-    words.style.letterSpacing = ".3px";
-    words.textContent = g.words.join(" · ");
+    words.className = "conn-solved-words";
+
+    g.words.forEach(w=>{
+      const span = document.createElement("span");
+      span.className = "conn-solved-word";
+      span.dataset.word = w;
+      span.textContent = w;
+      words.appendChild(span);
+    });
 
     row.appendChild(title);
     row.appendChild(words);
@@ -1179,13 +1205,85 @@ function renderConnSolved(){
   });
 
   const dots = $$("#view-connections .dot");
-  dots.forEach((d, i)=>{
-    d.style.opacity = (i < connMistakes) ? "1" : "0.18";
-  });
+  dots.forEach((d, i)=> d.style.opacity = (i < connMistakes) ? "1" : "0.18");
 }
 
 function remainingConnWords(){
   return connWords.filter(w => !connLockedWords.has(w));
+}
+
+/* --- NYT-style "combine into group" animation --- */
+function animateConnGroupSolve(selectedWords){
+  if(!connGrid) return;
+
+  // capture start rects from current grid tiles
+  const tiles = Array.from(connGrid.querySelectorAll(".conn-word"));
+  const starts = new Map();
+  selectedWords.forEach(w=>{
+    const el = tiles.find(b => (b.textContent || "").trim() === w);
+    if(el) starts.set(w, { el, rect: el.getBoundingClientRect() });
+  });
+
+  const box = $("#connSolved");
+  const lastRow = box ? box.lastElementChild : null;
+  if(!lastRow) return;
+
+  const targets = new Map();
+  Array.from(lastRow.querySelectorAll(".conn-solved-word")).forEach(t=>{
+    const w = (t.dataset.word || t.textContent || "").trim();
+    targets.set(w, { el: t, rect: t.getBoundingClientRect() });
+  });
+
+  const clones = [];
+  selectedWords.forEach(w=>{
+    const s = starts.get(w);
+    const t = targets.get(w);
+    if(!s || !t) return;
+
+    t.el.classList.remove("is-revealed");
+
+    const c = document.createElement("div");
+    c.className = "conn-fly";
+    c.textContent = w;
+
+    const r = s.rect;
+    c.style.left = `${r.left}px`;
+    c.style.top = `${r.top}px`;
+    c.style.width = `${r.width}px`;
+    c.style.height = `${r.height}px`;
+
+    c.style.background = getComputedStyle(s.el).backgroundColor;
+    c.style.color = getComputedStyle(s.el).color;
+    c.style.letterSpacing = getComputedStyle(s.el).letterSpacing;
+    c.style.fontSize = getComputedStyle(s.el).fontSize;
+
+    document.body.appendChild(c);
+    clones.push({ c, from: s.rect, to: t.rect, target: t.el });
+  });
+
+  requestAnimationFrame(()=>{
+    clones.forEach(({ c, from, to })=>{
+      const dx = (to.left + to.width/2) - (from.left + from.width/2);
+      const dy = (to.top  + to.height/2) - (from.top  + from.height/2);
+      const sx = to.width  / from.width;
+      const sy = to.height / from.height;
+
+      c.style.transition = "transform 360ms cubic-bezier(.2,.8,.2,1), opacity 260ms ease";
+      c.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
+      c.style.opacity = "1";
+    });
+  });
+
+  setTimeout(()=>{
+    clones.forEach(({ c, target })=>{
+      target.classList.add("is-revealed");
+      c.style.opacity = "0";
+    });
+  }, 330);
+
+  setTimeout(()=>{
+    clones.forEach(({ c })=> c.remove());
+  }, 520);
 }
 
 function renderConnections(){
@@ -1201,7 +1299,7 @@ function renderConnections(){
     if(connSelected.has(w)) b.classList.add("selected");
 
     b.addEventListener("click", ()=>{
-      if(connLockedWords.has(w)) return;
+      if(connAnimating) return;
 
       if(connSelected.has(w)) connSelected.delete(w);
       else{
@@ -1212,6 +1310,7 @@ function renderConnections(){
         }
         connSelected.add(w);
       }
+
       if(connMsg) connMsg.textContent = "";
       haptic(6);
       renderConnections();
@@ -1221,28 +1320,24 @@ function renderConnections(){
   });
 
   tuneConnectionsLayout();
-
-}
-
-function normalizeSet(setLike){
-  return [...setLike].map(x=>String(x).toUpperCase()).sort().join("|");
 }
 
 function findMatchingGroup(selected4){
   const pick = normalizeSet(selected4);
   for(const g of CONFIG.connectionsGroups){
-    const key = normalizeSet(g.words);
-    if(key === pick) return g;
+    if(normalizeSet(g.words) === pick) return g;
   }
   return null;
 }
 
 function resetConnections(showToast=false){
+  setConnectionsAnimating(false);
   connSelected = new Set();
   connWords = [...CONFIG.connectionsWords];
   connMistakes = 4;
   connSolvedGroups = [];
   connLockedWords = new Set();
+  CONN_GROUP_TIER = buildConnTierMap();
   if(connMsg) connMsg.textContent = "";
   renderConnections();
   if(showToast) toast("Connections ready 🟪");
@@ -1252,6 +1347,7 @@ renderConnections();
 
 if(connClear){
   connClear.addEventListener("click", ()=>{
+    if(connAnimating) return;
     connSelected.clear();
     if(connMsg) connMsg.textContent = "";
     haptic(6);
@@ -1260,6 +1356,7 @@ if(connClear){
 }
 if(connShuffle){
   connShuffle.addEventListener("click", ()=>{
+    if(connAnimating) return;
     connWords = shuffleArray(connWords);
     if(connMsg) connMsg.textContent = "";
     haptic(6);
@@ -1268,6 +1365,8 @@ if(connShuffle){
 }
 if(connSubmit){
   connSubmit.addEventListener("click", ()=>{
+    if(connAnimating) return;
+
     if(connSelected.size !== 4){
       if(connMsg) connMsg.textContent = "Select exactly 4.";
       haptic(8);
@@ -1287,22 +1386,35 @@ if(connSubmit){
         return;
       }
 
+      const tier = Math.max(0, Math.min(3, (match.tier ?? CONN_GROUP_TIER.get(normalizeSet(match.words)) ?? connSolvedGroups.length)));
+
+      setConnectionsAnimating(true);
+
       match.words.forEach(w=> connLockedWords.add(w));
-      connSolvedGroups.push({ name: match.name, words: [...match.words] });
+      connSolvedGroups.push({ name: match.name, words: [...match.words], tier });
+
+      renderConnSolved();
+      animateConnGroupSolve([...match.words]);
+
       connSelected.clear();
       if(connMsg) connMsg.textContent = "Nice! ✅";
       haptic(16);
-      renderConnections();
 
-      if(connSolvedGroups.length === 4){
-        if(connMsg) connMsg.textContent = "You solved Connections! 🎉";
-        if(!Progress.state.connectionsSolved){
-          Progress.mark("connectionsSolved", true);
-          toast("Connections solved ✅");
-          haptic(25);
-          if(Progress.allSolved()) toast("Final Reveal unlocked 🎁");
+      setTimeout(()=>{
+        renderConnections();
+        setConnectionsAnimating(false);
+
+        if(connSolvedGroups.length === 4){
+          if(connMsg) connMsg.textContent = "You solved Connections! 🎉";
+          if(!Progress.state.connectionsSolved){
+            Progress.mark("connectionsSolved", true);
+            toast("Connections solved ✅");
+            haptic(25);
+            if(Progress.allSolved()) toast("Final Reveal unlocked 🎁");
+          }
         }
-      }
+      }, 420);
+
       return;
     }
 
