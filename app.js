@@ -846,35 +846,37 @@ function tuneWordleKeyboardLayout(){
 function tuneConnectionsLayout(){
   if(!connGrid) return;
 
-  // Center the grid like NYT and keep it comfortably wide
-  connGrid.style.maxWidth = "520px";
+  // Center the grid like NYT
+  connGrid.style.maxWidth = "440px";
   connGrid.style.marginLeft = "auto";
   connGrid.style.marginRight = "auto";
 
   const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-  const isSmall = vw <= 390;
+  const isPhone = vw <= 480;
 
-  // Spacing between tiles
-  connGrid.style.gap = isSmall ? "10px" : "12px";
+  // Tighter spacing
+  connGrid.style.gap = isPhone ? "8px" : "10px";
 
-  // Make tiles larger + improve long-label fit
   const tiles = Array.from(connGrid.querySelectorAll(".conn-word"));
   tiles.forEach((btn)=>{
-    btn.style.borderRadius = "16px";
-    btn.style.padding = isSmall ? "18px 10px" : "20px 10px";
-    btn.style.minHeight = isSmall ? "72px" : "78px";
+    // IMPORTANT: these are inline styles and will override CSS.
+    // Keep them compact so the grid fits on iPhone.
+    btn.style.borderRadius = "12px";
+    btn.style.padding = isPhone ? "9px 6px" : "12px 8px";
+    btn.style.minHeight = isPhone ? "50px" : "58px";
 
+    // Font sizing for long labels
     const text = (btn.textContent || "").trim();
     const len = text.length;
 
-    let fs = isSmall ? 14 : 15;
-    if(len >= 11) fs = isSmall ? 13 : 14;
-    if(len >= 14) fs = isSmall ? 12 : 13;
-    if(len >= 18) fs = isSmall ? 11 : 12;
+    let fs = isPhone ? 12.5 : 13.5;
+    if(len >= 11) fs = isPhone ? 12 : 13;
+    if(len >= 14) fs = isPhone ? 11.5 : 12.5;
+    if(len >= 18) fs = isPhone ? 11 : 12;
 
     btn.style.fontSize = `${fs}px`;
     btn.style.lineHeight = "1.05";
-    btn.style.letterSpacing = ".4px";
+    btn.style.letterSpacing = ".28px";
   });
 }
 

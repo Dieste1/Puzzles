@@ -463,37 +463,85 @@ body{
 
 /* ---------- Connections game (NYT-ish) ---------- */
 
-/* === Connections layout tuning (NYT-like, large iPhone) === */
+/* === Connections layout tuning (NYT-like, phone compact) === */
 .conn-grid.nyt{
-  max-width: 500px;
-  margin-left: auto;
-  margin-right: auto;
-  gap: 10px;
+  max-width: 440px; /* tighter vertical spacing */
+  gap: 8px;
 }
 
 .conn-word{
-  min-height: 64px;
-  padding: 14px 8px;
-  font-size: 14px;
-  border-radius: 14px;
+  min-height: 50px;
+  padding: 9px 6px;
+  font-size: 12.5px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  letter-spacing: .35px;
+  letter-spacing: .28px;
 }
 
+/* Strong selection feedback */
 .conn-word.selected{
-  outline: 3px solid rgba(255,255,255,.35);
+  outline: 2px solid rgba(255,255,255,.35);
   opacity: 1;
 }
 
-/* Large phones still get a small safety trim */
+/* Tighten surrounding spacing so the grid doesn't feel "zoomed" */
+#view-connections .conn-title{
+  margin: 10px 0 8px;
+  font-size: 18px;
+}
+
+#view-connections .conn-status{
+  margin: 6px 0 10px;
+}
+
+#view-connections .conn-actions{
+  margin-top: 4px;
+  gap: 10px;
+}
+
+#view-connections .conn-action{
+  padding: 10px 14px;
+  min-width: 104px;
+}
+
+/* Large iPhone safety trim */
 @media (max-width: 430px){
+  .conn-grid.nyt{ max-width: 420px; gap: 7px; }
   .conn-word{
-    min-height: 60px;
-    padding: 12px 6px;
-    font-size: 13px;
+    min-height: 48px;
+    padding: 8px 6px;
+    font-size: 12px;
+  }
+}
+
+
+
+.conn-word{
+  min-height: 56px;
+  padding: 10px 6px;
+  font-size: 13px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  letter-spacing: .3px;
+}
+
+.conn-word.selected{
+  outline: 2px solid rgba(255,255,255,.35);
+  opacity: 1;
+}
+
+/* Extra safety for very tall tiles */
+@media (max-width: 480px){
+  .conn-word{
+    min-height: 52px;
+    padding: 9px 6px;
+    font-size: 12.5px;
   }
 }
 
