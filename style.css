@@ -1336,7 +1336,7 @@ svg.span-svg{
   border-radius:14px;
   padding: 16px 14px;
   color:#111;
-  font-weight:900;
+  font-weight:700;
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -1354,13 +1354,13 @@ svg.span-svg{
 }
 
 .conn-solved-words{
-  font-size: 13px;
+  font-size: 12px;
   letter-spacing:.35px;
   text-transform: uppercase;
-  font-weight: 900;
+  font-weight: 600;
   opacity: .92;
   display:flex;
-  gap:6px;
+  gap:1px;
   flex-wrap:wrap;
   justify-content:center;
 }
