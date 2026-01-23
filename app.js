@@ -1456,6 +1456,7 @@ const spanThemeHelp = $("#spanThemeHelp");
 const spanThemeTitle = $("#spanThemeTitle");
 const spanGridEl = $("#spanGrid");
 const spanMsg = $("#spanMsg");
+const spanCurrent = $("#spanCurrent");
 const spanClear = $("#spanClear");
 const spanProgress = $("#spanProgress");
 
@@ -1481,6 +1482,10 @@ function selectionWord(indices){
 }
 function setSpanMsg(t){
   if(spanMsg) spanMsg.textContent = t || "";
+}
+
+function setSpanCurrent(t){
+  if(spanCurrent) spanCurrent.textContent = t || "";
 }
 
 function updateProgress(){
@@ -1625,7 +1630,7 @@ function idxFromPoint(clientX, clientY){
 
 function beginSelect(idx){
   spanPath = [idx];
-  setSpanMsg(selectionWord(spanPath));
+  setSpanCurrent(selectionWord(spanPath));
   updateStrandsVisual();
   haptic(6);
 }
@@ -1639,7 +1644,7 @@ function tryExtendPath(idx){
   // backtrack if dragging to previous cell
   if(spanPath.length >= 2 && idx === spanPath[spanPath.length - 2]){
     spanPath.pop();
-    setSpanMsg(selectionWord(spanPath));
+    setSpanCurrent(selectionWord(spanPath));
     updateStrandsVisual();
     haptic(4);
     return;
@@ -1650,7 +1655,7 @@ function tryExtendPath(idx){
 
   if(isAdjacent(last, idx)){
     spanPath.push(idx);
-    setSpanMsg(selectionWord(spanPath));
+    setSpanCurrent(selectionWord(spanPath));
     updateStrandsVisual();
     haptic(4);
   }
@@ -1658,12 +1663,14 @@ function tryExtendPath(idx){
 
 function finalizeSelection(){
   if(!spanPath.length){
-    setSpanMsg("");
+    setSpanCurrent("");
+    // keep any status message as-is
     updateStrandsVisual();
     return;
   }
 
   const w = selectionWord(spanPath);
+  setSpanCurrent("");
   const themeSet = new Set((SP.themeWords || []).map(x => String(x).toUpperCase()));
   const spanagram = String(SP.strandsWord || "").toUpperCase();
 
@@ -1687,6 +1694,8 @@ function finalizeSelection(){
     }
   }else{
     setSpanMsg("");
+    setSpanCurrent("");
+  setSpanCurrent("");
     haptic(8);
   }
 
@@ -1758,6 +1767,7 @@ function resetStrands(showToast=false){
   spanFoundWords = new Set();
   spanFoundPaths = [];
   setSpanMsg("");
+  setSpanCurrent("");
   updateProgress();
   updateStrandsVisual();
   if(showToast) toast("Strands ready 🧵");
@@ -1772,6 +1782,8 @@ if(spanClear){
   spanClear.addEventListener("click", ()=>{
     spanPath = [];
     setSpanMsg("");
+    setSpanCurrent("");
+  setSpanCurrent("");
     updateStrandsVisual();
     haptic(6);
   });

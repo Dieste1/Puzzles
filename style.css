@@ -361,6 +361,20 @@ body{
   padding:10px 0;
 }
 
+
+/* ---------- Strands current word (NYT-ish) ---------- */
+.span-current{
+  margin: 6px 0 10px;
+  min-height: 22px;
+  text-align:center;
+  font-weight: 900;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(0,0,0,.55);
+  user-select:none;
+  -webkit-user-select:none;
+}
+
 /* ---------- STRANDS GRID (UPDATED for SVG overlay) ---------- */
 .span-grid.nyt{
   display:grid;
