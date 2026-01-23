@@ -371,7 +371,7 @@ body{
   font-weight: 600;
   letter-spacing: .18em;
   text-transform: uppercase;
-  color: rgba(0,0,0,.55);
+  color: rgb(0, 0, 0);
   user-select:none;
   -webkit-user-select:none;
 }
