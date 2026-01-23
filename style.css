@@ -366,8 +366,9 @@ body{
 .span-current{
   margin: 6px 0 10px;
   min-height: 22px;
+  font-size: 20px;
   text-align:center;
-  font-weight: 900;
+  font-weight: 600;
   letter-spacing: .18em;
   text-transform: uppercase;
   color: rgba(0,0,0,.55);

@@ -1683,7 +1683,7 @@ function finalizeSelection(){
       spanFoundWords.add(w);
       spanFoundPaths.push({ word: w, type, indices: [...spanPath] });
 
-      setSpanMsg(type === "spanagram" ? "SPANAGRAM! ⭐" : "Nice!");
+      setSpanMsg(type === "spanagram" ? "SPANAGRAM! ⭐" : "Esooooooo!");
       toast(type === "spanagram" ? "Spanagram found ⭐" : "Theme word found ✅");
       haptic(18);
 
