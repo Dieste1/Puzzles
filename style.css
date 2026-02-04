@@ -478,17 +478,17 @@ body{
 
 /* ---------- Connections game (NYT-ish) ---------- */
 
-/* === Connections layout tuning (NYT-like, phone) === */
+/* === Connections layout tuning (NYT-like, phone compact) === */
 .conn-grid.nyt{
-  max-width: 440px;
-  gap: 12px;
+  max-width: 440px; /* tighter vertical spacing */
+  gap: 8px;
 }
 
 .conn-word{
-  min-height: 70px;
-  padding: 13px 9px;
-  font-size: 14.5px;
-  border-radius: 14px;
+  min-height: 50px;
+  padding: 9px 6px;
+  font-size: 12.5px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -524,17 +524,20 @@ body{
 
 /* Large iPhone safety trim */
 @media (max-width: 430px){
-  .conn-grid.nyt{ max-width: 420px; gap: 11px; }
+  .conn-grid.nyt{ max-width: 420px; gap: 7px; }
   .conn-word{
-    min-height: 74px;     /* Pro Max style */
-    padding: 14px 10px;
-    font-size: 15px;
+    min-height: 48px;
+    padding: 8px 6px;
+    font-size: 12px;
   }
 }
+
+
+
 .conn-word{
-  min-height: 66px;
+  min-height: 56px;
   padding: 10px 6px;
-  font-size: 15px;
+  font-size: 13px;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -551,11 +554,12 @@ body{
 /* Extra safety for very tall tiles */
 @media (max-width: 480px){
   .conn-word{
-    min-height: 70px;
-    padding: 13px 9px;
-    font-size: 14.5px;
+    min-height: 52px;
+    padding: 9px 6px;
+    font-size: 12.5px;
   }
 }
+
 .connections-game{
   min-height: calc(100vh - 86px);
   background: var(--conn-bg);
@@ -618,7 +622,7 @@ body{
 .conn-grid.nyt{
   display:grid;
   grid-template-columns:repeat(4, 1fr);
-  gap:14px;
+  gap:12px;
   margin: 10px 0 16px;
 
   /* Helps mobile taps */
@@ -627,7 +631,7 @@ body{
 .conn-word{
   border:none;
   border-radius:14px;
-  padding:22px 12px;
+  padding:18px 10px;
   font-weight:900;
   letter-spacing:.3px;
   background: var(--conn-tile);
@@ -661,7 +665,7 @@ body{
 }
 .conn-actions{
   display:flex;
-  gap:14px;
+  gap:12px;
   justify-content:center;
   margin-top: 6px;
 }
@@ -745,7 +749,7 @@ body{
   padding:14px 14px;
   display:flex;
   align-items:center;
-  gap:14px;
+  gap:12px;
   box-shadow: 0 10px 24px rgba(0,0,0,.12);
   cursor:pointer;
 }
@@ -1338,7 +1342,7 @@ svg.span-svg{
 #connSolved{
   display:flex;
   flex-direction:column;
-  gap:14px;
+  gap:12px;
   margin: 12px auto 12px;
   max-width: 440px;
 }
@@ -1436,4 +1440,45 @@ svg.span-svg{
 #view-connections.is-animating .conn-grid,
 #view-connections.is-animating .conn-actions{
   pointer-events:none;
+}
+
+/* ======================================================================
+   CONNECTIONS — FINAL SIZING OVERRIDE (phone-safe, bigger tiles, no overflow)
+   ====================================================================== */
+#view-connections .conn-grid.nyt{
+  width: 100%;
+  max-width: 440px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#view-connections .conn-grid.nyt{
+  gap: 11px;
+}
+
+#view-connections .conn-word{
+  border-radius: 14px;
+  min-height: 68px;
+  padding: 13px 8px;
+  font-size: 14.5px;
+}
+
+/* iPhone Pro Max / large phones (e.g., 12/13/14/15 Pro Max widths) */
+@media (min-width: 410px) and (max-width: 480px){
+  #view-connections .conn-grid.nyt{ gap: 12px; }
+  #view-connections .conn-word{
+    min-height: 72px;
+    padding: 14px 8px;
+    font-size: 15px;
+  }
+}
+
+/* Smaller phones */
+@media (max-width: 389px){
+  #view-connections .conn-grid.nyt{ gap: 10px; }
+  #view-connections .conn-word{
+    min-height: 64px;
+    padding: 12px 7px;
+    font-size: 14px;
+  }
 }

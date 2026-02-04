@@ -846,38 +846,32 @@ function tuneWordleKeyboardLayout(){
 function tuneConnectionsLayout(){
   if(!connGrid) return;
 
-  // Center the grid like NYT
+  const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+  const isPhone = vw <= 480;
+  const isLargePhone = isPhone && vw >= 410; // e.g., iPhone Pro Max width class
+
+  // Keep the grid inside the card (no overflow) while still allowing a NYT-ish max width
+  connGrid.style.width = "100%";
   connGrid.style.maxWidth = "440px";
   connGrid.style.marginLeft = "auto";
   connGrid.style.marginRight = "auto";
 
-  const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-
-  // iPhone sizing:
-  // - Most phones are <= 480px, but "large phones" like iPhone 12/13/14 Pro Max are ~428px wide.
-  const isPhone = vw <= 480;
-  const isLargePhone = isPhone && vw >= 410;
-
-  // Slightly roomier spacing without changing layout structure
+  // Slightly roomier spacing (NYT feel) but safe for phones
   connGrid.style.gap = isPhone ? (isLargePhone ? "12px" : "11px") : "12px";
 
   const tiles = Array.from(connGrid.querySelectorAll(".conn-word"));
   tiles.forEach((btn)=>{
-    // IMPORTANT: inline styles override CSS — keep these larger to match NYT feel.
+    // Let CSS handle width; only tune height/typography.
     btn.style.borderRadius = "14px";
 
-    // Bigger tiles (but still fits 4x4 on iPhone)
-    const minH = isPhone ? (isLargePhone ? 74 : 70) : 74;
+    const minH = isPhone ? (isLargePhone ? 72 : 68) : 72;
     btn.style.minHeight = `${minH}px`;
 
-    // Comfortable padding
-    btn.style.padding = isPhone ? (isLargePhone ? "14px 10px" : "13px 9px") : "14px 10px";
+    btn.style.padding = isPhone ? (isLargePhone ? "14px 8px" : "13px 8px") : "14px 10px";
 
-    // Font sizing for long labels
     const text = (btn.textContent || "").trim();
     const len = text.length;
 
-    // Base font sizes (NYT-like)
     let fs = isPhone ? (isLargePhone ? 15 : 14.5) : 15;
     if(len >= 11) fs = isPhone ? (isLargePhone ? 14.5 : 14) : 14.5;
     if(len >= 14) fs = isPhone ? (isLargePhone ? 13.5 : 13) : 13.5;
