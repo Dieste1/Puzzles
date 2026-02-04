@@ -64,7 +64,7 @@ body{
 
 .main{
   padding:16px;
-  padding-bottom:86px;
+  padding-bottom:16px;
 }
 
 /* ---------- Smooth transitions between views ---------- */
@@ -83,8 +83,7 @@ body{
 /* full-bleed pages (hide header padding look) */
 .main.is-immersive{
   padding:0;
-  padding-bottom:86px;
-}
+  }
 #topHeader.is-hidden{ display:none; }
 
 /* ---------- Home feed ---------- */
@@ -271,7 +270,7 @@ body{
 
 /* ---------- Strands intro ---------- */
 .strands-intro{
-  min-height: calc(100vh - 86px);
+  min-height: 100vh;
   background: var(--mint);
   color:#000;
   border-radius: 22px;
@@ -315,12 +314,12 @@ body{
 
 /* Make the Strands view fill the screen */
 #view-strands{
-  min-height: calc(100vh - 86px); /* 86px = bottom nav space you already reserve */
+  min-height: 100vh; /* 86px = bottom nav space you already reserve */
 }
 
 /* Make the white card stretch to fill the view */
 #view-strands .card.light-card{
-  min-height: calc(100vh - 86px - 32px); /* subtract 16px top + 16px bottom margin */
+  min-height: calc(100vh - 32px); /* subtract 16px top + 16px bottom margin */
   display: flex;
   flex-direction: column;
 }
@@ -442,7 +441,7 @@ body{
 
 /* ---------- Connections intro (purple) ---------- */
 .connections-intro{
-  min-height: calc(100vh - 86px);
+  min-height: 100vh;
   background: var(--purple);
   color:#000;
   border-radius: 22px;
@@ -560,7 +559,7 @@ body{
 }
 
 .connections-game{
-  min-height: calc(100vh - 86px);
+  min-height: 100vh;
   background: var(--conn-bg);
   color:#fff;
   border-radius: 22px;
@@ -691,7 +690,7 @@ body{
 
 /* ---------- WORDLE INTRO ---------- */
 .wordle-intro{
-  min-height: calc(100vh - 86px);
+  min-height: 100vh;
   background: #efefef;
   color:#000;
   border-radius: 22px;
@@ -767,7 +766,7 @@ body{
 
 /* ---------- WORDLE GAME ---------- */
 .wordle-game{
-  min-height: calc(100vh - 86px);
+  min-height: 100vh;
   background: var(--w-bg);
   color: var(--w-text);
   border-radius: 22px;
@@ -960,7 +959,7 @@ body{
 
 /* ---------- MINI INTRO ---------- */
 .mini-intro{
-  min-height: calc(100vh - 86px);
+  min-height: 100vh;
   background: var(--mini-blue);
   color:#000;
   border-radius: 22px;
@@ -1022,7 +1021,7 @@ body{
 
 /* ---------- MINI GAME ---------- */
 .mini-game{
-min-height: calc(100vh - 86px);
+min-height: 100vh;
 background: var(--mini-blue);
 border-radius: 22px;
 margin: 16px;
@@ -1543,7 +1542,7 @@ svg.span-svg{
 #welcomeContinue{ margin-top: 10px; }
 
 .welcome-wrap{
-  min-height: calc(100vh - 86px);
+  min-height: 100vh;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -1617,3 +1616,4 @@ svg.span-svg{
   font-size:18px;
   cursor:pointer;
 }
+

@@ -214,11 +214,6 @@ const immersiveViews = new Set([
   "strands-intro","strands"
 ]);
 
-function setActiveNav(name){
-  $$(".bottom-nav button").forEach(b=>{
-    b.classList.toggle("active", b.dataset.view === name);
-  });
-}
 
 function applyImmersiveMode(viewName){
   const isImm = immersiveViews.has(viewName);
@@ -306,9 +301,7 @@ function showView(name){
       (name === "wordle") ? "wordle-intro" :
       (name === "mini") ? "mini-intro" :
       name;
-
-    setActiveNav(navName);
-    applyImmersiveMode(name);
+applyImmersiveMode(name);
     window.scrollTo({ top: 0 });
 
     if(name === "wordle") {
@@ -340,7 +333,6 @@ if(welcomeView){
   welcomeView.classList.add("is-active");
   requestAnimationFrame(()=> welcomeView.classList.add("is-entered"));
 }
-setActiveNav("home");
 applyImmersiveMode("welcome");
 updateHomeLockUI();
 updateHomeBadges();
