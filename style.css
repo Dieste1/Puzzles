@@ -269,15 +269,24 @@ body{
 .intro-small{ font-size:14px; margin-top:4px; }
 
 /* ---------- Strands intro ---------- */
-.strands-intro{  min-height:100vh;
+.strands-intro{
+  min-height: 100vh;
   background: var(--mint);
   color:#000;
-  border-radius:0;
-  margin:0;
+  border-radius: 0;
+  margin: 0;
   padding: 14px 16px 18px;
-  box-shadow:none;
+  box-shadow: none;
   display:flex;
   flex-direction:column;
+  position: fixed;
+  inset: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-top: calc(env(safe-area-inset-top) + 14px);
+  padding-left: calc(env(safe-area-inset-left) + 16px);
+  padding-right: calc(env(safe-area-inset-right) + 16px);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 18px);
 }
 .strands-mark{
   width:72px;height:72px;
@@ -313,17 +322,24 @@ body{
 
 /* Make the Strands view fill the screen */
 #view-strands{
-  min-height: 100vh;
+  min-height: 100vh; /* 86px = bottom nav space you already reserve */
 }
 
 /* Make the white card stretch to fill the view */
-#view-strands .card.light-card{
-    min-height: 100vh; /* subtract 16px top + 16px bottom margin */
+#view-strands .card.light-card{  min-height: 100vh; /* subtract 16px top + 16px bottom margin */
   display: flex;
   flex-direction: column;
+  position: fixed;
+  inset: 0;
   margin: 0;
   border-radius: 0;
   box-shadow: none;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-top: calc(env(safe-area-inset-top) + 14px);
+  padding-left: calc(env(safe-area-inset-left) + 16px);
+  padding-right: calc(env(safe-area-inset-right) + 16px);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
 }
 
 /* Push the bottom controls to the bottom of the card */
@@ -442,16 +458,25 @@ body{
 }
 
 /* ---------- Connections intro (purple) ---------- */
-.connections-intro{  min-height:100vh;
+.connections-intro{
+  min-height: 100vh;
   background: var(--purple);
   color:#000;
-  border-radius:0;
-  margin:0;
+  border-radius: 0;
+  margin: 0;
   padding: 14px 16px 16px;
-  box-shadow:none;
+  box-shadow: none;
   display:flex;
   flex-direction:column;
   gap:14px;
+  position: fixed;
+  inset: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-top: calc(env(safe-area-inset-top) + 14px);
+  padding-left: calc(env(safe-area-inset-left) + 16px);
+  padding-right: calc(env(safe-area-inset-right) + 16px);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
 }
 .conn-mark{
   width:72px;height:72px;
@@ -559,13 +584,22 @@ body{
   }
 }
 
-.connections-game{  min-height:100vh;
+.connections-game{
+  min-height: 100vh;
   background: var(--conn-bg);
   color:#fff;
-  border-radius:0;
-  margin:0;
+  border-radius: 0;
+  margin: 0;
   padding: 14px 14px 16px;
-  box-shadow:none;
+  box-shadow: none;
+  position: fixed;
+  inset: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-top: calc(env(safe-area-inset-top) + 14px);
+  padding-left: calc(env(safe-area-inset-left) + 14px);
+  padding-right: calc(env(safe-area-inset-right) + 14px);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
 }
 .conn-topbar{
   display:flex;
@@ -689,16 +723,25 @@ body{
 }
 
 /* ---------- WORDLE INTRO ---------- */
-.wordle-intro{  min-height:100vh;
+.wordle-intro{
+  min-height: 100vh;
   background: #efefef;
   color:#000;
-  border-radius:0;
-  margin:0;
+  border-radius: 0;
+  margin: 0;
   padding: 14px 16px 16px;
-  box-shadow:none;
+  box-shadow: none;
   display:flex;
   flex-direction:column;
   gap:14px;
+  position: fixed;
+  inset: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-top: calc(env(safe-area-inset-top) + 14px);
+  padding-left: calc(env(safe-area-inset-left) + 16px);
+  padding-right: calc(env(safe-area-inset-right) + 16px);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
 }
 .wordle-logo{
   width:72px;height:72px;
@@ -764,16 +807,25 @@ body{
 .banner-arrow{ font-size:26px; opacity:.5; }
 
 /* ---------- WORDLE GAME ---------- */
-.wordle-game{  min-height:100vh;
+.wordle-game{
+  min-height: 100vh;
   background: var(--w-bg);
   color: var(--w-text);
-  border-radius:0;
-  margin:0;
+  border-radius: 0;
+  margin: 0;
   padding: 10px 12px 16px;
-  box-shadow:none;
+  box-shadow: none;
   display:flex;
   flex-direction:column;
   align-items:center;
+  position: fixed;
+  inset: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-top: calc(env(safe-area-inset-top) + 10px);
+  padding-left: calc(env(safe-area-inset-left) + 12px);
+  padding-right: calc(env(safe-area-inset-right) + 12px);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
 }
 .wordle-topbar{
   width:100%;
@@ -956,15 +1008,24 @@ body{
 }
 
 /* ---------- MINI INTRO ---------- */
-.mini-intro{  min-height:100vh;
+.mini-intro{
+  min-height: 100vh;
   background: var(--mini-blue);
   color:#000;
-  border-radius:0;
-  margin:0;
+  border-radius: 0;
+  margin: 0;
   padding: 14px 16px 16px;
-  box-shadow:none;
+  box-shadow: none;
   display:flex;
   flex-direction:column;
+  position: fixed;
+  inset: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-top: calc(env(safe-area-inset-top) + 14px);
+  padding-left: calc(env(safe-area-inset-left) + 16px);
+  padding-right: calc(env(safe-area-inset-right) + 16px);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
 }
 .mini-logo{
   width:72px;height:72px;
@@ -1017,16 +1078,21 @@ body{
 }
 
 /* ---------- MINI GAME ---------- */
-.mini-game{  min-height:100vh;
+.mini-game{
+min-height: 100vh;
 background: var(--mini-blue);
-  border-radius:0;
-  margin:0;
+  border-radius: 0;
+  margin: 0;
 padding: 0;
-padding-bottom: 0; /* clue bar is in-flow under grid */
-  box-shadow:none;
+  padding-bottom: env(safe-area-inset-bottom); /* clue bar is in-flow under grid */
+  box-shadow: none;
 display:flex;
 flex-direction:column;
-overflow:hidden;
+  overflow: auto;
+  position: fixed;
+  inset: 0;
+  -webkit-overflow-scrolling: touch;
+  padding-top: env(safe-area-inset-top);
 }
 .mini-topbar{
   display:flex;
@@ -1581,6 +1647,8 @@ svg.span-svg{
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 #welcome-screen.hidden{
@@ -1615,10 +1683,38 @@ svg.span-svg{
 
 
 
-/* ===== FULL-BLEED PAGES (match welcome screen style) ===== */
+/* ===== TRUE FULL-BLEED (iOS safe-area) =====
+   - Works with viewport-fit=cover
+   - Makes screen backgrounds paint behind the status bar/notch
+*/
+.full-bleed-screen{
+  position: fixed;
+  inset: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  /* ensure it sits above normal flow */
+  z-index: 50;
+}
+
+/* Safe-area padding helpers */
+.full-bleed-pad{
+  padding-top: calc(env(safe-area-inset-top) + 14px);
+  padding-left: calc(env(safe-area-inset-left) + 16px);
+  padding-right: calc(env(safe-area-inset-right) + 16px);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
+}
+
 #view-reveal .card{
+  position: fixed;
+  inset: 0;
   margin: 0;
   border-radius: 0;
   box-shadow: none;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-top: calc(env(safe-area-inset-top) + 18px);
+  padding-left: calc(env(safe-area-inset-left) + 18px);
+  padding-right: calc(env(safe-area-inset-right) + 18px);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 18px);
   min-height: 100vh;
 }
