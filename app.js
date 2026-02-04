@@ -202,7 +202,7 @@ const views = [
   "reveal"
 ];
 
-let activeView = "welcome";
+let activeView = "home";
 
 const topHeader = $("#topHeader");
 const mainRoot = $("#mainRoot");
@@ -301,7 +301,7 @@ function showView(name){
       (name === "wordle") ? "wordle-intro" :
       (name === "mini") ? "mini-intro" :
       name;
-applyImmersiveMode(name);
+    applyImmersiveMode(name);
     window.scrollTo({ top: 0 });
 
     if(name === "wordle") {
@@ -327,13 +327,13 @@ applyImmersiveMode(name);
   }, 140);
 }
 
-// init view
-const welcomeView = $("#view-welcome");
-if(welcomeView){
-  welcomeView.classList.add("is-active");
-  requestAnimationFrame(()=> welcomeView.classList.add("is-entered"));
+// init view (start on HOME; full-screen welcome overlay sits above)
+const homeView = $("#view-home");
+if(homeView){
+  homeView.classList.add("is-active");
+  requestAnimationFrame(()=> homeView.classList.add("is-entered"));
 }
-applyImmersiveMode("welcome");
+applyImmersiveMode("home");
 updateHomeLockUI();
 updateHomeBadges();
 
@@ -696,6 +696,7 @@ function miniReset(showToast=false){
   miniDir = "across";
   miniClueIndex = 0;
   renderMini();
+  if(showToast) toast("Mini ready 🧩");
 }
 
 function setMiniLetter(ch){
@@ -1331,6 +1332,7 @@ function resetConnections(showToast=false){
   CONN_GROUP_TIER = buildConnTierMap();
   if(connMsg) connMsg.textContent = "";
   renderConnections();
+  if(showToast) toast("Connections ready 🟪");
 }
 
 renderConnections();
@@ -1748,6 +1750,7 @@ function resetStrands(showToast=false){
   setSpanCurrent("");
   updateProgress();
   updateStrandsVisual();
+  if(showToast) toast("Strands ready 🧵");
 }
 
 // init
@@ -1801,7 +1804,18 @@ const welcomeScreen = document.getElementById("welcome-screen");
 
 if(welcomeBtn && welcomeScreen){
   welcomeBtn.addEventListener("click", ()=>{
+    // Hide overlay immediately; we already start on HOME so there's no intermediate "welcome view" flash.
     welcomeScreen.classList.add("hidden");
-    showView("home");
+
+    const home = document.getElementById("view-home");
+    if(home){
+      home.classList.add("is-active");
+      // ensure the fade-in class is set (in case DOM loaded before RAF)
+      requestAnimationFrame(()=> home.classList.add("is-entered"));
+    }
+
+    activeView = "home";
+    applyImmersiveMode("home");
+    window.scrollTo({ top: 0 });
   });
 }
