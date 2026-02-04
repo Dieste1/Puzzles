@@ -269,14 +269,13 @@ body{
 .intro-small{ font-size:14px; margin-top:4px; }
 
 /* ---------- Strands intro ---------- */
-.strands-intro{
-  min-height: 100vh;
+.strands-intro{  min-height:100vh;
   background: var(--mint);
   color:#000;
-  border-radius: 22px;
-  margin: 16px;
+  border-radius:0;
+  margin:0;
   padding: 14px 16px 18px;
-  box-shadow: var(--shadow);
+  box-shadow:none;
   display:flex;
   flex-direction:column;
 }
@@ -314,14 +313,17 @@ body{
 
 /* Make the Strands view fill the screen */
 #view-strands{
-  min-height: 100vh; /* 86px = bottom nav space you already reserve */
+  min-height: 100vh;
 }
 
 /* Make the white card stretch to fill the view */
 #view-strands .card.light-card{
-  min-height: calc(100vh - 32px); /* subtract 16px top + 16px bottom margin */
+    min-height: 100vh; /* subtract 16px top + 16px bottom margin */
   display: flex;
   flex-direction: column;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 /* Push the bottom controls to the bottom of the card */
@@ -440,14 +442,13 @@ body{
 }
 
 /* ---------- Connections intro (purple) ---------- */
-.connections-intro{
-  min-height: 100vh;
+.connections-intro{  min-height:100vh;
   background: var(--purple);
   color:#000;
-  border-radius: 22px;
-  margin: 16px;
+  border-radius:0;
+  margin:0;
   padding: 14px 16px 16px;
-  box-shadow: var(--shadow);
+  box-shadow:none;
   display:flex;
   flex-direction:column;
   gap:14px;
@@ -558,14 +559,13 @@ body{
   }
 }
 
-.connections-game{
-  min-height: 100vh;
+.connections-game{  min-height:100vh;
   background: var(--conn-bg);
   color:#fff;
-  border-radius: 22px;
-  margin: 16px;
+  border-radius:0;
+  margin:0;
   padding: 14px 14px 16px;
-  box-shadow: var(--shadow);
+  box-shadow:none;
 }
 .conn-topbar{
   display:flex;
@@ -689,14 +689,13 @@ body{
 }
 
 /* ---------- WORDLE INTRO ---------- */
-.wordle-intro{
-  min-height: 100vh;
+.wordle-intro{  min-height:100vh;
   background: #efefef;
   color:#000;
-  border-radius: 22px;
-  margin: 16px;
+  border-radius:0;
+  margin:0;
   padding: 14px 16px 16px;
-  box-shadow: var(--shadow);
+  box-shadow:none;
   display:flex;
   flex-direction:column;
   gap:14px;
@@ -765,14 +764,13 @@ body{
 .banner-arrow{ font-size:26px; opacity:.5; }
 
 /* ---------- WORDLE GAME ---------- */
-.wordle-game{
-  min-height: 100vh;
+.wordle-game{  min-height:100vh;
   background: var(--w-bg);
   color: var(--w-text);
-  border-radius: 22px;
-  margin: 16px;
+  border-radius:0;
+  margin:0;
   padding: 10px 12px 16px;
-  box-shadow: var(--shadow);
+  box-shadow:none;
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -958,14 +956,13 @@ body{
 }
 
 /* ---------- MINI INTRO ---------- */
-.mini-intro{
-  min-height: 100vh;
+.mini-intro{  min-height:100vh;
   background: var(--mini-blue);
   color:#000;
-  border-radius: 22px;
-  margin: 16px;
+  border-radius:0;
+  margin:0;
   padding: 14px 16px 16px;
-  box-shadow: var(--shadow);
+  box-shadow:none;
   display:flex;
   flex-direction:column;
 }
@@ -1020,14 +1017,13 @@ body{
 }
 
 /* ---------- MINI GAME ---------- */
-.mini-game{
-min-height: 100vh;
+.mini-game{  min-height:100vh;
 background: var(--mini-blue);
-border-radius: 22px;
-margin: 16px;
+  border-radius:0;
+  margin:0;
 padding: 0;
 padding-bottom: 0; /* clue bar is in-flow under grid */
-box-shadow: var(--shadow);
+  box-shadow:none;
 display:flex;
 flex-direction:column;
 overflow:hidden;
@@ -1617,3 +1613,12 @@ svg.span-svg{
   cursor:pointer;
 }
 
+
+
+/* ===== FULL-BLEED PAGES (match welcome screen style) ===== */
+#view-reveal .card{
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+  min-height: 100vh;
+}
