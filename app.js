@@ -852,27 +852,36 @@ function tuneConnectionsLayout(){
   connGrid.style.marginRight = "auto";
 
   const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-  const isPhone = vw <= 480;
 
-  // Tighter spacing
-  connGrid.style.gap = isPhone ? "8px" : "10px";
+  // iPhone sizing:
+  // - Most phones are <= 480px, but "large phones" like iPhone 12/13/14 Pro Max are ~428px wide.
+  const isPhone = vw <= 480;
+  const isLargePhone = isPhone && vw >= 410;
+
+  // Slightly roomier spacing without changing layout structure
+  connGrid.style.gap = isPhone ? (isLargePhone ? "12px" : "11px") : "12px";
 
   const tiles = Array.from(connGrid.querySelectorAll(".conn-word"));
   tiles.forEach((btn)=>{
-    // IMPORTANT: these are inline styles and will override CSS.
-    // Keep them compact so the grid fits on iPhone.
-    btn.style.borderRadius = "12px";
-    btn.style.padding = isPhone ? "9px 6px" : "12px 8px";
-    btn.style.minHeight = isPhone ? "50px" : "58px";
+    // IMPORTANT: inline styles override CSS — keep these larger to match NYT feel.
+    btn.style.borderRadius = "14px";
+
+    // Bigger tiles (but still fits 4x4 on iPhone)
+    const minH = isPhone ? (isLargePhone ? 74 : 70) : 74;
+    btn.style.minHeight = `${minH}px`;
+
+    // Comfortable padding
+    btn.style.padding = isPhone ? (isLargePhone ? "14px 10px" : "13px 9px") : "14px 10px";
 
     // Font sizing for long labels
     const text = (btn.textContent || "").trim();
     const len = text.length;
 
-    let fs = isPhone ? 12.5 : 13.5;
-    if(len >= 11) fs = isPhone ? 12 : 13;
-    if(len >= 14) fs = isPhone ? 11.5 : 12.5;
-    if(len >= 18) fs = isPhone ? 11 : 12;
+    // Base font sizes (NYT-like)
+    let fs = isPhone ? (isLargePhone ? 15 : 14.5) : 15;
+    if(len >= 11) fs = isPhone ? (isLargePhone ? 14.5 : 14) : 14.5;
+    if(len >= 14) fs = isPhone ? (isLargePhone ? 13.5 : 13) : 13.5;
+    if(len >= 18) fs = isPhone ? (isLargePhone ? 12.5 : 12) : 12.5;
 
     btn.style.fontSize = `${fs}px`;
     btn.style.lineHeight = "1.05";
