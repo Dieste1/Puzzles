@@ -189,6 +189,7 @@ function toast(msg){
    VIEW ROUTER
    ========================= */
 const views = [
+  "welcome",
   "home",
   "mini-intro",
   "mini",
@@ -201,7 +202,7 @@ const views = [
   "reveal"
 ];
 
-let activeView = "home";
+let activeView = "welcome";
 
 const topHeader = $("#topHeader");
 const mainRoot = $("#mainRoot");
@@ -299,6 +300,7 @@ function showView(name){
     activeView = name;
 
     const navName =
+      (name === "welcome") ? "home" :
       (name === "strands") ? "strands-intro" :
       (name === "connections") ? "connections-intro" :
       (name === "wordle") ? "wordle-intro" :
@@ -333,13 +335,13 @@ function showView(name){
 }
 
 // init view
-const homeView = $("#view-home");
-if(homeView){
-  homeView.classList.add("is-active");
-  requestAnimationFrame(()=> homeView.classList.add("is-entered"));
+const welcomeView = $("#view-welcome");
+if(welcomeView){
+  welcomeView.classList.add("is-active");
+  requestAnimationFrame(()=> welcomeView.classList.add("is-entered"));
 }
 setActiveNav("home");
-applyImmersiveMode("home");
+applyImmersiveMode("welcome");
 updateHomeLockUI();
 updateHomeBadges();
 
@@ -1803,3 +1805,14 @@ preventDoubleTapZoom($("#wordleKeyboard"));
 preventDoubleTapZoom($("#miniCrossword"));
 preventDoubleTapZoom($("#connGrid"));
 preventDoubleTapZoom($("#spanGrid"));
+
+/* ===== WELCOME SCREEN LOGIC ===== */
+const welcomeBtn = document.getElementById("welcomeContinue");
+const welcomeScreen = document.getElementById("welcome-screen");
+
+if(welcomeBtn && welcomeScreen){
+  welcomeBtn.addEventListener("click", ()=>{
+    welcomeScreen.classList.add("hidden");
+    showView("home");
+  });
+}
