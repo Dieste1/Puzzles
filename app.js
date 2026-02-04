@@ -1175,9 +1175,26 @@ function ensureConnSolvedUI(){
   return box;
 }
 
+let __connSolvedRenderKey = "";
+
 function renderConnSolved(hideLastWords=false){
   const box = ensureConnSolvedUI();
   if(!box) return;
+
+  const key = JSON.stringify({
+    hideLastWords: !!hideLastWords,
+    mistakes: connMistakes,
+    groups: connSolvedGroups.map(g=>({
+      name: g.name,
+      tier: g.tier,
+      animated: g.animated,
+      words: g.words
+    }))
+  });
+
+  if(key === __connSolvedRenderKey) return;
+  __connSolvedRenderKey = key;
+
   box.innerHTML = "";
 
   connSolvedGroups.forEach((g, idx)=>{
