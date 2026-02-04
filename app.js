@@ -844,43 +844,9 @@ function tuneWordleKeyboardLayout(){
 }
 
 function tuneConnectionsLayout(){
-  if(!connGrid) return;
-
-  const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-  const isPhone = vw <= 480;
-  const isLargePhone = isPhone && vw >= 410; // e.g., iPhone Pro Max width class
-
-  // Keep the grid inside the card (no overflow) while still allowing a NYT-ish max width
-  connGrid.style.width = "100%";
-  connGrid.style.maxWidth = "440px";
-  connGrid.style.marginLeft = "auto";
-  connGrid.style.marginRight = "auto";
-
-  // Slightly roomier spacing (NYT feel) but safe for phones
-  connGrid.style.gap = isPhone ? (isLargePhone ? "12px" : "11px") : "12px";
-
-  const tiles = Array.from(connGrid.querySelectorAll(".conn-word"));
-  tiles.forEach((btn)=>{
-    // Let CSS handle width; only tune height/typography.
-    btn.style.borderRadius = "14px";
-
-    const minH = isPhone ? (isLargePhone ? 72 : 68) : 72;
-    btn.style.minHeight = `${minH}px`;
-
-    btn.style.padding = isPhone ? (isLargePhone ? "14px 8px" : "13px 8px") : "14px 10px";
-
-    const text = (btn.textContent || "").trim();
-    const len = text.length;
-
-    let fs = isPhone ? (isLargePhone ? 15 : 14.5) : 15;
-    if(len >= 11) fs = isPhone ? (isLargePhone ? 14.5 : 14) : 14.5;
-    if(len >= 14) fs = isPhone ? (isLargePhone ? 13.5 : 13) : 13.5;
-    if(len >= 18) fs = isPhone ? (isLargePhone ? 12.5 : 12) : 12.5;
-
-    btn.style.fontSize = `${fs}px`;
-    btn.style.lineHeight = "1.05";
-    btn.style.letterSpacing = ".28px";
-  });
+  // CSS is the single source of truth for Connections sizing.
+  // (NYT-style: let the grid decide width; only adjust via media queries in CSS.)
+  return;
 }
 
 function buildKeyboard(){
