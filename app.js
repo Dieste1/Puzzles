@@ -696,7 +696,6 @@ function miniReset(showToast=false){
   miniDir = "across";
   miniClueIndex = 0;
   renderMini();
-  if(showToast) toast("Mini ready 🧩");
 }
 
 function setMiniLetter(ch){
@@ -1332,7 +1331,6 @@ function resetConnections(showToast=false){
   CONN_GROUP_TIER = buildConnTierMap();
   if(connMsg) connMsg.textContent = "";
   renderConnections();
-  if(showToast) toast("Connections ready 🟪");
 }
 
 renderConnections();
@@ -1750,7 +1748,6 @@ function resetStrands(showToast=false){
   setSpanCurrent("");
   updateProgress();
   updateStrandsVisual();
-  if(showToast) toast("Strands ready 🧵");
 }
 
 // init
