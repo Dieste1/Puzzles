@@ -1528,32 +1528,12 @@ svg.span-svg{
   letter-spacing: .28px;
 }
 
-/* iPhone 12/13/14/15 Pro Max class (wide phones) */
+/* iPhone 12 Pro Max class (wide phones) */
 @media (min-width: 410px) and (max-width: 480px){
   #view-connections .conn-grid.nyt{ gap: 12px; }
   #view-connections .conn-word{
     min-height: 76px;
     padding: 15px 10px;
     font-size: 10px;
-  }
-}
-
-/* Typical iPhones */
-@media (max-width: 409px){
-  #view-connections .conn-grid.nyt{ gap: 11px; }
-  #view-connections .conn-word{
-    min-height: 70px;
-    padding: 14px 9px;
-    font-size: 15px;
-  }
-}
-
-/* Smaller phones */
-@media (max-width: 375px){
-  #view-connections .conn-grid.nyt{ gap: 10px; }
-  #view-connections .conn-word{
-    min-height: 66px;
-    padding: 13px 8px;
-    font-size: 14.5px;
   }
 }
