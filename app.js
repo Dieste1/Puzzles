@@ -1333,6 +1333,47 @@ function resetConnections(showToast=false){
   renderConnections();
 }
 
+/* --- Connections: "one away" + shake feedback on wrong submit (NYT-ish) --- */
+function connIsOneAway(selected4){
+  try{
+    const sel = new Set(selected4.map(w=>String(w).toUpperCase()));
+
+    // consider only groups not already solved
+    const solvedKeys = new Set(connSolvedGroups.map(g => normalizeSet(g.words)));
+
+    for(const g of (CONFIG.connectionsGroups || [])){
+      const key = normalizeSet(g.words);
+      if(solvedKeys.has(key)) continue;
+
+      const words = (g.words || []).map(w=>String(w).toUpperCase());
+      let hit = 0;
+      for(const w of words){
+        if(sel.has(w)) hit++;
+      }
+      if(hit === 3) return true;
+    }
+  }catch(_){}
+  return false;
+}
+
+function connShakeSelection(selected4){
+  if(!connGrid) return;
+  const tiles = Array.from(connGrid.querySelectorAll(".conn-word.selected"));
+  tiles.forEach(el=> el.classList.add("shake"));
+
+  // stronger haptic for error
+  try{
+    if(typeof navigator !== "undefined" && navigator.vibrate){
+      navigator.vibrate([18, 28, 18]);
+    }
+  }catch(_){}
+
+  // remove shake class after animation so future selection isn't affected
+  setTimeout(()=>{
+    tiles.forEach(el=> el.classList.remove("shake"));
+  }, 320);
+}
+
 renderConnections();
 
 if(connClear){
@@ -1415,12 +1456,24 @@ animateConnGroupSolve([...match.words]);
     }
 
     connMistakes = Math.max(0, connMistakes - 1);
-    if(connMsg) connMsg.textContent = connMistakes ? "Not quite — try again." : "No mistakes left.";
-    toast(connMistakes ? `Mistakes left: ${connMistakes}` : "Out of mistakes");
-    haptic(12);
-    connSelected.clear();
-    renderConnections();
-  });
+
+    const oneAway = connIsOneAway(selected);
+    if(connMsg) connMsg.textContent = connMistakes
+      ? (oneAway ? "One away… 👀" : "Not quite — try again.")
+      : "No mistakes left.";
+
+    toast(connMistakes ? (oneAway ? "One away…" : `Mistakes left: ${connMistakes}`) : "Out of mistakes");
+
+    // Shake the currently-selected tiles before clearing selection
+    setConnectionsAnimating(true);
+    connShakeSelection(selected);
+
+    setTimeout(()=>{
+      connSelected.clear();
+      renderConnections();
+      setConnectionsAnimating(false);
+    }, 320);
+});
 }
 
 /* =========================
