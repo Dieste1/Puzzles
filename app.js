@@ -1161,7 +1161,7 @@ function renderConnSolved(hideLastWords=false){
 
   connSolvedGroups.forEach((g, idx)=>{
     const row = document.createElement("div");
-    row.className = `conn-solved-row conn-tier-${g.tier}`;
+    row.className = `conn-solved-row conn-tier-${g.tier}` + ((idx === connSolvedGroups.length - 1 && g.animated === false) ? " is-pop" : "");
 
     const title = document.createElement("div");
     title.className = "conn-solved-title";
