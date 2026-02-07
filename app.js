@@ -19,7 +19,7 @@ strands: {
   strandsWord: "TOGETHERFOREVER"
 },
 
-  wordleSolution: "HEART",
+  wordleSolution: "FLACA",
 
   connectionsWords: [
     "JAZZ","MARTINI","CANDLE","DANCE",
