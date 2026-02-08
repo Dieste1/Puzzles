@@ -36,8 +36,24 @@ strands: {
   ],
 
   finalRevealHtml: `
-    <h3 style="margin:0 0 8px;">❤️ Surprise</h3>
-    <p style="margin:0;">Meet me at <strong>8:00</strong> — I planned something special.</p>
+    <h3 style="margin:0 0 10px;">❤️ A Little Something</h3>
+
+    <img
+      src="images/42772e2f-4932-40ba-ac46-3ccc095850e8.png"
+      alt="Keychain"
+      style="
+        width:100%;
+        max-width:260px;
+        margin:16px auto;
+        display:block;
+        border-radius:14px;
+        box-shadow:0 14px 35px rgba(0,0,0,.35);
+      "
+    />
+
+    <p style="margin-top:14px;">
+      Something small — but it means a lot 💚
+    </p>
   `,
 
   mini: {
