@@ -1850,3 +1850,11 @@ svg.span-svg{
   background: transparent;
   padding: 0;
 }
+
+
+/* ===== FINAL REVEAL — FULL-BLEED SAFEGUARD ===== */
+#view-reveal{
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
