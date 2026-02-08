@@ -3,20 +3,20 @@
    ========================= */
 const CONFIG = {
 strands: {
-  themeTitle: "Our Love Story",
+  themeTitle: "Cravings",
   cols: 6, // 8 rows inferred from 48 letters
   grid: [
-    "R","S","E","L","I","M",
-    "E","E","R","O","E","S",
-    "G","V","F","V","O","L",
-    "N","E","R","C","F","E",
-    "I","H","T","O","F","R",
-    "P","E","E","E","E","O",
-    "S","L","E","G","O","M",
-    "T","R","A","E","H","T"
+    "C","S","E","G","C","O",
+    "A","L","B","A","O","F",
+    "R","A","J","I","L","F",
+    "E","I","D","O","L","E",
+    "O","Q","T","N","O","E",
+    "C","U","I","S","A","F",
+    "A","Z","T","S","I","O",
+    "Z","P","I","A","C","R"
   ],
-  themeWords: ["LOVE","HEART","SMILES","MORE","COFFEE","SLEEPING"],
-  strandsWord: "TOGETHERFOREVER"
+  themeWords: ["BAGELS","COFFEE","PIZZA","CARAJILLO","CROISSANT","COQUITA"],
+  strandsWord: "FOODIE"
 },
 
   wordleSolution: "FLACA",
