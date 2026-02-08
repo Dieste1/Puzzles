@@ -735,7 +735,7 @@ body.welcome-active #mainRoot{
   font-size:38px;
   font-weight:900;
   letter-spacing:-.2px;
-  font-family: ui-serif, Georgia, "Times New Roman", serif;
+
 }
 .wordle-sub{
   margin:0 0 18px;
@@ -743,7 +743,7 @@ body.welcome-active #mainRoot{
   line-height:1.25;
   max-width: 320px;
   color: rgba(0,0,0,.72);
-  font-family: ui-serif, Georgia, "Times New Roman", serif;
+
 }
 .wordle-footer{
   margin-top:22px;
@@ -1002,7 +1002,7 @@ body.welcome-active #mainRoot{
   font-size:38px;
   font-weight:900;
   letter-spacing:-.2px;
-  font-family: ui-serif, Georgia, "Times New Roman", serif;
+
 }
 .mini-sub{
   margin:0 0 18px;
@@ -1010,7 +1010,7 @@ body.welcome-active #mainRoot{
   line-height:1.25;
   max-width: 320px;
   color: rgba(0,0,0,.72);
-  font-family: ui-serif, Georgia, "Times New Roman", serif;
+
 }
 .mini-footer{
   margin-top:18px;
