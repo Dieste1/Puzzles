@@ -22,14 +22,14 @@ strands: {
   wordleSolution: "FLACA",
 
   connectionsWords: [
-    "JAZZ","MARTINI","CANDLE","DANCE",
+    "FLACA","NONA","GATA","KITTY",
     "MTL","UPSTATE","THE CITY","ROCKAWAY",
     "JAZZ NIGHT","SKI TRIP","KARAOKE","TRAVEL",
     "BASICA","MATA","SUIT","KAW"
   ],
 
   connectionsGroups: [
-    { name: "Date Night Vibes",        words: ["JAZZ","MARTINI","CANDLE","DANCE"] },
+    { name: "Eca's Nicknames",         words: ["FLACA","NONA","GATA","KITTY"] },
     { name: "2025 Trips",              words: ["MTL","UPSTATE","THE CITY","ROCKAWAY"] },
     { name: "Our Wish list",           words: ["JAZZ NIGHT","SKI TRIP","KARAOKE","TRAVEL"] },
     { name: "Thing Eca Says ",         words: ["BASICA","MATA","SUIT","KAW"], revealWords: ["BASICAMENTE","MATATE","SUIT YOURSELF","KAWFEE"] }
@@ -231,7 +231,6 @@ function toast(msg){
    VIEW ROUTER
    ========================= */
 const views = [
-  "welcome",
   "home",
   "mini-intro",
   "mini",
@@ -244,7 +243,7 @@ const views = [
   "reveal"
 ];
 
-let activeView = "welcome";
+let activeView = "home";
 
 const topHeader = $("#topHeader");
 const mainRoot = $("#mainRoot");
@@ -337,7 +336,6 @@ function showView(name){
     activeView = name;
 
     const navName =
-      (name === "welcome") ? "home" :
       (name === "strands") ? "strands-intro" :
       (name === "connections") ? "connections-intro" :
       (name === "wordle") ? "wordle-intro" :
@@ -370,15 +368,14 @@ applyImmersiveMode(name);
 }
 
 // init view
-const welcomeView = $("#view-welcome");
-if(welcomeView){
-  welcomeView.classList.add("is-active");
-  requestAnimationFrame(()=> welcomeView.classList.add("is-entered"));
+const homeView = $("#view-home");
+if(homeView){
+  homeView.classList.add("is-active");
+  requestAnimationFrame(()=> homeView.classList.add("is-entered"));
 }
-applyImmersiveMode("welcome");
+applyImmersiveMode("home");
 updateHomeLockUI();
 updateHomeBadges();
-
 function resetAllProgress(){
   Progress.state = {
     miniSolved: false,
@@ -1982,9 +1979,32 @@ preventDoubleTapZoom($("#spanGrid"));
 const welcomeBtn = document.getElementById("welcomeContinue");
 const welcomeScreen = document.getElementById("welcome-screen");
 
+// Smooth fade/slide transition from Welcome -> Main menu
+const WELCOME_FADE_MS = 320;
+
+try{
+  if(welcomeScreen && !welcomeScreen.classList.contains("hidden")){
+    document.body.classList.add("welcome-active");
+    if(mainRoot) mainRoot.setAttribute("aria-hidden","true");
+  }
+}catch(_){}
+
 if(welcomeBtn && welcomeScreen){
   welcomeBtn.addEventListener("click", ()=>{
-    welcomeScreen.classList.add("hidden");
-    showView("home");
+    // Start exit animation
+    welcomeScreen.classList.add("is-hiding");
+    welcomeScreen.setAttribute("aria-hidden","true");
+
+    // Reveal the main menu underneath (CSS handles the fade-in)
+    try{
+      document.body.classList.remove("welcome-active");
+      if(mainRoot) mainRoot.removeAttribute("aria-hidden");
+    }catch(_){}
+
+    // After animation completes, remove from layout
+    setTimeout(()=>{
+      welcomeScreen.classList.add("hidden");
+      welcomeScreen.classList.remove("is-hiding");
+    }, WELCOME_FADE_MS);
   });
 }

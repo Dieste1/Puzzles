@@ -67,6 +67,16 @@ body{
   padding-bottom:16px;
 }
 
+/* ---------- Welcome -> Main menu transition ---------- */
+#mainRoot{
+  transition: opacity 320ms ease, transform 320ms ease;
+}
+body.welcome-active #mainRoot{
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+}
+
 /* ---------- Smooth transitions between views ---------- */
 .view{
   display:none;
@@ -1581,6 +1591,17 @@ svg.span-svg{
   justify-content: center;
   align-items: center;
   z-index: 1000;
+
+  /* smooth exit */
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: opacity 320ms ease, transform 320ms ease;
+}
+
+#welcome-screen.is-hiding{
+  opacity: 0;
+  transform: translateY(-10px) scale(1.01);
+  pointer-events: none;
 }
 
 #welcome-screen.hidden{
@@ -1786,4 +1807,15 @@ svg.span-svg{
   cursor:pointer;
   display:grid;
   place-items:center;
+}
+
+/* ---------- Reduced motion accessibility ---------- */
+@media (prefers-reduced-motion: reduce){
+  #welcome-screen,
+  #mainRoot,
+  .view{
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
 }
