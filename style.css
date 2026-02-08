@@ -610,6 +610,17 @@ body.welcome-active #mainRoot{
   cursor:pointer;
   -webkit-tap-highlight-color: transparent;
 }
+.conn-subscribe{
+  background:transparent;
+  border:1px solid rgba(255,255,255,.6);
+  color:#fff;
+  padding:8px 12px;
+  border-radius:999px;
+  font-weight:700;
+  white-space:nowrap;
+  cursor:pointer;
+  -webkit-tap-highlight-color: transparent;
+}
 .conn-title{
   text-align:center;
   font-size:20px;
@@ -724,7 +735,7 @@ body.welcome-active #mainRoot{
   font-size:38px;
   font-weight:900;
   letter-spacing:-.2px;
-
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
 }
 .wordle-sub{
   margin:0 0 18px;
@@ -732,7 +743,7 @@ body.welcome-active #mainRoot{
   line-height:1.25;
   max-width: 320px;
   color: rgba(0,0,0,.72);
-
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
 }
 .wordle-footer{
   margin-top:22px;
@@ -805,6 +816,17 @@ body.welcome-active #mainRoot{
   color:#111;
   font-size:18px;
   opacity:.9;
+  cursor:pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.wordle-subscribe{
+  background:transparent;
+  border:1px solid rgba(0,0,0,.35);
+  color:#111;
+  padding:8px 12px;
+  border-radius:999px;
+  font-weight:700;
+  white-space:nowrap;
   cursor:pointer;
   -webkit-tap-highlight-color: transparent;
 }
@@ -980,7 +1002,7 @@ body.welcome-active #mainRoot{
   font-size:38px;
   font-weight:900;
   letter-spacing:-.2px;
-
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
 }
 .mini-sub{
   margin:0 0 18px;
@@ -988,7 +1010,7 @@ body.welcome-active #mainRoot{
   line-height:1.25;
   max-width: 320px;
   color: rgba(0,0,0,.72);
-
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
 }
 .mini-footer{
   margin-top:18px;
@@ -1796,4 +1818,35 @@ svg.span-svg{
     animation: none !important;
     transform: none !important;
   }
+}
+
+
+
+/* ===== FINAL REVEAL — FULL PINK BACKGROUND ===== */
+#view-reveal{
+  min-height: 100vh;
+  background: var(--pink);
+}
+
+#view-reveal .card{
+  background: transparent;
+  min-height: 100vh;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+  color: #000;
+}
+
+#view-reveal .help{
+  color: rgba(0,0,0,.7);
+}
+
+#view-reveal .primary{
+  background: #111;
+  color: #fff;
+}
+
+#view-reveal #revealContent{
+  background: transparent;
+  padding: 0;
 }

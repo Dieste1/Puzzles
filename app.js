@@ -37,20 +37,9 @@ strands: {
   ],
 
   finalRevealHtml: `
-    <div class="reveal-gift" id="giftWrap">
-      <div class="gift-left">
-        <div class="gift-emoji" aria-hidden="true">🎁</div>
-        <div>
-          <div class="gift-title">A little surprise</div>
-          <div class="gift-sub">Tap to unwrap</div>
-        </div>
-      </div>
-      <button class="gift-cta" type="button" id="giftUnwrapBtn">Unwrap</button>
-    </div>
-
     <div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
 
-    <div class="reveal-inner" id="revealInner">
+    <div class="reveal-inner is-visible" id="revealInner">
       <h3 class="reveal-anim" style="margin:0 0 10px;">❤️ A Little Something</h3>
 
       <img
@@ -1865,7 +1854,6 @@ if(spanClear){
 /* =========================
    FINAL REVEAL — unwrap + confetti + lightbox
    ========================= */
-let __revealHasUnwrapped = false;
 
 function runConfetti(layerEl){
   if(!layerEl) return;
@@ -1887,14 +1875,17 @@ function runConfetti(layerEl){
 function initFinalReveal(rootEl){
   if(!rootEl) return;
 
-  const gift = rootEl.querySelector("#giftWrap");
-  const btn  = rootEl.querySelector("#giftUnwrapBtn");
   const inner = rootEl.querySelector("#revealInner");
   const confettiLayer = rootEl.querySelector("#confettiLayer");
 
   const photo = rootEl.querySelector("#revealPhoto");
   const lightbox = rootEl.querySelector("#revealLightbox");
   const lbClose = rootEl.querySelector("#lbClose");
+
+  // Show reveal immediately (no extra "unwrap" step)
+  if(inner) inner.classList.add("is-visible");
+  runConfetti(confettiLayer);
+  haptic(18);
 
   function openLightbox(){
     if(!lightbox) return;
@@ -1918,33 +1909,8 @@ function initFinalReveal(rootEl){
     });
   }
   if(lbClose){ lbClose.addEventListener("click", closeLightbox); }
-
-  function unwrap(){
-    if(__revealHasUnwrapped) return;
-    __revealHasUnwrapped = true;
-
-    if(gift){ gift.classList.add("is-unwrapping"); }
-    haptic(14);
-
-    setTimeout(()=>{
-      if(gift) gift.style.display = "none";
-      if(inner) inner.classList.add("is-visible");
-      runConfetti(confettiLayer);
-      try{
-        if(typeof navigator !== "undefined" && navigator.vibrate){
-          navigator.vibrate([12, 18, 12]);
-        }
-      }catch(_){}
-      haptic(18);
-    }, 320);
-  }
-
-  if(btn) btn.addEventListener("click", (e)=>{ e.preventDefault(); unwrap(); });
-  if(gift) gift.addEventListener("click", (e)=>{
-    if(e.target === btn) return;
-    unwrap();
-  });
 }
+
 
 /* =========================
    FINAL REVEAL
