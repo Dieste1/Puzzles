@@ -36,24 +36,49 @@ strands: {
   ],
 
   finalRevealHtml: `
-    <h3 style="margin:0 0 10px;">❤️ A Little Something</h3>
+    <div class="reveal-gift" id="giftWrap">
+      <div class="gift-left">
+        <div class="gift-emoji" aria-hidden="true">🎁</div>
+        <div>
+          <div class="gift-title">A little surprise</div>
+          <div class="gift-sub">Tap to unwrap</div>
+        </div>
+      </div>
+      <button class="gift-cta" type="button" id="giftUnwrapBtn">Unwrap</button>
+    </div>
 
-    <img
-      src="images/42772e2f-4932-40ba-ac46-3ccc095850e8.png"
-      alt="Keychain"
-      style="
-        width:100%;
-        max-width:260px;
-        margin:16px auto;
-        display:block;
-        border-radius:14px;
-        box-shadow:0 14px 35px rgba(0,0,0,.35);
-      "
-    />
+    <div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
 
-    <p style="margin-top:14px;">
-      Something small — but it means a lot 💚
-    </p>
+    <div class="reveal-inner" id="revealInner">
+      <h3 class="reveal-anim" style="margin:0 0 10px;">❤️ A Little Something</h3>
+
+      <img
+        class="reveal-anim is-delay-1"
+        id="revealPhoto"
+        src="images/42772e2f-4932-40ba-ac46-3ccc095850e8.png"
+        alt="Keychain"
+        style="
+          width:100%;
+          max-width:260px;
+          margin:16px auto;
+          display:block;
+          border-radius:14px;
+          box-shadow:0 14px 35px rgba(0,0,0,.35);
+          cursor:pointer;
+        "
+      />
+
+      <p class="reveal-anim is-delay-2" style="margin-top:14px;">
+        Something small — but it means a lot 💚
+      </p>
+
+      <div class="reveal-lightbox" id="revealLightbox" aria-hidden="true">
+        <div class="lb-card" role="dialog" aria-label="Photo">
+          <button class="lb-close" type="button" id="lbClose" aria-label="Close">✕</button>
+          <img src="images/42772e2f-4932-40ba-ac46-3ccc095850e8.png" alt="Keychain photo large"/>
+        </div>
+      </div>
+    </div>
   `,
 
   mini: {
@@ -1837,6 +1862,90 @@ if(spanClear){
 
 
 /* =========================
+   FINAL REVEAL — unwrap + confetti + lightbox
+   ========================= */
+let __revealHasUnwrapped = false;
+
+function runConfetti(layerEl){
+  if(!layerEl) return;
+  layerEl.innerHTML = "";
+  const pieces = 26;
+  for(let i=0;i<pieces;i++){
+    const p = document.createElement("div");
+    p.className = "confetti";
+    p.style.left = `${Math.random()*100}%`;
+    p.style.setProperty("--delay", `${Math.floor(Math.random()*120)}ms`);
+    p.style.setProperty("--dur", `${820 + Math.floor(Math.random()*380)}ms`);
+    const colors = ["#f9df6d","#a0c35a","#b0c4ef","#ba81c5","#ffffff"];
+    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    layerEl.appendChild(p);
+  }
+  setTimeout(()=>{ layerEl.innerHTML=""; }, 1300);
+}
+
+function initFinalReveal(rootEl){
+  if(!rootEl) return;
+
+  const gift = rootEl.querySelector("#giftWrap");
+  const btn  = rootEl.querySelector("#giftUnwrapBtn");
+  const inner = rootEl.querySelector("#revealInner");
+  const confettiLayer = rootEl.querySelector("#confettiLayer");
+
+  const photo = rootEl.querySelector("#revealPhoto");
+  const lightbox = rootEl.querySelector("#revealLightbox");
+  const lbClose = rootEl.querySelector("#lbClose");
+
+  function openLightbox(){
+    if(!lightbox) return;
+    lightbox.classList.add("is-open");
+    lightbox.setAttribute("aria-hidden","false");
+    try{ document.body.style.overflow = "hidden"; }catch(_){}
+    haptic(6);
+  }
+  function closeLightbox(){
+    if(!lightbox) return;
+    lightbox.classList.remove("is-open");
+    lightbox.setAttribute("aria-hidden","true");
+    try{ document.body.style.overflow = ""; }catch(_){}
+    haptic(6);
+  }
+
+  if(photo){ photo.addEventListener("click", openLightbox); }
+  if(lightbox){
+    lightbox.addEventListener("click", (e)=>{
+      if(e.target === lightbox) closeLightbox();
+    });
+  }
+  if(lbClose){ lbClose.addEventListener("click", closeLightbox); }
+
+  function unwrap(){
+    if(__revealHasUnwrapped) return;
+    __revealHasUnwrapped = true;
+
+    if(gift){ gift.classList.add("is-unwrapping"); }
+    haptic(14);
+
+    setTimeout(()=>{
+      if(gift) gift.style.display = "none";
+      if(inner) inner.classList.add("is-visible");
+      runConfetti(confettiLayer);
+      try{
+        if(typeof navigator !== "undefined" && navigator.vibrate){
+          navigator.vibrate([12, 18, 12]);
+        }
+      }catch(_){}
+      haptic(18);
+    }, 320);
+  }
+
+  if(btn) btn.addEventListener("click", (e)=>{ e.preventDefault(); unwrap(); });
+  if(gift) gift.addEventListener("click", (e)=>{
+    if(e.target === btn) return;
+    unwrap();
+  });
+}
+
+/* =========================
    FINAL REVEAL
    ========================= */
 const revealBtn = $("#revealBtn");
@@ -1851,7 +1960,8 @@ if(revealBtn){
     if(!el) return;
     el.innerHTML = CONFIG.finalRevealHtml;
     el.classList.remove("hidden");
-    haptic(20);
+        initFinalReveal(el);
+haptic(20);
   });
 }
 
