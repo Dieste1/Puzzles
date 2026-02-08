@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Aliego’s Puzzle Pack</title>
+
+  <link rel="stylesheet" href="style.css" />
+  <meta name="theme-color" content="#2b2b2b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+
+<body>
+
+  <!-- WELCOME SCREEN -->
+  <div id="welcome-screen">
+    <h2 class="welcome-title">Welcome to Aliego's NYT Games</h2>
+    <p class="welcome-sub">A little puzzle pack made with love 💖</p>
+    <button class="welcome-btn" id="welcomeContinue">Continue</button>
+  </div>
+
+    <!-- if you want a title in the main menu -->
+  <!-- 
+   <header class="top-header" id="topHeader"> 
+      <h1 id="siteTitle">NYT Aliego's <br/>Edition</h1> 
+    </header> 
+  -->
+
+  <main class="main" id="mainRoot">
+
+
+    <!-- WELCOME -->
+    <section class="view" id="view-welcome">
+      <div class="welcome-wrap">
+        <div class="welcome-card">
+          <h2 class="welcome-title">Welcome to Aliego’s NYT Games</h2>
+          <p class="welcome-sub">A little puzzle pack made with love 💝</p>
+          <button class="pill-btn" type="button" data-goto="home" id="welcomeContinue">Continue</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOME -->
+    <section class="view is-active" id="view-home">
+      <div class="feed">
+
+        <div class="game-card mint" data-goto="strands-intro" role="button" tabindex="0" aria-label="Open Strands">
+          <h2>Strands</h2>
+          <p>Find hidden words and uncover the theme.</p>
+          <div class="meta">
+            <span>Saturday, Feb 14</span>
+            <span>For Alexia Castillo</span>
+          </div>
+        </div>
+
+        <div class="game-card gray" data-goto="wordle-intro" role="button" tabindex="0" aria-label="Open Wordle">
+          <h2>Wordle</h2>
+          <p>Guess your way to the correct word.</p>
+          <div class="meta">
+            <span>Saturday, Feb 14</span>
+            <span>For Alexia Castillo</span>
+          </div>
+        </div>
+
+        <div class="game-card purple" data-goto="connections-intro" role="button" tabindex="0" aria-label="Open Connections">
+          <h2>Connections</h2>
+          <p>Group words that share a common thread.</p>
+          <div class="meta">
+            <span>Saturday, Feb 14</span>
+            <span>For Alexia Castillo</span>
+          </div>
+        </div>
+
+        <div class="game-card blue" data-goto="mini-intro" role="button" tabindex="0" aria-label="Open The Mini">
+          <h2>The Mini</h2>
+          <p>Solve the puzzle in seconds.</p>
+          <div class="meta">
+            <span>Saturday, Feb 14</span>
+            <span>For Alexia Castillo</span>
+          </div>
+        </div>
+
+        <!-- FINAL REVEAL CARD (locked styling; JS still enforces lock) -->
+        <div class="game-card pink is-locked" data-goto="reveal" role="button" tabindex="0" aria-label="Open Final Reveal">
+          <div class="locked-badge" aria-hidden="true">🔒</div>
+          <h2>Final Reveal</h2>
+          <p>A message just for you.</p>
+          <div class="meta">
+            <span>Locked</span>
+            <span>💝</span>
+          </div>
+          <div class="locked-overlay" aria-hidden="true"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- MINI INTRO -->
+    <section class="view" id="view-mini-intro">
+      <div class="mini-intro">
+        <div class="intro-top">
+          <button class="icon-btn light" type="button" data-goto="home" aria-label="Back">←</button>
+        </div>
+
+        <div class="intro-center">
+          <div class="mini-logo" aria-hidden="true">
+            <div class="mini-logo-grid">
+              <span class="ml-cell ml-black"></span><span class="ml-cell"></span>
+              <span class="ml-cell"></span><span class="ml-cell"></span>
+            </div>
+          </div>
+
+          <h2 class="mini-title">The Mini Crossword</h2>
+          <p class="mini-sub">How quickly can you<br/>solve the clues?</p>
+
+          <button class="pill-btn" type="button" id="miniPlay">Play</button>
+
+          <div class="mini-footer">
+            <div class="mini-date">February 14, 2026</div>
+            <div class="mini-byline">By Diego Steiner</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MINI GAME -->
+    <section class="view" id="view-mini">
+      <div class="mini-game">
+        <div class="mini-topbar">
+          <button class="mini-back" type="button" data-goto="mini-intro" aria-label="Back">←</button>
+
+          <div class="mini-timer" id="miniTimer">0:00</div>
+
+          <div class="mini-icons">
+            <button class="mini-icon" type="button" aria-label="List">≡</button>
+            <button class="mini-icon" type="button" aria-label="Pencil">✎</button>
+            <button class="mini-icon is-active" id="miniTarget" type="button" aria-label="Target">⦿</button>
+            <button class="mini-icon" type="button" aria-label="Info">i</button>
+            <button class="mini-icon" type="button" aria-label="Settings">⚙︎</button>
+          </div>
+        </div>
+
+        <div id="miniCrossword" class="mini-crossword" aria-label="Mini Crossword Grid"></div>
+
+        <!-- hidden input for mobile typing -->
+        <input
+          id="miniHiddenInput"
+          class="mini-hidden-input"
+          maxlength="1"
+          autocomplete="off"
+          autocapitalize="characters"
+          spellcheck="false"
+          inputmode="text"
+        />
+
+        <div class="mini-cluebar" aria-label="Mini clue">
+          <button class="mini-clue-btn" type="button" id="miniPrevClue" aria-label="Previous clue">‹</button>
+          <div class="mini-clue-text" id="miniClueText">1 ACROSS — ___ of a kind</div>
+          <button class="mini-clue-btn" type="button" id="miniNextClue" aria-label="Next clue">›</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- WORDLE INTRO -->
+    <section class="view" id="view-wordle-intro">
+      <div class="wordle-intro">
+        <div class="intro-top">
+          <button class="icon-btn light" type="button" data-goto="home" aria-label="Back">←</button>
+        </div>
+
+        <div class="intro-center">
+          <div class="wordle-logo" aria-hidden="true">
+            <div class="w-row">
+              <span class="w-cell"></span><span class="w-cell"></span><span class="w-cell"></span>
+            </div>
+            <div class="w-row">
+              <span class="w-cell"></span><span class="w-cell w-yellow"></span><span class="w-cell w-green"></span>
+            </div>
+            <div class="w-row">
+              <span class="w-cell w-green"></span><span class="w-cell w-green"></span><span class="w-cell w-green"></span>
+            </div>
+          </div>
+
+          <h2 class="wordle-title">Wordle</h2>
+          <p class="wordle-sub">Get 6 chances to guess a 5-letter<br/>word.</p>
+
+          <button class="pill-btn" type="button" id="wordlePlay">Play</button>
+          <button class="outline-btn" type="button">Subscribe</button>
+
+          <div class="wordle-footer">
+            <div class="intro-date">February 14, 2026</div>
+            <div class="intro-small">No. 1676</div>
+            <div class="intro-small">By Diego Steiner</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WORDLE GAME -->
+    <section class="view" id="view-wordle">
+      <div class="wordle-game">
+        <div class="wordle-topbar">
+          <button class="wordle-back" type="button" data-goto="wordle-intro" aria-label="Back">←</button>
+
+          <div class="wordle-icons">
+            <button class="wordle-icon" type="button" aria-label="Hint">💡</button>
+            <button class="wordle-icon" type="button" aria-label="Stats">📊</button>
+            <button class="wordle-icon" type="button" aria-label="Help">?</button>
+            <button class="wordle-icon" type="button" aria-label="Settings">⚙︎</button>
+          </div>
+
+          <button class="wordle-subscribe" type="button">Subscribe to Games</button>
+        </div>
+
+        <div id="wordleBoard" class="wordle-board nyt" aria-label="Wordle board"></div>
+
+        <p id="wordleMsg" class="wordle-msg" aria-live="polite"></p>
+
+        <input
+          id="wordleHiddenInput"
+          class="wordle-hidden-input"
+          maxlength="5"
+          autocomplete="off"
+          autocapitalize="characters"
+          spellcheck="false"
+          inputmode="text"
+        />
+
+        <div id="wordleKeyboard" class="wordle-kb" aria-label="Keyboard"></div>
+      </div>
+    </section>
+
+    <!-- CONNECTIONS INTRO -->
+    <section class="view" id="view-connections-intro">
+      <div class="connections-intro">
+        <div class="intro-top">
+          <button class="icon-btn light" type="button" data-goto="home" aria-label="Back">←</button>
+        </div>
+
+        <div class="intro-center">
+          <div class="conn-mark" aria-hidden="true">▦</div>
+          <h2 class="intro-title">Connections</h2>
+          <p class="intro-sub">Create four groups<br/>of four.</p>
+
+          <button class="pill-btn" type="button" id="connectionsPlay">Play</button>
+          <button class="outline-btn" type="button">Subscribe</button>
+
+          <div class="intro-footer">
+            <div class="intro-date">February 14, 2026</div>
+            <div class="intro-small">No. 953</div>
+            <div class="intro-small">By Diego Steiner</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONNECTIONS GAME -->
+    <section class="view" id="view-connections">
+      <div class="connections-game">
+        <div class="conn-topbar">
+          <button class="conn-back" type="button" data-goto="connections-intro" aria-label="Back">←</button>
+
+          <div class="conn-icons">
+            <button class="conn-icon" type="button" aria-label="Hint">💡</button>
+            <button class="conn-icon" type="button" aria-label="Stats">📊</button>
+            <button class="conn-icon" type="button" aria-label="Help">?</button>
+            <button class="conn-icon" type="button" aria-label="Settings">⚙︎</button>
+          </div>
+
+          <button class="conn-subscribe" type="button">Subscribe to Games</button>
+        </div>
+
+        <div class="conn-title">Create four groups of four!</div>
+
+        <!-- app.js will inject solved groups above the grid -->
+        <div id="connGrid" class="conn-grid nyt" aria-label="Connections word grid"></div>
+
+        <div class="conn-status">
+          <div class="mistakes">
+            <span>Mistakes Remaining:</span>
+            <span class="dots" aria-hidden="true">
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </span>
+          </div>
+        </div>
+
+        <div class="conn-actions">
+          <button id="connShuffle" type="button" class="conn-action">Shuffle</button>
+          <button id="connClear" type="button" class="conn-action secondary">Deselect All</button>
+          <button id="connSubmit" type="button" class="conn-action secondary">Submit</button>
+        </div>
+
+        <p id="connMsg" class="conn-msg" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <!-- STRANDS INTRO -->
+    <section class="view" id="view-strands-intro">
+      <div class="strands-intro">
+        <div class="intro-top">
+          <button class="icon-btn light" type="button" data-goto="home" aria-label="Back">←</button>
+        </div>
+
+        <div class="intro-center">
+          <div class="strands-mark" aria-hidden="true">
+            <span class="mark-a">N</span><span class="mark-b">N</span>
+          </div>
+          <h2 class="intro-title">Strands</h2>
+          <p class="intro-sub">Find hidden words and uncover the day’s theme.</p>
+
+          <button class="pill-btn" type="button" id="strandsPlay">Play</button>
+
+          <div class="intro-footer">
+            <div class="intro-date">February 14, 2026</div>
+            <div class="intro-small">No. 687</div>
+            <div class="intro-small">By Diego Steiner</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STRANDS GAME -->
+    <section class="view" id="view-strands">
+      <div class="card light-card">
+        <div class="top-row light-top">
+          <button class="icon-btn" type="button" data-goto="strands-intro" aria-label="Back">←</button>
+          <div class="spacer"></div>
+          <div class="top-icons">
+            <button class="tiny-btn" type="button">?</button>
+            <button class="tiny-btn" type="button">⚙︎</button>
+          </div>
+        </div>
+
+        <div class="banner">
+          <div class="banner-top">TODAY’S THEME</div>
+          <div class="banner-title" id="spanThemeTitle">Our Love Story</div>
+        </div>
+
+        <p class="help light-help" id="spanThemeHelp"></p>
+
+        <div class="span-current" id="spanCurrent" aria-live="polite"></div>
+
+        <div id="spanGrid" class="span-grid nyt" aria-label="Strands grid"></div>
+
+        <div class="strands-bottom">
+          <button class="hint-btn" id="spanClear" type="button">Clear</button>
+          <div class="progress" id="spanProgress">0 of 7 theme words found.</div>
+        </div>
+
+        <p id="spanMsg" class="msg light-msg" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <!-- FINAL REVEAL -->
+    <section class="view" id="view-reveal">
+      <div class="card">
+        <div class="top-row">
+          <button class="icon-btn" type="button" data-goto="home" aria-label="Back">←</button>
+          <div class="spacer"></div>
+        </div>
+
+        <h2 class="h1">Final Reveal 🎁</h2>
+        <p class="help">This unlocks after you solve all four puzzles.</p>
+
+        <button id="revealBtn" type="button" class="primary">Open</button>
+        <div id="revealContent" class="reveal-content hidden"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
+

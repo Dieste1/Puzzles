@@ -1,0 +1,1789 @@
+:root{
+  --app-bg:#2b2b2b;
+  --chrome:#1c1c1c;
+  --text:#ffffff;
+  --muted:rgba(255,255,255,.72);
+
+  /* NYT-ish card colors */
+  --yellow:#fde02f;
+  --gray:#e5e5e5;
+  --purple:#bdb5ff;
+  --mint:#bfe8e1;
+  --pink:#f6b1d8;
+
+  --black:#111;
+  --shadow: 0 14px 35px rgba(0,0,0,.28);
+
+  --conn-bg:#0f0f10;
+  --conn-tile:#d6d3c7;
+
+  /* Wordle colors */
+  --w-correct:#6aaa64;
+  --w-present:#c9b458;
+  --w-absent:#787c7e;
+  --w-border:#d3d6da;
+  --w-bg:#ffffff;
+  --w-text:#111;
+  --w-kb:#d3d6da;
+
+  /* Mini theme */
+  --mini-blue:#9fc6ff;
+  --mini-bar:#9fd3ff;
+  --mini-ink:#0f2a55;
+  --mini-grid:#ffffff;
+  --mini-line: rgba(15, 42, 85, .35);
+  --mini-active:#ffdf33;
+  --mini-word:#bfe3ff;
+
+  /* ---------- Strands path colors (NEW) ---------- */
+  --span-preview: rgba(0,0,0,.14);
+  --span-preview-stroke: rgba(0,0,0,.18);
+
+  --span-theme: rgba(86,183,255,.40);         /* blue-ish fill */
+  --span-theme-stroke: rgba(86,183,255,.46);  /* blue-ish stroke */
+
+  --span-spanagram: rgba(241,196,15,.52);     /* yellow fill */
+  --span-spanagram-stroke: rgba(241,196,15,.58); /* yellow stroke */
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--app-bg);
+  color:var(--text);
+  font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
+}
+
+.top-header{
+  text-align:center;
+  padding:14px 0 10px;
+  font-size:22px;
+  font-weight:800;
+  letter-spacing:.2px;
+}
+
+.main{
+  padding:16px;
+  padding-bottom:16px;
+}
+
+/* ---------- Smooth transitions between views ---------- */
+.view{
+  display:none;
+  opacity:0;
+  transform: translateY(8px);
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+.view.is-active{ display:block; }
+.view.is-active.is-entered{
+  opacity:1;
+  transform: translateY(0);
+}
+
+/* full-bleed pages (hide header padding look) */
+.main.is-immersive{
+  padding:0;
+  }
+#topHeader.is-hidden{ display:none; }
+
+/* ---------- Home feed ---------- */
+.feed{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+.game-card{
+  border-radius:22px;
+  padding:18px;
+  box-shadow: var(--shadow);
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+  user-select:none;
+  -webkit-tap-highlight-color: transparent;
+}
+.game-card h2{
+  margin:0 0 6px;
+  font-size:30px;
+  letter-spacing:-.2px;
+}
+.game-card p{
+  margin:0 0 14px;
+  font-size:18px;
+  color: rgba(0,0,0,.75);
+}
+.meta{
+  display:flex;
+  justify-content:space-between;
+  font-weight:700;
+  color: rgba(0,0,0,.75);
+}
+
+/* NEW: "Completed ✓" badge injected by JS */
+.home-badge{
+  position:absolute;
+  top:12px;
+  right:12px;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  border-radius:999px;
+  background: rgba(255,255,255,.72);
+  color:#000;
+  font-weight:900;
+  font-size:13px;
+  box-shadow: 0 10px 20px rgba(0,0,0,.18);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Card colors */
+.yellow { background:var(--yellow); color:#000; }
+.gray   { background:var(--gray); color:#000; }
+.purple { background:var(--purple); color:#000; }
+.mint   { background:var(--mint); color:#000; }
+.pink   { background:var(--pink); color:#000; }
+.blue   { background:var(--mini-blue); color:#000;}
+
+/* ---------- Generic card pages ---------- */
+.card{
+  background:#1f1f1f;
+  border-radius:18px;
+  padding:18px;
+  box-shadow: var(--shadow);
+}
+.h1{margin:8px 0 10px;font-size:28px}
+.help{color:var(--muted);margin:0 0 14px}
+.msg{color:var(--muted)}
+
+/* Top row with back arrow */
+.top-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.spacer{flex:1}
+.icon-btn{
+  border:none;
+  background:transparent;
+  color:#fff;
+  font-size:22px;
+  padding:8px 6px;
+  cursor:pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.icon-btn.light{ color:#000; }
+
+/* Inputs/buttons */
+.row{display:flex;gap:10px;align-items:center}
+.text{
+  flex:1;
+  padding:12px 12px;
+  border-radius:12px;
+  border:none;
+  font-size:16px;
+  background:#2a2a2a;
+  color:#fff;
+}
+.primary{
+  background:#111;
+  color:#fff;
+  border:none;
+  padding:12px 18px;
+  border-radius:999px;
+  font-weight:800;
+  cursor:pointer;
+}
+.ghost{
+  background:transparent;
+  border:1px solid rgba(255,255,255,.25);
+  color:#fff;
+  padding:10px 14px;
+  border-radius:12px;
+}
+
+/* ---------- Bottom nav ---------- */
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:var(--chrome);
+  display:flex;
+  justify-content:space-around;
+  padding:12px 8px;
+  box-shadow: 0 -10px 30px rgba(0,0,0,.25);
+  z-index: 20;
+}
+.bottom-nav button{
+  background:none;
+  border:none;
+  color:rgba(255,255,255,.55);
+  font-size:22px;
+  padding:8px 10px;
+  -webkit-tap-highlight-color: transparent;
+}
+.bottom-nav button.active{ color:#fff; }
+
+/* ---------- Shared intro blocks ---------- */
+.intro-top{ display:flex; align-items:center; }
+.intro-center{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding: 18px 10px;
+}
+.pill-btn{
+  background:#111;
+  color:#fff;
+  border:none;
+  border-radius:999px;
+  padding:14px 44px;
+  font-weight:900;
+  font-size:18px;
+  cursor:pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.intro-title{
+  margin:10px 0 6px;
+  font-size:34px;
+  font-weight:900;
+  letter-spacing:-.2px;
+}
+.intro-sub{
+  margin:0 0 18px;
+  font-size:22px;
+  line-height:1.25;
+  max-width: 300px;
+  color: rgba(0,0,0,.72);
+}
+.intro-footer{
+  margin-top:22px;
+  color: rgba(0,0,0,.72);
+}
+.intro-date{ font-weight:900; font-size:18px; }
+.intro-small{ font-size:14px; margin-top:4px; }
+
+/* ---------- Strands intro ---------- */
+.strands-intro{  min-height:100vh;
+  background: var(--mint);
+  color:#000;
+  border-radius:0;
+  margin:0;
+  padding: 14px 16px 18px;
+  box-shadow:none;
+  display:flex;
+  flex-direction:column;
+}
+.strands-mark{
+  width:72px;height:72px;
+  border-radius:18px;
+  display:grid;
+  place-items:center;
+  margin-bottom:10px;
+  font-weight:900;
+  position:relative;
+}
+.strands-mark .mark-a{
+  position:absolute;
+  left:22px;
+  top:16px;
+  font-size:42px;
+  color:#56b7ff;
+  transform: rotate(-10deg);
+}
+.strands-mark .mark-b{
+  position:absolute;
+  left:34px;
+  top:16px;
+  font-size:42px;
+  color:#f1c40f;
+  transform: rotate(10deg);
+}
+
+/* ---------- Strands game look ---------- */
+.light-card{ background:#ffffff; color:#000; }
+.light-top .icon-btn{ color:#000; }
+.light-help{ color: rgba(0,0,0,.62); }
+.light-msg{ color: rgba(0,0,0,.62); }
+
+/* Make the Strands view fill the screen */
+#view-strands{
+  min-height: 100vh;
+}
+
+/* Make the white card stretch to fill the view */
+#view-strands .card.light-card{
+    min-height: 100vh; /* subtract 16px top + 16px bottom margin */
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Push the bottom controls to the bottom of the card */
+#view-strands .strands-bottom{
+  margin-top: auto;   /* instead of margin-top:14px; */
+  padding-top: 10px;  /* keep your spacing */
+}
+
+.top-icons{ display:flex; gap:10px; }
+.tiny-btn{
+  border:1px solid rgba(0,0,0,.2);
+  background:#fff;
+  border-radius:999px;
+  padding:6px 10px;
+  cursor:pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.banner{
+  border:1px solid rgba(0,0,0,.14);
+  border-radius:12px;
+  overflow:hidden;
+  margin:14px 0 10px;
+}
+.banner-top{
+  background:#bfe8e1;
+  text-align:center;
+  font-weight:900;
+  letter-spacing:1px;
+  padding:6px 0;
+}
+.banner-title{
+  text-align:center;
+  font-weight:900;
+  font-size:22px;
+  padding:10px 0;
+}
+
+
+/* ---------- Strands current word (NYT-ish) ---------- */
+.span-current{
+  margin: 6px 0 10px;
+  min-height: 22px;
+  font-size: 20px;
+  text-align:center;
+  font-weight: 600;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgb(0, 0, 0);
+  user-select:none;
+  -webkit-user-select:none;
+}
+
+/* ---------- STRANDS GRID (UPDATED for SVG overlay) ---------- */
+.span-grid.nyt{
+  display:grid;
+  grid-template-columns:repeat(6, 1fr);
+
+  /* tighter spacing so 8 rows fit comfortably */
+  gap:16px;
+
+  padding: 14px 8px 8px;
+  justify-items:center;
+
+  position: relative;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+
+/* letters sit ABOVE the svg bubbles/lines */
+.span-cell{
+  width: 20px;
+  height: 30px;
+  border-radius: 999px;
+  display:grid;
+  place-items:center;
+
+  /* slightly smaller text for 8 rows */
+  font-size: 25px;
+  font-weight: 400;
+
+  color:#000;
+  cursor:pointer;
+
+  position: relative;
+  z-index: 2;
+
+  user-select:none;
+  -webkit-user-select:none;
+}
+
+
+/* old click-select outline (harmless if unused) */
+.span-cell.selected{ outline: 3px solid rgba(0,0,0,.18); border-radius: 999px; }
+
+.strands-bottom{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:14px;
+  padding-top:10px;
+}
+.hint-btn{
+  border:2px solid rgba(0,0,0,.35);
+  background:#fff;
+  border-radius:999px;
+  padding:10px 18px;
+  font-weight:800;
+  cursor:pointer;
+}
+.progress{
+  font-weight:900;
+  color: rgba(0,0,0,.72);
+}
+
+/* ---------- Connections intro (purple) ---------- */
+.connections-intro{  min-height:100vh;
+  background: var(--purple);
+  color:#000;
+  border-radius:0;
+  margin:0;
+  padding: 14px 16px 16px;
+  box-shadow:none;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.conn-mark{
+  width:72px;height:72px;
+  border-radius:18px;
+  display:grid;
+  place-items:center;
+  margin-bottom:10px;
+  font-weight:900;
+  font-size:40px;
+  color:#000;
+}
+.outline-btn{
+  margin-top:10px;
+  background:transparent;
+  border:2px solid rgba(0,0,0,.55);
+  color:#000;
+  border-radius:999px;
+  padding:12px 44px;
+  font-weight:900;
+  font-size:18px;
+  cursor:pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------- Connections game (NYT-ish) ---------- */
+
+/* tighter vertical spacing */
+.conn-grid.nyt {
+  gap: 8px;
+}
+
+.conn-word{
+  min-height: 50px;
+  padding: 9px 6px;
+  font-size: 12.5px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  letter-spacing: .28px;
+}
+
+/* Strong selection feedback */
+.conn-word.selected{
+  outline: 2px solid rgba(255,255,255,.35);
+  opacity: 1;
+}
+
+/* Tighten surrounding spacing so the grid doesn't feel "zoomed" */
+#view-connections .conn-title{
+  margin: 10px 0 8px;
+  font-size: 18px;
+}
+
+#view-connections .conn-status{
+  margin: 6px 0 10px;
+}
+
+#view-connections .conn-actions{
+  margin-top: 4px;
+  gap: 10px;
+}
+
+#view-connections .conn-action{
+  padding: 10px 14px;
+  min-width: 104px;
+}
+
+/* Large iPhone safety trim */
+@media (max-width: 430px){
+  .conn-grid.nyt{ max-width: 420px; gap: 7px; }
+  .conn-word{
+    min-height: 48px;
+    padding: 8px 6px;
+    font-size: 12px;
+  }
+}
+
+
+
+.conn-word{
+  min-height: 56px;
+  padding: 10px 6px;
+  font-size: 13px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  letter-spacing: .3px;
+}
+
+.conn-word.selected{
+  outline: 2px solid rgba(255,255,255,.35);
+  opacity: 1;
+}
+
+/* Extra safety for very tall tiles */
+@media (max-width: 480px){
+  .conn-word{
+    min-height: 52px;
+    padding: 9px 6px;
+    font-size: 12.5px;
+  }
+}
+
+.connections-game{  min-height:100vh;
+  background: var(--conn-bg);
+  color:#fff;
+  border-radius:0;
+  margin:0;
+  padding: 14px 14px 16px;
+  box-shadow:none;
+}
+.conn-topbar{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  justify-content:space-between;
+  padding-bottom:10px;
+  border-bottom: 1px solid rgba(255,255,255,.12);
+}
+.conn-back{
+  background:transparent;
+  border:none;
+  color:#fff;
+  font-size:22px;
+  padding:8px 6px;
+  cursor:pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.conn-icons{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex:1;
+  justify-content:center;
+}
+.conn-icon{
+  background:transparent;
+  border:none;
+  color:#fff;
+  font-size:18px;
+  opacity:.9;
+  cursor:pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.conn-subscribe{
+  background:transparent;
+  border:1px solid rgba(255,255,255,.6);
+  color:#fff;
+  padding:8px 12px;
+  border-radius:999px;
+  font-weight:700;
+  white-space:nowrap;
+  cursor:pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.conn-title{
+  text-align:center;
+  font-size:20px;
+  margin:14px 0 12px;
+  color: rgba(255,255,255,.9);
+}
+.conn-grid.nyt{
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  gap:12px;
+  margin: 10px 0 16px;
+
+  /* Helps mobile taps */
+  touch-action: manipulation;
+}
+.conn-word{
+  border:none;
+  border-radius:14px;
+  padding:18px 10px;
+  font-weight:900;
+  letter-spacing:.3px;
+  background: var(--conn-tile);
+  color:#111;
+  text-transform:uppercase;
+  cursor:pointer;
+  user-select:none;
+  -webkit-tap-highlight-color: transparent;
+}
+.conn-word.selected{
+  outline: 3px solid rgba(255,255,255,.25);
+  opacity:.85;
+}
+.conn-status{
+  display:flex;
+  justify-content:center;
+  margin: 6px 0 14px;
+}
+.mistakes{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  color: rgba(255,255,255,.55);
+  font-weight:700;
+}
+.dots{ display:flex; gap:10px; }
+.dot{
+  width:16px;height:16px;
+  border-radius:999px;
+  background: rgba(255,255,255,.28);
+}
+.conn-actions{
+  display:flex;
+  gap:12px;
+  justify-content:center;
+  margin-top: 6px;
+}
+.conn-action{
+  background:transparent;
+  border:2px solid rgba(255,255,255,.72);
+  color:#fff;
+  border-radius:999px;
+  padding:12px 18px;
+  font-weight:900;
+  min-width: 120px;
+  cursor:pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.conn-action.secondary{
+  border-color: rgba(255,255,255,.28);
+  color: rgba(255,255,255,.55);
+}
+.conn-msg{
+  margin-top:14px;
+  text-align:center;
+  color: rgba(255,255,255,.55);
+}
+
+/* ---------- WORDLE INTRO ---------- */
+.wordle-intro{  min-height:100vh;
+  background: #efefef;
+  color:#000;
+  border-radius:0;
+  margin:0;
+  padding: 14px 16px 16px;
+  box-shadow:none;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.wordle-logo{
+  width:72px;height:72px;
+  border-radius:18px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:6px;
+  margin-bottom:10px;
+}
+.w-row{ display:flex; gap:6px; }
+.w-cell{
+  width:16px;height:16px;
+  border-radius:4px;
+  background:#fff;
+  border: 2px solid rgba(0,0,0,.12);
+}
+.w-cell.w-green{ background: var(--w-correct); border-color: rgba(0,0,0,.08); }
+.w-cell.w-yellow{ background: var(--w-present); border-color: rgba(0,0,0,.08); }
+
+.wordle-title{
+  margin:10px 0 6px;
+  font-size:38px;
+  font-weight:900;
+  letter-spacing:-.2px;
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+}
+.wordle-sub{
+  margin:0 0 18px;
+  font-size:24px;
+  line-height:1.25;
+  max-width: 320px;
+  color: rgba(0,0,0,.72);
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+}
+.wordle-footer{
+  margin-top:22px;
+  color: rgba(0,0,0,.72);
+}
+.wordle-banner{
+  margin-top:auto;
+  background:#fff;
+  border-radius:16px;
+  padding:14px 14px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.12);
+  cursor:pointer;
+}
+.banner-dot{
+  width:28px;height:28px;
+  border-radius:8px;
+  display:grid;
+  place-items:center;
+  background:#ffe46b;
+  font-weight:900;
+}
+.banner-text{ flex:1; }
+.banner-title{ font-weight:900; }
+.banner-sub{ color: rgba(0,0,0,.62); margin-top:3px; }
+.banner-arrow{ font-size:26px; opacity:.5; }
+
+/* ---------- WORDLE GAME ---------- */
+.wordle-game{  min-height:100vh;
+  background: var(--w-bg);
+  color: var(--w-text);
+  border-radius:0;
+  margin:0;
+  padding: 10px 12px 16px;
+  box-shadow:none;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.wordle-topbar{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  justify-content:space-between;
+  padding:8px 2px 10px;
+  border-bottom: 1px solid rgba(0,0,0,.12);
+}
+.wordle-back{
+  background:transparent;
+  border:none;
+  color: #111;
+  font-size:22px;
+  padding:8px 6px;
+  cursor:pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.wordle-icons{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex:1;
+  justify-content:center;
+}
+.wordle-icon{
+  background:transparent;
+  border:none;
+  color:#111;
+  font-size:18px;
+  opacity:.9;
+  cursor:pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.wordle-subscribe{
+  background:transparent;
+  border:1px solid rgba(0,0,0,.35);
+  color:#111;
+  padding:8px 12px;
+  border-radius:999px;
+  font-weight:700;
+  white-space:nowrap;
+  cursor:pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Board spacing: closer to NYT */
+.wordle-board.nyt{
+  display:grid;
+  grid-template-rows:repeat(6, 1fr);
+  gap:8px;
+  margin: 22px 0 12px;
+
+  /* helps mobile */
+  touch-action: manipulation;
+}
+.wordle-row{
+  display:grid;
+  grid-template-columns:repeat(5, 1fr);
+  gap:8px;
+}
+.wordle-tile{
+  width: 65px;
+  height: 65px;
+  border: 2px solid var(--w-border);
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
+  font-size:32px;
+  text-transform:uppercase;
+
+  /* NEW: for flip animation */
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  will-change: transform;
+}
+.wordle-tile.filled{
+  border-color: rgba(0,0,0,.35);
+}
+.wordle-tile.correct{
+  background: var(--w-correct);
+  border-color: var(--w-correct);
+  color:#fff;
+}
+.wordle-tile.present{
+  background: var(--w-present);
+  border-color: var(--w-present);
+  color:#fff;
+}
+.wordle-tile.absent{
+  background: var(--w-absent);
+  border-color: var(--w-absent);
+  color:#fff;
+}
+.wordle-msg{
+  min-height: 22px;
+  margin: 4px 0 10px;
+  color: rgba(0,0,0,.6);
+  font-weight:700;
+}
+.wordle-hidden-input{
+  position:absolute;
+  opacity:0;
+  pointer-events:none;
+  height:0;
+  width:0;
+}
+
+/* ---------- WORDLE FLIP ANIMATION ---------- */
+@keyframes wordleFlip{
+  0%   { transform: rotateX(0deg); }
+  49%  { transform: rotateX(90deg); }
+  50%  { transform: rotateX(90deg); }
+  100% { transform: rotateX(0deg); }
+}
+
+/* JS toggles .flip then adds color class midway */
+.wordle-tile.flip{
+  animation: wordleFlip 380ms ease-in-out forwards;
+}
+
+/* optional: tiny pop after flip */
+@keyframes wordlePop{
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+.wordle-tile.flip-done{
+  animation: wordlePop 140ms ease-out;
+}
+
+/* ---------- WORDLE KEYBOARD (NYT-like fit) ---------- */
+.wordle-kb{
+  width:100%;
+  max-width: 520px;
+  margin-top:auto;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding: 10px 0 0;
+  touch-action: manipulation;
+}
+.kb-row{
+  display:flex;
+  justify-content:center;
+  align-items:stretch;
+  gap:8px;
+  padding: 0 10px;
+}
+.kb-key{
+  border:none;
+  background: var(--w-kb);
+  color:#111;
+  border-radius:10px;
+  height: 58px;
+  font-weight:900;
+  font-size:14px;
+  letter-spacing:.2px;
+  text-transform:uppercase;
+  cursor:pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  flex: 1 1 0px;
+  min-width: 0px;
+  padding: 0;
+}
+.kb-key.wide{
+  flex: 1.5 1 0px;
+}
+.kb-key.correct{ background: var(--w-correct); color:#fff; }
+.kb-key.present{ background: var(--w-present); color:#fff; }
+.kb-key.absent{ background: var(--w-absent); color:#fff; }
+
+@media (max-width: 390px){
+  .kb-row{ gap:6px; padding: 0 8px; }
+  .kb-key{ height:54px; font-size:13px; border-radius:10px; }
+}
+
+/* ---------- MINI INTRO ---------- */
+.mini-intro{  min-height:100vh;
+  background: var(--mini-blue);
+  color:#000;
+  border-radius:0;
+  margin:0;
+  padding: 14px 16px 16px;
+  box-shadow:none;
+  display:flex;
+  flex-direction:column;
+}
+.mini-logo{
+  width:72px;height:72px;
+  border-radius:18px;
+  display:grid;
+  place-items:center;
+  margin-bottom:12px;
+}
+.mini-logo-grid{
+  display:grid;
+  grid-template-columns: repeat(2, 16px);
+  grid-template-rows: repeat(2, 16px);
+  gap:6px;
+}
+.ml-cell{
+  width:16px;height:16px;
+  border-radius:4px;
+  border: 2px solid rgba(0,0,0,.15);
+  background:#fff;
+}
+.ml-black{ background:#111; border-color:#111; }
+
+.mini-title{
+  margin:8px 0 6px;
+  font-size:38px;
+  font-weight:900;
+  letter-spacing:-.2px;
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+}
+.mini-sub{
+  margin:0 0 18px;
+  font-size:24px;
+  line-height:1.25;
+  max-width: 320px;
+  color: rgba(0,0,0,.72);
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+}
+.mini-footer{
+  margin-top:18px;
+  color: rgba(0,0,0,.8);
+}
+.mini-date{
+  font-weight:900;
+  font-size:18px;
+}
+.mini-byline{
+  font-size:16px;
+  margin-top:6px;
+  color: rgba(0,0,0,.75);
+}
+
+/* ---------- MINI GAME ---------- */
+.mini-game{  min-height:100vh;
+background: var(--mini-blue);
+  border-radius:0;
+  margin:0;
+padding: 0;
+padding-bottom: 0; /* clue bar is in-flow under grid */
+  box-shadow:none;
+display:flex;
+flex-direction:column;
+overflow:hidden;
+}
+.mini-topbar{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding: 10px 10px;
+  color: var(--mini-ink);
+}
+.mini-back{
+  background:transparent;
+  border:none;
+  color: var(--mini-ink);
+  font-size:26px;
+  padding:6px 8px;
+  cursor:pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.mini-timer{
+  font-weight:900;
+  font-size:18px;
+  min-width: 64px;
+}
+.mini-icons{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  margin-left:auto;
+}
+.mini-icon{
+  background:transparent;
+  border:none;
+  color: var(--mini-ink);
+  font-weight:900;
+  font-size:18px;
+  padding:8px 8px;
+  border-radius:10px;
+  opacity:.9;
+  cursor:pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.mini-icon.is-active{
+  background: rgba(255,255,255,.45);
+}
+
+.mini-crossword{
+background: var(--mini-grid);
+margin: 8px auto 0;
+border: 2px solid rgba(0,0,0,.65);
+display:grid;
+grid-template-columns: repeat(5, 1fr);
+gap:0;
+
+/* Responsive but capped: fixes iPhone 12 Pro Max oversized grid */
+width: min(92vmin, 340px);
+height: min(92vmin, 340px);
+
+touch-action: manipulation;
+}
+
+.mini-cell{
+position:relative;
+border: 1px solid var(--mini-line);
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:900;
+
+/* lock box sizing so it never "grows" when typing */
+width:100%;
+height:100%;
+
+font-size:32px;
+line-height:1;
+color: #1d4f9a;
+user-select:none;
+}
+.mini-cell.block{
+  background:#111;
+  border-color:#111;
+}
+.mini-cell.active{
+  background: var(--mini-active);
+}
+.mini-cell.word{
+  background: var(--mini-word);
+}
+.mini-num{
+  position:absolute;
+  top:4px;
+  left:6px;
+  font-size:14px;
+  font-weight:900;
+  color: rgba(0,0,0,.7);
+}
+.mini-letter{
+  line-height:1;
+  height:1em;
+}
+
+.mini-hidden-input{
+  position:absolute;
+  opacity:0;
+  pointer-events:none;
+  height:0;
+  width:0;
+}
+
+.mini-cluebar{
+  /* In-flow: sits directly under the grid (between crossword and keyboard) */
+  position: relative;
+  margin: 12px 10px 0;
+  background: var(--mini-bar);
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding: 12px 10px;
+  color: var(--mini-ink);
+  border-radius: 14px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.18);
+}
+.mini-clue-btn{
+  background:transparent;
+  border:none;
+  font-size:28px;
+  font-weight:900;
+  color: var(--mini-ink);
+  padding: 0 8px;
+  cursor:pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.mini-clue-text{
+  flex:1;
+  text-align:left;
+  font-weight:400;
+  font-size:15px;
+}
+
+/* Reveal */
+.reveal-content{
+  margin-top:12px;
+  padding:14px;
+  border-radius:14px;
+  background:#2a2a2a;
+}
+.hidden{display:none}
+
+/* ======================================================================
+   STRANDS OVERLAY (NEW)
+   - SVG circles + connectors that match the NYT “pill path” look
+   - Letters stay above the overlay
+   ====================================================================== */
+svg.span-svg{
+  position:absolute;
+  inset: 0;
+  width:100%;
+  height:100%;
+  z-index: 1;
+  pointer-events:none;
+}
+
+/* base */
+.span-link,
+.span-bubble{
+  transition: opacity 120ms ease, filter 120ms ease;
+}
+
+/* PREVIEW (while dragging) */
+.span-bubble.preview{
+  fill: var(--span-preview);
+  filter: blur(.0px);
+}
+.span-link.preview{
+  stroke: var(--span-preview-stroke);
+}
+
+/* THEME WORD (blue) */
+.span-bubble.theme{
+  fill: var(--span-theme);
+}
+.span-link.theme{
+  stroke: var(--span-theme-stroke);
+}
+
+/* SPANAGRAM (yellow) */
+.span-bubble.spanagram{
+  fill: var(--span-spanagram);
+}
+.span-link.spanagram{
+  stroke: var(--span-spanagram-stroke);
+}
+
+/* Slightly stronger emphasis for locked paths */
+.span-bubble.theme,
+.span-bubble.spanagram{
+  filter: saturate(1.05);
+}
+
+
+/* ======================================================================
+   CONNECTIONS — NYT-style solved bar animation + fixed tier colors (NEW)
+   ====================================================================== */
+
+#connSolved{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin: 12px auto 12px;
+  max-width: 440px;
+}
+
+/* Big colored bar, like NYT */
+.conn-solved-row{
+  border-radius:14px;
+  padding: 16px 14px;
+  color:#111;
+  font-weight:900;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  gap:6px;
+
+  user-select:none;
+  -webkit-user-select:none;
+
+  transform: translateY(2px);
+  opacity: 0;
+  animation: connSolvedPop 220ms ease forwards;
+}
+
+@keyframes connSolvedPop{
+  to{ opacity:1; transform: translateY(0); }
+}
+
+.conn-solved-title{
+  font-size: 18px;
+  letter-spacing:.3px;
+  text-transform: uppercase;
+}
+
+.conn-solved-words{
+  font-size: 14px;
+  letter-spacing:.35px;
+  text-transform: uppercase;
+  font-weight: 900;
+  opacity: .92;
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+
+/* Individual word targets for fly-in */
+.conn-solved-word{
+  opacity: 0;                 /* revealed after fly-in */
+  transform: translateY(2px);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+.conn-solved-word.is-revealed{
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* comma separator */
+.conn-solved-word::after{
+  content: ",";
+  margin-left: 4px;
+}
+.conn-solved-word:last-child::after{
+  content:"";
+  margin:0;
+}
+
+/* Tier colors (NYT-ish) — fixed mapping via CONFIG.connectionsGroups[].tier */
+.conn-tier-0{ background: #f9df6d; } /* yellow */
+.conn-tier-1{ background: #a0c35a; } /* green  */
+.conn-tier-2{ background: #b0c4ef; } /* blue   */
+.conn-tier-3{ background: #ba81c5; } /* purple */
+
+/* Flying clones (animated tiles) */
+.conn-fly{
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  border-radius: 14px;
+  background: var(--conn-tile);
+  color:#111;
+  font-weight:900;
+  text-transform:uppercase;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow: 0 14px 35px rgba(0,0,0,.28);
+  will-change: transform, opacity;
+}
+
+/* While animating, prevent "ghost clicks" */
+#view-connections.is-animating .conn-grid,
+#view-connections.is-animating .conn-actions{
+  pointer-events:none;
+}
+
+/* ======================================================================
+   CONNECTIONS — NYT-style solved bars + word line (NEW)
+   ====================================================================== */
+
+#connSolved{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  margin: 12px auto 12px;
+  max-width: 440px;
+}
+
+/* Big colored bar like NYT */
+.conn-solved-row{
+  border-radius:14px;
+  padding: 16px 14px;
+  color:#111;
+  font-weight:700;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  gap:6px;
+
+  user-select:none;
+  -webkit-user-select:none;
+}
+
+.conn-solved-title{
+  font-size: 18px;
+  letter-spacing:.3px;
+  text-transform: uppercase;
+}
+
+.conn-solved-words{
+  font-size: 12px;
+  letter-spacing:.35px;
+  text-transform: uppercase;
+  font-weight: 600;
+  opacity: .92;
+  display:flex;
+  gap:1px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+
+/* Individual word targets for fly-in */
+.conn-solved-word{
+  opacity: 1;                 /* default visible */
+  transform: none;
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+/* During animation we temporarily hide + reveal */
+.conn-solved-word.is-hidden{
+  opacity: 0;
+  transform: translateY(2px);
+}
+.conn-solved-word.is-revealed{
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* comma separator */
+.conn-solved-word::after{
+  content: ",";
+  margin-left: 4px;
+}
+.conn-solved-word:last-child::after{
+  content:"";
+  margin:0;
+}
+
+/* Tier colors */
+.conn-tier-0{ background: #f9df6d; } /* yellow */
+.conn-tier-1{ background: #a0c35a; } /* green  */
+.conn-tier-2{ background: #b0c4ef; } /* blue   */
+.conn-tier-3{ background: #ba81c5; } /* purple */
+
+/* Flying clones */
+.conn-fly{
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  border-radius: 14px;
+  background: var(--conn-tile);
+  color:#111;
+  font-weight:900;
+  text-transform:uppercase;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow: 0 14px 35px rgba(0,0,0,.28);
+  will-change: transform, opacity;
+}
+
+/* Prevent any visual "tap highlight" on solved bars */
+.conn-solved-row, .conn-solved-row *{
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* While animating, prevent ghost clicks */
+#view-connections.is-animating .conn-grid,
+#view-connections.is-animating .conn-actions{
+  pointer-events:none;
+}
+
+/* ======================================================================
+   CONNECTIONS — NYT-LIKE GRID (CSS-ONLY, PHONE-FIRST)
+   ====================================================================== */
+
+#view-connections .conn-grid.nyt{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+  max-width: 440px;
+  margin: 12px auto 16px;
+}
+
+#view-connections .conn-word{
+  background: var(--conn-tile);
+  border-radius: 14px;
+  min-height: 72px;
+  padding: 14px 10px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* iPhone Pro / Pro Max tuning */
+@media (min-width: 410px){
+  #view-connections .conn-grid.nyt{
+    gap: 14px;
+  }
+  #view-connections .conn-word{
+    min-height: 76px;
+    font-size: 15.5px;
+    padding: 16px 12px;
+  }
+}
+
+/* Smaller phones safety */
+@media (max-width: 380px){
+  #view-connections .conn-grid.nyt{
+    gap: 10px;
+  }
+  #view-connections .conn-word{
+    min-height: 64px;
+    font-size: 14px;
+    padding: 12px 8px;
+  }
+}
+
+/* ======================================================================
+   CONNECTIONS — NYT-LIKE SIZING (CSS-only, iPhone-safe)
+   - Single source of truth for tile sizing
+   - No inline styles from JS
+   ====================================================================== */
+#view-connections .conn-grid.nyt{
+  width: 100%;
+  max-width: 100%;
+  margin: 10px auto 16px;
+
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* Base tile sizing: larger, NYT-like */
+#view-connections .conn-word{
+  min-height: 72px;
+  padding: 14px 10px;
+  font-size: 15px;
+  border-radius: 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  line-height: 1.05;
+  letter-spacing: .28px;
+}
+
+/* iPhone 12 Pro Max class (wide phones) */
+@media (min-width: 410px) and (max-width: 480px){
+  #view-connections .conn-grid.nyt{ gap: 12px; }
+  #view-connections .conn-word{
+    min-height: 76px;
+    padding: 15px 10px;
+    font-size: 13px;
+  }
+}
+
+
+/* ---------- Welcome screen (NEW) ---------- */
+#welcomeContinue{ margin-top: 10px; }
+
+.welcome-wrap{
+  min-height: 100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 16px;
+}
+
+.welcome-card{
+  width: 100%;
+  max-width: 520px;
+  background: var(--pink);
+  color:#000;
+  border-radius:22px;
+  padding: 26px 18px;
+  box-shadow: var(--shadow);
+  text-align:center;
+}
+
+.welcome-title{
+  margin: 0 0 10px;
+  font-size: 34px;
+  font-weight: 900;
+  letter-spacing: -.2px;
+}
+
+.welcome-sub{
+  margin: 0 0 18px;
+  font-size: 18px;
+  color: rgba(0,0,0,.75);
+  line-height: 1.3;
+}
+
+
+/* ===== WELCOME SCREEN (FULL PAGE PINK) ===== */
+#welcome-screen{
+  position: fixed;
+  inset: 0;
+  background: var(--pink);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+#welcome-screen.hidden{
+  display: none;
+}
+
+.welcome-title{
+  font-size: 34px;
+  font-weight: 900;
+  margin-bottom: 8px;
+  color: #000;
+  text-align: center;
+}
+
+.welcome-sub{
+  font-size: 18px;
+  margin-bottom: 24px;
+  color: rgba(0,0,0,.75);
+  text-align: center;
+}
+
+.welcome-btn{
+  background:#111;
+  color:#fff;
+  border:none;
+  padding:14px 36px;
+  border-radius:999px;
+  font-weight:900;
+  font-size:18px;
+  cursor:pointer;
+}
+
+
+
+/* ===== FULL-BLEED PAGES (match welcome screen style) ===== */
+#view-reveal .card{
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+  min-height: 100vh;
+}
+
+/* ======================================================================
+   FIX: Only animate the *new* solved Connections bar
+   - Previously, rebuilds of #connSolved caused ALL rows to replay the pop,
+     which looks like every bar is being "selected".
+   ====================================================================== */
+.conn-solved-row{
+  opacity: 1 !important;
+  transform: none !important;
+  animation: none !important;
+}
+.conn-solved-row.is-pop{
+  opacity: 0 !important;
+  transform: translateY(2px) !important;
+  animation: connSolvedPop 220ms ease forwards !important;
+}
+
+/* ======================================================================
+   CONNECTIONS — Wrong submit feedback (NYT-ish)
+   - Shake only selected tiles on incorrect submit
+   ====================================================================== */
+@keyframes connShake{
+  0%   { transform: translateX(0); }
+  15%  { transform: translateX(-6px); }
+  30%  { transform: translateX(6px); }
+  45%  { transform: translateX(-5px); }
+  60%  { transform: translateX(5px); }
+  75%  { transform: translateX(-3px); }
+  90%  { transform: translateX(3px); }
+  100% { transform: translateX(0); }
+}
+#view-connections .conn-word.shake{
+  animation: connShake 260ms ease-in-out;
+}
+
+/* ======================================================================
+   FINAL REVEAL — Gift unwrap + subtle reveal + confetti + lightbox
+   ====================================================================== */
+
+#revealContent{ position: relative; }
+
+@keyframes revealRise{
+  from{ opacity:0; transform: translateY(10px); }
+  to{ opacity:1; transform: translateY(0); }
+}
+.reveal-anim{
+  opacity: 0;
+  transform: translateY(10px);
+  animation: revealRise 360ms cubic-bezier(.2,.8,.2,1) forwards;
+}
+.reveal-anim.is-delay-1{ animation-delay: 90ms; }
+.reveal-anim.is-delay-2{ animation-delay: 170ms; }
+
+.reveal-gift{
+  border-radius: 16px;
+  padding: 16px 14px;
+  background: #2a2a2a;
+  box-shadow: 0 14px 35px rgba(0,0,0,.22);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  user-select:none;
+  -webkit-tap-highlight-color: transparent;
+}
+.reveal-gift .gift-left{ display:flex; align-items:center; gap: 12px; }
+.reveal-gift .gift-emoji{
+  font-size: 28px;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.06);
+  display:grid;
+  place-items:center;
+}
+.reveal-gift .gift-title{ font-weight: 900; font-size: 16px; margin: 0; }
+.reveal-gift .gift-sub{ margin: 2px 0 0; color: rgba(255,255,255,.70); font-weight: 600; font-size: 13px; }
+.reveal-gift .gift-cta{
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.06);
+  color: #fff;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-weight: 900;
+  cursor:pointer;
+}
+.reveal-gift:active{ transform: scale(.99); }
+
+@keyframes giftUnwrap{
+  0% { transform: scale(1); filter: brightness(1); }
+  55%{ transform: scale(1.02); filter: brightness(1.05); }
+  100%{ transform: scale(.98); opacity: 0; }
+}
+.reveal-gift.is-unwrapping{
+  animation: giftUnwrap 340ms cubic-bezier(.2,.8,.2,1) forwards;
+}
+
+.reveal-inner{ display:none; }
+.reveal-inner.is-visible{ display:block; }
+
+.confetti-layer{
+  position:absolute;
+  inset: 0;
+  pointer-events:none;
+  overflow:hidden;
+}
+.confetti{
+  position:absolute;
+  top: -12px;
+  width: 8px;
+  height: 14px;
+  border-radius: 3px;
+  opacity: .95;
+  animation: confettiFall var(--dur,900ms) ease-in forwards;
+  animation-delay: var(--delay,0ms);
+}
+@keyframes confettiFall{
+  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: translateY(520px) rotate(280deg); opacity: 0; }
+}
+
+.reveal-lightbox{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.62);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding: 16px;
+  z-index: 2000;
+}
+.reveal-lightbox.is-open{ display:flex; }
+.reveal-lightbox .lb-card{
+  position: relative;
+  max-width: 92vw;
+  max-height: 86vh;
+  background: rgba(18,18,18,.95);
+  border-radius: 18px;
+  padding: 12px;
+  box-shadow: 0 22px 60px rgba(0,0,0,.45);
+}
+.reveal-lightbox img{
+  display:block;
+  max-width: 88vw;
+  max-height: 78vh;
+  width: auto;
+  height: auto;
+  border-radius: 14px;
+}
+.reveal-lightbox .lb-close{
+  position:absolute;
+  top: 10px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.16);
+  background: rgba(255,255,255,.06);
+  color:#fff;
+  font-weight: 900;
+  cursor:pointer;
+  display:grid;
+  place-items:center;
+}
