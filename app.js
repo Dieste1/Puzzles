@@ -23,16 +23,17 @@ strands: {
 
   connectionsWords: [
     "JAZZ","MARTINI","CANDLE","DANCE",
-    "MONTREAL","OLDPORT","PLATEAU","MILEEND",
-    "KIND","FUNNY","SMART","WARM",
-    "ALWAYS","TOGETHER","FOREVER","US"
+    "MTL","UPSTATE","THE CITY","ROCKAWAY",
+    "JAZZ NIGHT","SKI TRIP","KARAOKE","TRAVEL",
+    "BASICA","MATA","SUIT","KAW"
   ],
 
   connectionsGroups: [
-    { name: "Date Night Vibes", words: ["JAZZ","MARTINI","CANDLE","DANCE"] },
-    { name: "Montreal Spots",   words: ["MONTREAL","OLDPORT","PLATEAU","MILEEND"] },
-    { name: "You Are…",         words: ["KIND","FUNNY","SMART","WARM"] },
-    { name: "Us Forever",       words: ["ALWAYS","TOGETHER","FOREVER","US"] }
+    { name: "Date Night Vibes",        words: ["JAZZ","MARTINI","CANDLE","DANCE"] },
+    { name: "2025 Trips",              words: ["MTL","UPSTATE","THE CITY","ROCKAWAY"] },
+    { name: "Our Wish list",           words: ["JAZZ NIGHT","SKI TRIP","KARAOKE","TRAVEL"] },
+    { name: "Thing Eca Says ",         words: ["BASICA","MATA","SUIT","KAW"], revealWords: ["BASICAMENTE","MATATE","SUIT YOURSELF","KAWFEE"] }
+
   ],
 
   finalRevealHtml: `
@@ -1191,7 +1192,8 @@ function renderConnSolved(hideLastWords=false){
       name: g.name,
       tier: g.tier,
       animated: g.animated,
-      words: g.words
+      words: g.words,
+      revealWords: g.revealWords
     }))
   });
 
@@ -1214,7 +1216,9 @@ function renderConnSolved(hideLastWords=false){
     const isLast = (idx === connSolvedGroups.length - 1);
     const hideThisGroup = !!(hideLastWords && isLast && g.animated === false);
 
-    g.words.forEach(w=>{
+    const displayWords = (g.animated ? (g.revealWords || g.words) : g.words);
+
+    displayWords.forEach(w=>{
       const span = document.createElement("span");
       span.className = "conn-solved-word";
       span.dataset.word = w;
@@ -1463,7 +1467,7 @@ if(connSubmit){
       setConnectionsAnimating(true);
 
       match.words.forEach(w=> connLockedWords.add(w));
-      connSolvedGroups.push({ name: match.name, words: [...match.words], tier, animated: false });
+      connSolvedGroups.push({ name: match.name, words: [...match.words], revealWords: match.revealWords ? [...match.revealWords] : undefined, tier, animated: false });
 
 // Build solved bars (hide newest group's words so they can fly in)
 renderConnSolved(true);
