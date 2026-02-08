@@ -1852,9 +1852,13 @@ svg.span-svg{
 }
 
 
-/* ===== FINAL REVEAL — FULL-BLEED SAFEGUARD ===== */
-#view-reveal{
-  width: 100%;
-  margin: 0;
-  padding: 0;
+/* ===== STRANDS: prevent grid "dropping" when current word appears ===== */
+#view-strands .span-current{
+  /* Reserve a fixed line so the grid below doesn't shift when the word changes */
+  height: 32px;
+  line-height: 32px;
+  min-height: 32px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

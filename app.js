@@ -241,8 +241,7 @@ const immersiveViews = new Set([
   "mini-intro","mini",
   "wordle-intro","wordle",
   "connections-intro","connections",
-  "strands-intro","strands",
-  "reveal"
+  "strands-intro","strands"
 ]);
 
 
