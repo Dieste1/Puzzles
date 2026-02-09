@@ -338,7 +338,7 @@
       </div>
     </section>
 
-    <!-- FINAL REVEAL -->
+        <!-- FINAL REVEAL -->
     <section class="view" id="view-reveal">
       <div class="card">
         <div class="top-row">
@@ -347,14 +347,19 @@
         </div>
 
         <h2 class="h1">Final Reveal 🎁</h2>
-        <p class="help">This unlocks after you solve all four puzzles.</p>
+        <p class="help">Scratch to reveal your surprise.</p>
 
-        <button id="revealBtn" type="button" class="primary">Open</button>
-        <div id="revealContent" class="reveal-content hidden"></div>
+        <div id="scratchCard" class="scratch-card" aria-label="Scratch to reveal">
+          <div id="scratchUnder" class="scratch-under"></div>
+          <canvas id="scratchCanvas" class="scratch-canvas" aria-hidden="true"></canvas>
+          <div class="scratch-hint" id="scratchHint">Scratch here ✨</div>
+        </div>
+
+        <p id="scratchMsg" class="msg" aria-live="polite"></p>
       </div>
     </section>
 
-  </main>
+</main>
 
   <script src="app.js"></script>
 </body>

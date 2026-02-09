@@ -32,7 +32,7 @@ strands: {
     { name: "Eca's Nicknames",         words: ["FLACA","NONA","GATA","KITTY"] },
     { name: "2025 Trips",              words: ["MTL","UPSTATE","THE CITY","ROCKAWAY"] },
     { name: "Our Wish list",           words: ["JAZZ NIGHT","SKI TRIP","KARAOKE","TRAVEL"] },
-    { name: "Thing Eca Says ",         words: ["BASICA","MATA","SUIT","KAW"], revealWords: ["BASICAMENTE","MATATE","SUIT YOURSELF","KAWFEE"] }
+    { name: "Things Eca Says ",        words: ["BASICA","MATA","SUIT","KAW"], revealWords: ["BASICAMENTE","MATATE","SUIT YOURSELF","KAWFEE"] }
 
   ],
 
@@ -305,6 +305,11 @@ function showView(name){
   if(!views.includes(name)) return;
   if(name === activeView) return;
 
+  // allow scratch card to remount cleanly when navigating away and back
+  if(activeView === "reveal" && name !== "reveal"){
+    resetRevealScratchMount();
+  }
+
   if(name === "reveal" && !canOpenReveal()){
     toast("Finish all 4 puzzles to unlock the final reveal 💝");
     if(activeView !== "home") showView("home");
@@ -324,6 +329,12 @@ function showView(name){
     next.classList.add("is-entered");
 
     activeView = name;
+
+    // Mount scratch card AFTER the view is actually active (prevents missing pointer listeners)
+    if(name === "reveal"){
+      resetRevealScratchMount();
+      requestAnimationFrame(()=> mountRevealScratch());
+    }
 
     const navName =
       (name === "strands") ? "strands-intro" :
@@ -1853,84 +1864,209 @@ if(spanClear){
 
 
 /* =========================
-   FINAL REVEAL — unwrap + confetti + lightbox
+   FINAL REVEAL — SCRATCH CARD (NEW)
+   - No "Open" button: scratch to reveal
+   - Underlay is CONFIG.finalRevealHtml
    ========================= */
+let __scratchMounted = false;
+let __scratchDone = false;
+let __scratchCleanup = null;
 
-function runConfetti(layerEl){
-  if(!layerEl) return;
-  layerEl.innerHTML = "";
-  const pieces = 26;
-  for(let i=0;i<pieces;i++){
-    const p = document.createElement("div");
-    p.className = "confetti";
-    p.style.left = `${Math.random()*100}%`;
-    p.style.setProperty("--delay", `${Math.floor(Math.random()*120)}ms`);
-    p.style.setProperty("--dur", `${820 + Math.floor(Math.random()*380)}ms`);
-    const colors = ["#f9df6d","#a0c35a","#b0c4ef","#ba81c5","#ffffff"];
-    p.style.background = colors[Math.floor(Math.random()*colors.length)];
-    layerEl.appendChild(p);
-  }
-  setTimeout(()=>{ layerEl.innerHTML=""; }, 1300);
-}
+function mountRevealScratch(){
+  if(__scratchMounted) return;
+  if(activeView !== "reveal") return;
 
-function initFinalReveal(rootEl){
-  if(!rootEl) return;
+  const msg = $("#scratchMsg");
 
-  const inner = rootEl.querySelector("#revealInner");
-  const confettiLayer = rootEl.querySelector("#confettiLayer");
-
-  const photo = rootEl.querySelector("#revealPhoto");
-  const lightbox = rootEl.querySelector("#revealLightbox");
-  const lbClose = rootEl.querySelector("#lbClose");
-
-  // Show reveal immediately (no extra "unwrap" step)
-  if(inner) inner.classList.add("is-visible");
-  runConfetti(confettiLayer);
-  haptic(18);
-
-  function openLightbox(){
-    if(!lightbox) return;
-    lightbox.classList.add("is-open");
-    lightbox.setAttribute("aria-hidden","false");
-    try{ document.body.style.overflow = "hidden"; }catch(_){}
-    haptic(6);
-  }
-  function closeLightbox(){
-    if(!lightbox) return;
-    lightbox.classList.remove("is-open");
-    lightbox.setAttribute("aria-hidden","true");
-    try{ document.body.style.overflow = ""; }catch(_){}
-    haptic(6);
+  // If not unlocked, keep the view as "locked"
+  if(!canOpenReveal()){
+    if(msg) msg.textContent = "Finish all 4 puzzles to unlock 💝";
+    return;
   }
 
-  if(photo){ photo.addEventListener("click", openLightbox); }
-  if(lightbox){
-    lightbox.addEventListener("click", (e)=>{
-      if(e.target === lightbox) closeLightbox();
-    });
+  const card = $("#scratchCard");
+  const under = $("#scratchUnder");
+  const canvas = $("#scratchCanvas");
+  const hint = $("#scratchHint");
+
+
+  if(!card || !under || !canvas){
+    return;
   }
-  if(lbClose){ lbClose.addEventListener("click", closeLightbox); }
-}
 
+  // Inject reveal content under the scratch layer
+  under.innerHTML = CONFIG.finalRevealHtml;
 
-/* =========================
-   FINAL REVEAL
-   ========================= */
-const revealBtn = $("#revealBtn");
-if(revealBtn){
-  revealBtn.addEventListener("click", ()=>{
-    if(!canOpenReveal()){
-      toast("Solve all 4 puzzles first 💝");
-      haptic(10);
+  const ctx = canvas.getContext("2d");
+  const dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+
+  // iOS Safari can fire resize events as the address bar collapses/expands.
+  // If we repaint the cover on resize, it "unscratches" everything.
+  // So we only repaint while the user hasn't started scratching yet.
+  let hasScratched = false;
+
+  function paintCover(){
+    const rect = card.getBoundingClientRect();
+    const w = Math.max(1, Math.floor(rect.width));
+    const h = Math.max(1, Math.floor(rect.height));
+
+    canvas.width = Math.floor(w * dpr);
+    canvas.height = Math.floor(h * dpr);
+    canvas.style.width = w + "px";
+    canvas.style.height = h + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    // Paint scratch surface (a soft "silver" layer)
+    ctx.globalCompositeOperation = "source-over";
+    ctx.clearRect(0,0,w,h);
+
+    // base
+    ctx.fillStyle = "#3b3b3b";
+    ctx.fillRect(0,0,w,h);
+
+    // subtle speckle noise so it feels like a scratch ticket
+    for(let i=0;i<220;i++){
+      const x = Math.random()*w;
+      const y = Math.random()*h;
+      const r = 0.6 + Math.random()*1.8;
+      ctx.fillStyle = `rgba(255,255,255,${0.03 + Math.random()*0.06})`;
+      ctx.beginPath();
+      ctx.arc(x,y,r,0,Math.PI*2);
+      ctx.fill();
+    }
+
+    // thin highlight strip
+    ctx.fillStyle = "rgba(255,255,255,.06)";
+    ctx.fillRect(0, 0, w, 38);
+
+    // set erase mode
+    ctx.globalCompositeOperation = "destination-out";
+  }
+
+  paintCover();
+  const onScratchResize = ()=>{
+    // If the user already scratched, don't repaint (it would reset progress).
+    if(__scratchDone) return;
+    if(!hasScratched) paintCover();
+  };
+  const onScratchOrient = ()=> setTimeout(onScratchResize, 150);
+  window.addEventListener("resize", onScratchResize);
+  window.addEventListener("orientationchange", onScratchOrient);
+
+  let drawing = false;
+  let lastPt = null;
+  let brushRadius = 30;
+
+  function posFromEvent(e){
+    const rect = canvas.getBoundingClientRect();
+    return { x: (e.clientX - rect.left), y: (e.clientY - rect.top) };
+  }
+
+  function scratchAt(x, y, radius, last){
+    // "Gradient scratch":
+    // - We erase with a soft radial falloff (not a hard circle)
+    // - The center erases more than the edges
+    // - Multiple passes make it progressively clearer (like real scratching)
+
+    function eraseDot(px, py){
+      const g = ctx.createRadialGradient(px, py, 0, px, py, radius);
+      // alpha here controls how much we erase per pass (destination-out)
+      g.addColorStop(0.0, "rgba(0,0,0,0.55)");
+      g.addColorStop(0.55, "rgba(0,0,0,0.22)");
+      g.addColorStop(1.0, "rgba(0,0,0,0.00)");
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(px, py, radius, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    if(!last){
+      eraseDot(x, y);
       return;
     }
-    const el = $("#revealContent");
-    if(!el) return;
-    el.innerHTML = CONFIG.finalRevealHtml;
-    el.classList.remove("hidden");
-        initFinalReveal(el);
-haptic(20);
-  });
+
+    const dx = x - last.x;
+    const dy = y - last.y;
+    const dist = Math.hypot(dx, dy);
+
+    // Step smaller than radius so the stroke is continuous
+    const step = Math.max(2, radius * 0.45);
+    const n = Math.max(1, Math.ceil(dist / step));
+    for(let i=1;i<=n;i++){
+      const t = i / n;
+      eraseDot(last.x + dx * t, last.y + dy * t);
+    }
+  }
+
+  // NOTE: No auto-reveal, and no reveal button.
+  // The player can scratch as little or as much as they want.
+
+  function onDown(e){
+    if(__scratchDone) return;
+    drawing = true;
+    lastPt = null;
+    hasScratched = true;
+    // Larger brush on touch so it feels effortless
+    brushRadius = (e.pointerType === "touch" || e.pointerType === "pen") ? 44 : 32;
+    canvas.setPointerCapture?.(e.pointerId);
+    e.preventDefault();
+    if(hint) hint.style.opacity = "0";
+    const p = posFromEvent(e);
+    scratchAt(p.x, p.y, brushRadius, null);
+    lastPt = p;
+  }
+
+  function onMove(e){
+    if(!drawing || __scratchDone) return;
+    e.preventDefault();
+    const p = posFromEvent(e);
+    scratchAt(p.x, p.y, brushRadius, lastPt);
+    lastPt = p;
+  }
+
+  function onUp(e){
+    if(!drawing) return;
+    drawing = false;
+    lastPt = null;
+    e.preventDefault();
+    // No auto-reveal messaging; let the player keep scratching or stop anytime.
+    if(msg) msg.textContent = "";
+  }
+
+  canvas.addEventListener("pointerdown", onDown, { passive: false });
+  canvas.addEventListener("pointermove", onMove, { passive: false });
+  canvas.addEventListener("pointerup", onUp, { passive: false });
+  canvas.addEventListener("pointercancel", onUp, { passive: false });
+
+  // iOS: avoid page bounce while scratching
+  const onTouchMove = (e)=>{ if(drawing && !__scratchDone) e.preventDefault(); };
+  canvas.addEventListener("touchmove", onTouchMove, { passive: false });
+
+  // Ensure we can fully unmount + avoid duplicate listeners (which can repaint the cover later).
+  __scratchCleanup = ()=>{
+    try{ window.removeEventListener("resize", onScratchResize); }catch(_){ }
+    try{ window.removeEventListener("orientationchange", onScratchOrient); }catch(_){ }
+    try{ canvas.removeEventListener("pointerdown", onDown); }catch(_){ }
+    try{ canvas.removeEventListener("pointermove", onMove); }catch(_){ }
+    try{ canvas.removeEventListener("pointerup", onUp); }catch(_){ }
+    try{ canvas.removeEventListener("pointercancel", onUp); }catch(_){ }
+    try{ canvas.removeEventListener("touchmove", onTouchMove); }catch(_){ }
+    if(revealBtn){
+      try{ revealBtn.onclick = null; }catch(_){ }
+    }
+  };
+  __scratchMounted = true;
+  __scratchDone = false;
+  card.classList.remove("is-done");
+  if(msg) msg.textContent = "";
+  if(hint) hint.style.opacity = "1";
+}
+
+function resetRevealScratchMount(){
+  try{ __scratchCleanup && __scratchCleanup(); }catch(_){ }
+  __scratchCleanup = null;
+  __scratchMounted = false;
+  __scratchDone = false;
 }
 
 /* =========================
