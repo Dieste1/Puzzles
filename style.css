@@ -1852,13 +1852,32 @@ svg.span-svg{
 }
 
 
-/* ===== STRANDS: prevent grid "dropping" when current word appears ===== */
-#view-strands .span-current{
-  /* Reserve a fixed line so the grid below doesn't shift when the word changes */
-  height: 32px;
-  line-height: 32px;
-  min-height: 32px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+/* ===== FINAL REVEAL — FULL-BLEED SAFEGUARD ===== */
+#view-reveal{
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
+
+
+/* ===== FINAL REVEAL — FULL BLEED (no inset) ===== */
+.main.is-immersive{
+  padding: 0 !important;
+}
+
+#view-reveal{
+  min-height: 100vh;
+  background: var(--pink);
+}
+
+#view-reveal .card{
+  background: transparent;
+  min-height: 100vh;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* make the back arrow readable on pink */
+#view-reveal .icon-btn{ color:#000; }
+#view-reveal .help{ color: rgba(0,0,0,.7); }
