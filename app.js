@@ -1174,7 +1174,7 @@ function submitWordle(){
 
   if(wordleRow >= 6){
     wordleDone = true;
-    setTimeout(()=> setMsg(`Out of tries! It was ${SOL}.`), 740);
+    setTimeout(()=> setMsg(`Out of tries! Try Again!`), 740);
     return;
   }
 
