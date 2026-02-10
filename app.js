@@ -75,11 +75,11 @@ strands: {
     size: 5,
     blocks: new Set([0, 4, 24]),
     solution: [
-      "", "T","W","O","",
-      "W","O","R","D","S",
-      "E","B","O","O","K",
-      "R","E","T","R","Y",
-      "E","Y","E","S",""
+      "", "B","E","C","",
+      "B","A","G","E","L",
+      "E","N","E","R","O",
+      "E","D","S","E","L",
+      "R","A","T","S",""
     ]
   }
 };
@@ -736,19 +736,19 @@ function buildMiniEntries(){
 const MINI_ENTRIES = buildMiniEntries();
 
 const MINI_ACROSS_CLUES = [
-  "___ of a kind",
-  "Things you type",
-  "Digital book, for short",
-  "Give it another go",
-  "They help you see"
+  "Go to bagel order",
+  "Mtl ______s are better than NYC",
+  "Nuestro mes",
+  "Henry Ford's son",
+  "Eca hates them and NYC has a lot"
 ];
 
 const MINI_DOWN_CLUES = [
-  "Maguire who played Spider-Man",
-  "Put into words",
-  "Smells",
-  "“They ___ here”",
-  "It’s above the clouds"
+  "Silvestre y la Naranja es una ____",
+  "Discharge",
+  "Diego's favorite NYZ pizza",
+  "Diego's go to drink”",
+  "Online chuckle"
 ];
 
 function entryClueText(dir, entry, idxInDir){
