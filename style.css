@@ -1948,3 +1948,78 @@ svg.span-svg{
 @media (max-width: 380px){
   .scratch-card{ min-height: 380px; }
 }
+
+
+/* ======================================================================
+   MINI — Completion feedback (NEW)
+   - Wave animation on success
+   - Shake on filled-but-wrong (Connections-style)
+   ====================================================================== */
+
+@keyframes miniWave{
+  0%   { transform: translateY(0); }
+  35%  { transform: translateY(-10px); }
+  70%  { transform: translateY(0); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes miniShake{
+  0%   { transform: translateX(0); }
+  15%  { transform: translateX(-6px); }
+  30%  { transform: translateX(6px); }
+  45%  { transform: translateX(-5px); }
+  60%  { transform: translateX(5px); }
+  75%  { transform: translateX(-3px); }
+  90%  { transform: translateX(3px); }
+  100% { transform: translateX(0); }
+}
+
+/* Wave the letters (stagger via --i on .mini-letter) */
+.mini-crossword.mini-win .mini-letter{
+  animation: miniWave 620ms ease-in-out both;
+  animation-delay: calc(var(--i, 0) * 42ms);
+}
+
+/* Shake all filled tiles on wrong completion */
+#view-mini .mini-cell.shake{
+  animation: miniShake 260ms ease-in-out;
+}
+
+/* Congrats banner */
+#miniWinBanner{
+  position: fixed;
+  left: 50%;
+  top: 78px;
+  transform: translateX(-50%) translateY(-6px);
+  z-index: 9999;
+
+  background: rgba(0,0,0,.86);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 14px;
+  text-align: center;
+  max-width: 92vw;
+  box-shadow: 0 12px 28px rgba(0,0,0,.25);
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+#miniWinBanner.is-visible{
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce){
+  .mini-crossword.mini-win .mini-letter,
+  #view-mini .mini-cell.shake{
+    animation: none !important;
+  }
+  #miniWinBanner{
+    transition: none !important;
+  }
+}

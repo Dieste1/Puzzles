@@ -494,6 +494,104 @@ let miniTimerId = null;
 let miniDir = "across";
 let miniClueIndex = 0;
 
+
+// --- Mini completion feedback (NEW)
+let miniDidCelebrate = false;
+let miniLastFullKey = "";
+let miniBannerTimer = null;
+
+function miniAllFilled(){
+  for(let i=0;i<MP.size*MP.size;i++){
+    if(isBlock(i)) continue;
+    const got = (miniLetters[i] || "").toUpperCase();
+    if(!got) return false;
+  }
+  return true;
+}
+
+function miniLettersKey(){
+  // stable "snapshot" of the grid (non-block cells)
+  let s = "";
+  for(let i=0;i<MP.size*MP.size;i++){
+    if(isBlock(i)) continue;
+    s += (miniLetters[i] || "_").toUpperCase();
+  }
+  return s;
+}
+
+function ensureMiniBanner(){
+  let el = document.getElementById("miniWinBanner");
+  if(el) return el;
+
+  const host = document.querySelector("#view-mini .mini-game");
+  if(!host) return null;
+
+  el = document.createElement("div");
+  el.id = "miniWinBanner";
+  el.setAttribute("role","status");
+  el.setAttribute("aria-live","polite");
+  el.textContent = "";
+  host.appendChild(el);
+  return el;
+}
+
+function showMiniBanner(msg){
+  const el = ensureMiniBanner();
+  if(!el) return;
+
+  el.textContent = msg || "";
+  el.classList.add("is-visible");
+
+  if(miniBannerTimer) clearTimeout(miniBannerTimer);
+  miniBannerTimer = setTimeout(()=> el.classList.remove("is-visible"), 1800);
+}
+
+function prefersReducedMotion(){
+  try{
+    return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }catch(_){ return false; }
+}
+
+function miniWaveCelebrate(){
+  if(!miniCrossword) return;
+  if(prefersReducedMotion()) return;
+
+  miniCrossword.classList.remove("mini-win");
+  // force reflow to allow retrigger if needed
+  void miniCrossword.offsetWidth;
+  miniCrossword.classList.add("mini-win");
+
+  setTimeout(()=> miniCrossword.classList.remove("mini-win"), 900);
+}
+
+function miniShakeAll(){
+  if(!miniCrossword) return;
+  if(prefersReducedMotion()) return;
+
+  const cells = Array.from(miniCrossword.querySelectorAll(".mini-cell:not(.block)"));
+  cells.forEach(c=> c.classList.add("shake"));
+
+  try{
+    if(typeof navigator !== "undefined" && navigator.vibrate){
+      navigator.vibrate([18, 28, 18]);
+    }
+  }catch(_){}
+
+  setTimeout(()=> cells.forEach(c=> c.classList.remove("shake")), 320);
+}
+
+function miniCheckFilledButWrong(){
+  if(Progress.state.miniSolved) return;
+  if(!miniAllFilled()) { miniLastFullKey = ""; return; }
+  if(miniAllFilledCorrect()) return;
+
+  const key = miniLettersKey();
+  if(key && key !== miniLastFullKey){
+    miniLastFullKey = key;
+    miniShakeAll();
+  }
+}
+
 function formatTime(s){
   const m = Math.floor(s / 60);
   const r = s % 60;
@@ -680,6 +778,7 @@ function renderMini(){
 
   miniCrossword.innerHTML = "";
   const word = new Set(getMiniWordIndices(miniSelected));
+  let waveIndex = 0;
   setMiniClueFromSelection();
 
   for(let i=0;i<MP.size*MP.size;i++){
@@ -705,6 +804,7 @@ function renderMini(){
 
     const letter = document.createElement("div");
     letter.className = "mini-letter";
+    letter.style.setProperty("--i", String(waveIndex++));
     letter.textContent = (miniLetters[i] || "").toUpperCase();
     cell.appendChild(letter);
 
@@ -722,16 +822,36 @@ function renderMini(){
     miniCrossword.appendChild(cell);
   }
 
-  if(!Progress.state.miniSolved && miniAllFilledCorrect()){
-    Progress.mark("miniSolved", true);
-    toast("Mini solved ✅");
-    haptic(20);
-    if(Progress.allSolved()) toast("Final Reveal unlocked 🎁");
+  // Completion / wrong-completion feedback
+  // Celebrate on every successful solve of the current grid (even if already marked solved in Progress).
+  if(miniAllFilledCorrect()){
+    if(!miniDidCelebrate){
+      miniDidCelebrate = true;
+      miniWaveCelebrate();
+      showMiniBanner("Congrats — you completed the puzzle! 🎉");
+    }
+    // Only mark Progress once
+    if(!Progress.state.miniSolved){
+      Progress.mark("miniSolved", true);
+      toast("Mini solved ✅");
+      haptic(20);
+      miniStopTimer();
+      if(Progress.allSolved()) toast("Final Reveal unlocked 🎁");
+    }
+  }else{
+    // If the player edits after celebrating, allow celebrating again on a later correct completion
+    miniDidCelebrate = false;
+    // If every cell is filled but incorrect, shake once per distinct filled grid
+    miniCheckFilledButWrong();
   }
+
 }
+
 
 function miniReset(showToast=false){
   miniLetters = new Array(MP.size*MP.size).fill("");
+  miniDidCelebrate = false;
+  miniLastFullKey = "";
   miniSelected = pickFirstCell();
   miniDir = "across";
   miniClueIndex = 0;
