@@ -3,7 +3,7 @@
    ========================= */
 const CONFIG = {
 strands: {
-  themeTitle: "Cravings",
+  themeTitle: "I Can't Resist",
   cols: 6, // 8 rows inferred from 48 letters
   grid: [
     "C","S","E","G","C","O",
@@ -29,10 +29,10 @@ strands: {
   ],
 
   connectionsGroups: [
-    { name: "Eca's Nicknames",         words: ["FLACA","NONA","GATA","KITTY"] },
-    { name: "2025 Trips",              words: ["MTL","UPSTATE","THE CITY","ROCKAWAY"] },
-    { name: "Our Wish list",           words: ["JAZZ NIGHT","SKI TRIP","KARAOKE","TRAVEL"] },
-    { name: "Things Eca Says ",        words: ["BASICA","MATA","SUIT","KAW"], revealWords: ["BASICAMENTE","MATATE","SUIT YOURSELF","KAWFEE"] }
+    { name: "Eca's Nicknames",                    words: ["FLACA","NONA","GATA","KITTY"] },
+    { name: "2025 Trips",                         words: ["MTL","UPSTATE","THE CITY","ROCKAWAY"] },
+    { name: "Our Wish list",                      words: ["JAZZ NIGHT","SKI TRIP","KARAOKE","TRAVEL"] },
+    { name: "First part of what Eca Says",        words: ["BASICA","MATA","SUIT","KAW"], revealWords: ["BASICAMENTE","MATATE","SUIT YOURSELF","KAWFEE"] }
 
   ],
 
@@ -40,7 +40,7 @@ strands: {
     <div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
 
     <div class="reveal-inner is-visible" id="revealInner">
-      <h3 class="reveal-anim" style="margin:0 0 10px;">❤️ A Little Something</h3>
+      <h3 class="reveal-anim" style="margin:0 0 10px;">A Little Something</h3>
 
       <img
         class="reveal-anim is-delay-1"
@@ -59,7 +59,7 @@ strands: {
       />
 
       <p class="reveal-anim is-delay-2" style="margin-top:14px;">
-        Something small — but it means a lot 💚
+        Almenos en una cosa me tenes que copiar! 💚
       </p>
 
       <div class="reveal-lightbox" id="revealLightbox" aria-hidden="true">
