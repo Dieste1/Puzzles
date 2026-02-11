@@ -736,17 +736,17 @@ function buildMiniEntries(){
 const MINI_ENTRIES = buildMiniEntries();
 
 const MINI_ACROSS_CLUES = [
-  "Go to bagel order",
-  "Mtl ______s are better than NYC",
+  "Go to - 4.answer",
+  "Boiled-and-baked icon with two rival cities",
   "Nuestro mes",
-  "Henry Ford's son",
-  "Eca hates them and NYC has a lot"
+  "Ford Flop (🫣)",
+  "Eca's least favorite New Yorkers"
 ];
 
 const MINI_DOWN_CLUES = [
-  "Silvestre y la Naranja es una ____",
-  "Discharge",
-  "Diego's favorite NYZ pizza",
+  "Silvestre y la Naranja and The Killers, por ejemplo",
+  "Discharge, expel waste (🫣)",
+  "Worth the wait NYC pipsha",
   "Diego's go to drink”",
   "Online chuckle"
 ];
