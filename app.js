@@ -23,16 +23,16 @@ strands: {
 
   connectionsWords: [
     "FLACA","NONA","GATA","KITTY",
-    "MTL","UPSTATE","THE CITY","ROCKAWAY",
-    "JAZZ NIGHT","SKI TRIP","KARAOKE","TRAVEL",
-    "BASICA","MATA","SUIT","KAW"
+    "CHINA","BADDIE","MONKEY NOVIA","FINANCE BRO",
+    "BONIS","CHINCU","ADMIN","MENTE",
+    "ROL","FEE","TINI","LIGHT"
   ],
 
   connectionsGroups: [
-    { name: "Eca's Nicknames",                    words: ["FLACA","NONA","GATA","KITTY"] },
-    { name: "2025 Trips",                         words: ["MTL","UPSTATE","THE CITY","ROCKAWAY"] },
-    { name: "Our Wish list",                      words: ["JAZZ NIGHT","SKI TRIP","KARAOKE","TRAVEL"] },
-    { name: "First part of what Eca Says",        words: ["BASICA","MATA","SUIT","KAW"], revealWords: ["BASICAMENTE","MATATE","SUIT YOURSELF","KAWFEE"] }
+    { name: "Eca's Nicknames",             words: ["FLACA","NONA","GATA","KITTY"] },
+    { name: "Eca's Alter Egos",            words: ["CHINA","BADDIE","MONKEY NOVIA","FINANCE BRO"] },
+    { name: "Aliego's Sayings",            words: ["BONIS","CHINCU","ADMIN","MENTE"], revealWords: ["BONIS","HEY CHINCU","ADMIN WORK","BASICAMENTE"] },
+    { name: "Your Favorite Drinks",        words: ["ROL","FEE","TINI","LIGHT"], revealWords: ["APEROL","COFFEE","MARTINI","CLIGHT"] }
 
   ],
 
