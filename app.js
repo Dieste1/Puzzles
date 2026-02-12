@@ -736,10 +736,10 @@ function buildMiniEntries(){
 const MINI_ENTRIES = buildMiniEntries();
 
 const MINI_ACROSS_CLUES = [
-  "Go to - 4.answer",
+  "Diego's (4.answer) order",
   "Boiled-and-baked icon with two rival cities",
   "Nuestro mes",
-  "Ford Flop (🫣)",
+  "Henry Ford's son (🫣)",
   "Eca's least favorite New Yorkers"
 ];
 
@@ -747,7 +747,7 @@ const MINI_DOWN_CLUES = [
   "Silvestre y la Naranja and The Killers, por ejemplo",
   "Discharge, expel waste (🫣)",
   "Worth the wait NYC pipsha",
-  "Diego's go to drink”",
+  "Eca's wine = Diego's _____",
   "Online chuckle"
 ];
 
