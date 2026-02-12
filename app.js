@@ -22,10 +22,10 @@ strands: {
   wordleSolution: "FLACA",
 
   connectionsWords: [
-    "FLACA","NONA","GATA","KITTY",
-    "CHINA","BADDIE","MONKEY NOVIA","FINANCE BRO",
-    "BONIS","CHINCU","ADMIN","MENTE",
-    "ROL","FEE","TINI","LIGHT"
+    "FINANCE BRO","FLACA","ROL","KITTY",
+    "CHINA","MENTE","NONA","BADDIE",
+    "FEE","MONKEY NOVIA","TINI","ADMIN",
+    "CHINCU","GATA","LIGHT","BONIS",
   ],
 
   connectionsGroups: [
