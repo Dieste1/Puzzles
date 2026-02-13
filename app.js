@@ -7,9 +7,9 @@ strands: {
   cols: 6, // 8 rows inferred from 48 letters
   grid: [
     "C","S","E","G","C","O",
-    "A","L","B","A","O","F",
+    "A","L","B","A","L","F",
     "R","A","J","I","L","F",
-    "E","I","D","O","L","E",
+    "E","I","D","O","O","E",
     "O","Q","T","N","O","E",
     "C","U","I","S","A","F",
     "A","Z","T","S","I","O",
